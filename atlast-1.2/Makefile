@@ -4,7 +4,7 @@
 VERSION = 1.2
 
 COPTIONS = -g -Wall
-CC = gcc
+# CC = gcc
 
 LIBRARIES = -lm
 
