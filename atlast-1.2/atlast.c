@@ -3650,9 +3650,7 @@ int atl_prologue(sp)
 
 /*  ATL_EVAL  --  Evaluate a string containing ATLAST words.  */
 
-int atl_eval(sp)
-    char *sp;
-{
+int atl_eval(char *sp) {
     int i;
 
 #undef Memerrs
