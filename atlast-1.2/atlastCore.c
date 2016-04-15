@@ -3309,9 +3309,7 @@ void atl_init()
 #define Cconst(cell, name)  cell = (stackitem) lookup(name); if(cell==0)abort()
         Cconst(s_exit, "EXIT");
         Cconst(s_lit, "(LIT)");
-#ifdef REAL
         Cconst(s_flit, "(FLIT)");
-#endif
         Cconst(s_strlit, "(STRLIT)");
         Cconst(s_dotparen, ".(");
         Cconst(s_qbranch, "?BRANCH");

@@ -2,3 +2,5 @@
 atlast
 *.o
 primdeftest
+cscope.out
+.gdb_history
