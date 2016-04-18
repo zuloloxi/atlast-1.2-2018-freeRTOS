@@ -10,7 +10,8 @@ LIBRARIES = -lm
 
 INCLUDE =
 
-ATLCONFIG = -DCUSTOM -DMEMSTAT -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
+# ATLCONFIG = -DCUSTOM -DMEMSTAT -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
+ATLCONFIG = -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 
 CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
@@ -18,10 +19,13 @@ ATLOBJ = atlast.o atlmain.o
 
 APPS = atlast primdeftest
 
-all:	$(APPS)
+all:	$(APPS) tst
 
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
+
+tst: $(ATLOBJ) atlMinMain.c
+	$(CC) $(CFLAGS)  atlMinMain.c atlast.o -o tst $(LIBRARIES)
 
 atlast.o:   atlast.c atldef.h atlcfig.h
 atldef.h:   atlast.h
