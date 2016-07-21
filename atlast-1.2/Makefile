@@ -3,7 +3,7 @@
 
 VERSION = 1.2
 
-COPTIONS = -g -Wall
+COPTIONS = -m32 -g -Wall
 # CC = gcc
 
 LIBRARIES = -lm
