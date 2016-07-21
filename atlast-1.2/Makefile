@@ -17,15 +17,15 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest
+APPS = atlast primdeftest atlsmall
 
-all:	$(APPS) tst
+all:	$(APPS) atlsmall
 
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
 
-tst: $(ATLOBJ) atlMinMain.c
-	$(CC) $(CFLAGS)  atlMinMain.c atlast.o -o tst $(LIBRARIES)
+atlsmall: $(ATLOBJ) atlMinMain.c
+	$(CC) $(CFLAGS)  atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
 
 atlast.o:   atlast.c atldef.h atlcfig.h
 atldef.h:   atlast.h

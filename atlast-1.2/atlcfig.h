@@ -21,6 +21,8 @@
 #define TRACE                 /* Execution tracing */
 #define WALKBACK              /* Walkback trace */
 #define WORDSUSED             /* Logging of words used and unused */
+// TODO Modify to output to buffer.
+// #define MEMSTAT          /* Output memory statistics. //
 // 
 // Stuff added by me
 //
