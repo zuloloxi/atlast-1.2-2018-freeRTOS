@@ -21,4 +21,17 @@
 #define TRACE                 /* Execution tracing */
 #define WALKBACK              /* Walkback trace */
 #define WORDSUSED             /* Logging of words used and unused */
+// 
+// Stuff added by me
+//
+// #define ATH
+// 
 
+#define EMBEDDED            // Mods for use in an embedded system.
+                            // anything that results in output to stdout, or stderr goes 
+                            // to a global buffer.
+                            //
+
+#ifdef EMBEDDED
+char outBuffer[255];
+#endif

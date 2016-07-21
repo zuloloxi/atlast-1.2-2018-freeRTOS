@@ -186,11 +186,6 @@ extern char *atl_fgetsp();
 #define FBmode
 #endif
 
-#ifdef HIGHC
-#define unlink(x) remove(x)	      /* High C library is brain-dead */
-pragma On(PCC_msgs);		      /* High C compiler is brain-dead */
-#endif
-
 
 /*  STATIC is defined as "static" on platforms which require this
     specification on declarations for forward-referenced functions.  */
