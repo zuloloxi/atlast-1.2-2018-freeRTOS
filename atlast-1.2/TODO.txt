@@ -1,0 +1,19 @@
+
+23 July 2016
+
+Embedded
+========
+
+Port
+
+Linux
+=====
+
+Add using dynamic libs, e.g:
+
+dlopen
+dlclose
+dlsym
+
+
+
