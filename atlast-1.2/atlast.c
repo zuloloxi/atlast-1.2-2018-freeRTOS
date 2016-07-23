@@ -26,6 +26,10 @@
 #endif
 #endif
 
+#ifdef FILEIO
+#include <unistd.h>
+#endif
+
 #ifdef EMBEDDED
 extern char *outBuffer;
 #endif
@@ -550,7 +554,7 @@ static int token( char **cp) {
         /* See if the token is a number. */
 
         if (isdigit(tokbuf[0]) || tokbuf[0] == '-') {
-            char tc;
+//            char tc;
             char *tcp;
 
 #ifdef OS2
@@ -665,7 +669,6 @@ Exported char *atl_fgetsp(s, n, stream)
 #ifdef MEMSTAT
 // TODO Comments reduce size to below 255 bytes, now make it print into
 // outBuffer
-#warning MEMSTAT
 void atl_memstat() {
     static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld\n";
 
