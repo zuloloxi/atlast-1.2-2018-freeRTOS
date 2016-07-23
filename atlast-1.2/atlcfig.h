@@ -29,7 +29,7 @@
 // #define ATH
 // 
 
-#define EMBEDDED            // Mods for use in an embedded system.
+// #define EMBEDDED            // Mods for use in an embedded system.
                             // anything that results in output to stdout, or stderr goes 
                             // to a global buffer.
                             //

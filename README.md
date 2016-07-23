@@ -1,11 +1,13 @@
 ATLast
 ======
 
-This is a fortk of a fork.
+This is a fork of a fork.
 
 It is a fork of Michael Henderson's (aka quoha) of Atlast.
 
 I want to add a few features and use as the basis for a scriptable unit test framework.
+
+I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as to usage.)
 
 Below is Michael's original README.
 
