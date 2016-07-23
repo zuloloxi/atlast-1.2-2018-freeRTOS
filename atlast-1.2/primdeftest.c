@@ -30,9 +30,9 @@ prim phhmmss()
 }
 
 static struct primfcn timep[] = {
-    {"0TIME",   ptime},
-    {"0HHMMSS", phhmmss},
-    {NULL,      (codeptr) 0}
+    {(char *)"0TIME",   ptime},
+    {(char *)"0HHMMSS", phhmmss},
+    {(char *)NULL,      (codeptr) 0}
 };
 
 int main()

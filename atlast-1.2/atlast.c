@@ -420,7 +420,7 @@ static int token( char **cp) {
 
     while (True) {
         char *tp = tokbuf;
-        int tl = 0;
+        unsigned int tl = 0;
         Boolean istring = False, rstring = False;
 
         if (atl_comment) {
@@ -3769,7 +3769,7 @@ int atl_prologue( char *sp) {
     };
 
     if (strncmp(sp, "\\ *", 3) == 0) {
-        int i;
+        unsigned int i;
         char *vp = sp + 3, *ap;
 
         ucase(vp);
