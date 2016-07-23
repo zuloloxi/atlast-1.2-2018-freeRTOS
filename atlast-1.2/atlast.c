@@ -194,10 +194,10 @@ static char *fopenmodes[] = {
 #ifndef FMspecial
         /* Default fopen() mode table for SVID-compatible systems not
            overridden by a special table above. */
-        "", "r",  "",   "r+",
-    "", "r",  "",   "r+",
-    "", "",   "w",  "w+",
-    "", "",   "w",  "w+"
+    (char *)"", (char *)"r", (char *) "", (char *)  "r+",
+    (char *)"", (char *)"r", (char *) "", (char *)  "r+",
+    (char *)"", (char *)"", (char *)  "w", (char *) "w+",
+    (char *)"", (char *)"", (char *)  "w", (char *) "w+"
 #endif
 };
 
@@ -1126,7 +1126,7 @@ prim P_arraysub()		      /* Array subscript calculation */
         stackitem subn = *isp--;
 
         if (subn < 0 || subn >= array[i])
-            trouble("Subscript out of range");
+            trouble((char *)"Subscript out of range");
     }
 #endif /* NOMEMCHECK */
     isp = &S0;
@@ -1151,9 +1151,9 @@ prim P_array()			      /* Declare array */
     Sl(2);
 #ifndef NOMEMCHECK
     if (S0 <= 0)
-        trouble("Bad array element size");
+        trouble((char *)"Bad array element size");
     if (S1 <= 0)
-        trouble("Bad array subscript count");
+        trouble((char *)"Bad array subscript count");
 #endif /* NOMEMCHECK */
 
     nsubs = S1; 		      /* Number of subscripts */
@@ -1166,7 +1166,7 @@ prim P_array()			      /* Declare array */
     for (i = 0; i < nsubs; i++) {
 #ifndef NOMEMCHECK
         if (*isp <= 0)
-            trouble("Bad array dimension");
+            trouble((char *)"Bad array dimension");
 #endif /* NOMEMCHECK */
         asize *= *isp--;
     }
@@ -2953,261 +2953,261 @@ prim P_fwdresolve()		      /* Emit forward jump offset */
 /*  Table of primitive words  */
 
 static struct primfcn primt[] = {
-    {"0+", P_plus},
-    {"0-", P_minus},
-    {"0*", P_times},
-    {"0/", P_div},
-    {"0MOD", P_mod},
-    {"0/MOD", P_divmod},
-    {"0MIN", P_min},
-    {"0MAX", P_max},
-    {"0NEGATE", P_neg},
-    {"0ABS", P_abs},
-    {"0=", P_equal},
-    {"0<>", P_unequal},
-    {"0>", P_gtr},
-    {"0<", P_lss},
-    {"0>=", P_geq},
-    {"0<=", P_leq},
+    {(char *)"0+", P_plus},
+    {(char *)"0-", P_minus},
+    {(char *)"0*", P_times},
+    {(char *)"0/", P_div},
+    {(char *)"0MOD", P_mod},
+    {(char *)"0/MOD", P_divmod},
+    {(char *)"0MIN", P_min},
+    {(char *)"0MAX", P_max},
+    {(char *)"0NEGATE", P_neg},
+    {(char *)"0ABS", P_abs},
+    {(char *)"0=", P_equal},
+    {(char *)"0<>", P_unequal},
+    {(char *)"0>", P_gtr},
+    {(char *)"0<", P_lss},
+    {(char *)"0>=", P_geq},
+    {(char *)"0<=", P_leq},
 
-    {"0AND", P_and},
-    {"0OR", P_or},
-    {"0XOR", P_xor},
-    {"0NOT", P_not},
-    {"0SHIFT", P_shift},
+    {(char *)"0AND", P_and},
+    {(char *)"0OR", P_or},
+    {(char *)"0XOR", P_xor},
+    {(char *)"0NOT", P_not},
+    {(char *)"0SHIFT", P_shift},
 
-    {"0DEPTH", P_depth},
-    {"0CLEAR", P_clear},
-    {"0DUP", P_dup},
-    {"0DROP", P_drop},
-    {"0SWAP", P_swap},
-    {"0OVER", P_over},
-    {"0PICK", P_pick},
-    {"0ROT", P_rot},
-    {"0-ROT", P_minusrot},
-    {"0ROLL", P_roll},
-    {"0>R", P_tor},
-    {"0R>", P_rfrom},
-    {"0R@", P_rfetch},
+    {(char *)"0DEPTH", P_depth},
+    {(char *)"0CLEAR", P_clear},
+    {(char *)"0DUP", P_dup},
+    {(char *)"0DROP", P_drop},
+    {(char *)"0SWAP", P_swap},
+    {(char *)"0OVER", P_over},
+    {(char *)"0PICK", P_pick},
+    {(char *)"0ROT", P_rot},
+    {(char *)"0-ROT", P_minusrot},
+    {(char *)"0ROLL", P_roll},
+    {(char *)"0>R", P_tor},
+    {(char *)"0R>", P_rfrom},
+    {(char *)"0R@", P_rfetch},
 
 #ifdef SHORTCUTA
-    {"01+", P_1plus},
-    {"02+", P_2plus},
-    {"01-", P_1minus},
-    {"02-", P_2minus},
-    {"02*", P_2times},
-    {"02/", P_2div},
+    {(char *)"01+", P_1plus},
+    {(char *)"02+", P_2plus},
+    {(char *)"01-", P_1minus},
+    {(char *)"02-", P_2minus},
+    {(char *)"02*", P_2times},
+    {(char *)"02/", P_2div},
 #endif /* SHORTCUTA */
 
 #ifdef SHORTCUTC
-    {"00=", P_0equal},
-    {"00<>", P_0notequal},
-    {"00>", P_0gtr},
-    {"00<", P_0lss},
+    {(char *)"00=", P_0equal},
+    {(char *)"00<>", P_0notequal},
+    {(char *)"00>", P_0gtr},
+    {(char *)"00<", P_0lss},
 #endif /* SHORTCUTC */
 
 #ifdef DOUBLE
-    {"02DUP", P_2dup},
-    {"02DROP", P_2drop},
-    {"02SWAP", P_2swap},
-    {"02OVER", P_2over},
-    {"02ROT", P_2rot},
-    {"02VARIABLE", P_2variable},
-    {"02CONSTANT", P_2constant},
-    {"02!", P_2bang},
-    {"02@", P_2at},
+    {(char *)"02DUP", P_2dup},
+    {(char *)"02DROP", P_2drop},
+    {(char *)"02SWAP", P_2swap},
+    {(char *)"02OVER", P_2over},
+    {(char *)"02ROT", P_2rot},
+    {(char *)"02VARIABLE", P_2variable},
+    {(char *)"02CONSTANT", P_2constant},
+    {(char *)"02!", P_2bang},
+    {(char *)"02@", P_2at},
 #endif /* DOUBLE */
 
-    {"0VARIABLE", P_variable},
-    {"0CONSTANT", P_constant},
-    {"0!", P_bang},
-    {"0@", P_at},
-    {"0+!", P_plusbang},
-    {"0ALLOT", P_allot},
-    {"0,", P_comma},
-    {"0C!", P_cbang},
-    {"0C@", P_cat},
-    {"0C,", P_ccomma},
-    {"0C=", P_cequal},
-    {"0HERE", P_here},
+    {(char *)"0VARIABLE", P_variable},
+    {(char *)"0CONSTANT", P_constant},
+    {(char *)"0!", P_bang},
+    {(char *)"0@", P_at},
+    {(char *)"0+!", P_plusbang},
+    {(char *)"0ALLOT", P_allot},
+    {(char *)"0,", P_comma},
+    {(char *)"0C!", P_cbang},
+    {(char *)"0C@", P_cat},
+    {(char *)"0C,", P_ccomma},
+    {(char *)"0C=", P_cequal},
+    {(char *)"0HERE", P_here},
 
 #ifdef ARRAY
-    {"0ARRAY", P_array},
+    {(char *)"0ARRAY", P_array},
 #endif
 
 #ifdef STRING
-    {"0(STRLIT)", P_strlit},
-    {"0STRING", P_string},
-    {"0STRCPY", P_strcpy},
-    {"0S!", P_strcpy},
-    {"0STRCAT", P_strcat},
-    {"0S+", P_strcat},
-    {"0STRLEN", P_strlen},
-    {"0STRCMP", P_strcmp},
-    {"0STRCHAR", P_strchar},
-    {"0SUBSTR", P_substr},
-    {"0COMPARE", P_strcmp},
-    {"0STRFORM", P_strform},
+    {(char *)"0(STRLIT)", P_strlit},
+    {(char *)"0STRING", P_string},
+    {(char *)"0STRCPY", P_strcpy},
+    {(char *)"0S!", P_strcpy},
+    {(char *)"0STRCAT", P_strcat},
+    {(char *)"0S+", P_strcat},
+    {(char *)"0STRLEN", P_strlen},
+    {(char *)"0STRCMP", P_strcmp},
+    {(char *)"0STRCHAR", P_strchar},
+    {(char *)"0SUBSTR", P_substr},
+    {(char *)"0COMPARE", P_strcmp},
+    {(char *)"0STRFORM", P_strform},
 #ifdef REAL
-    {"0FSTRFORM", P_fstrform},
-    {"0STRREAL", P_strreal},
+    {(char *)"0FSTRFORM", P_fstrform},
+    {(char *)"0STRREAL", P_strreal},
 #endif
-    {"0STRINT", P_strint},
+    {(char *)"0STRINT", P_strint},
 #endif /* STRING */
 
 #ifdef REAL
-    {"0(FLIT)", P_flit},
-    {"0F+", P_fplus},
-    {"0F-", P_fminus},
-    {"0F*", P_ftimes},
-    {"0F/", P_fdiv},
-    {"0FMIN", P_fmin},
-    {"0FMAX", P_fmax},
-    {"0FNEGATE", P_fneg},
-    {"0FABS", P_fabs},
-    {"0F=", P_fequal},
-    {"0F<>", P_funequal},
-    {"0F>", P_fgtr},
-    {"0F<", P_flss},
-    {"0F>=", P_fgeq},
-    {"0F<=", P_fleq},
-    {"0F.", P_fdot},
-    {"0FLOAT", P_float},
-    {"0FIX", P_fix},
+    {(char *)"0(FLIT)", P_flit},
+    {(char *)"0F+", P_fplus},
+    {(char *)"0F-", P_fminus},
+    {(char *)"0F*", P_ftimes},
+    {(char *)"0F/", P_fdiv},
+    {(char *)"0FMIN", P_fmin},
+    {(char *)"0FMAX", P_fmax},
+    {(char *)"0FNEGATE", P_fneg},
+    {(char *)"0FABS", P_fabs},
+    {(char *)"0F=", P_fequal},
+    {(char *)"0F<>", P_funequal},
+    {(char *)"0F>", P_fgtr},
+    {(char *)"0F<", P_flss},
+    {(char *)"0F>=", P_fgeq},
+    {(char *)"0F<=", P_fleq},
+    {(char *)"0F.", P_fdot},
+    {(char *)"0FLOAT", P_float},
+    {(char *)"0FIX", P_fix},
 #ifdef MATH
-    {"0ACOS", P_acos},
-    {"0ASIN", P_asin},
-    {"0ATAN", P_atan},
-    {"0ATAN2", P_atan2},
-    {"0COS", P_cos},
-    {"0EXP", P_exp},
-    {"0LOG", P_log},
-    {"0POW", P_pow},
-    {"0SIN", P_sin},
-    {"0SQRT", P_sqrt},
-    {"0TAN", P_tan},
+    {(char *)"0ACOS", P_acos},
+    {(char *)"0ASIN", P_asin},
+    {(char *)"0ATAN", P_atan},
+    {(char *)"0ATAN2", P_atan2},
+    {(char *)"0COS", P_cos},
+    {(char *)"0EXP", P_exp},
+    {(char *)"0LOG", P_log},
+    {(char *)"0POW", P_pow},
+    {(char *)"0SIN", P_sin},
+    {(char *)"0SQRT", P_sqrt},
+    {(char *)"0TAN", P_tan},
 #endif /* MATH */
 #endif /* REAL */
 
-    {"0(NEST)", P_nest},
-    {"0EXIT", P_exit},
-    {"0(LIT)", P_dolit},
-    {"0BRANCH", P_branch},
-    {"0?BRANCH", P_qbranch},
-    {"1IF", P_if},
-    {"1ELSE", P_else},
-    {"1THEN", P_then},
-    {"0?DUP", P_qdup},
-    {"1BEGIN", P_begin},
-    {"1UNTIL", P_until},
-    {"1AGAIN", P_again},
-    {"1WHILE", P_while},
-    {"1REPEAT", P_repeat},
-    {"1DO", P_do},
-    {"1?DO", P_qdo},
-    {"1LOOP", P_loop},
-    {"1+LOOP", P_ploop},
-    {"0(XDO)", P_xdo},
-    {"0(X?DO)", P_xqdo},
-    {"0(XLOOP)", P_xloop},
-    {"0(+XLOOP)", P_xploop},
-    {"0LEAVE", P_leave},
-    {"0I", P_i},
-    {"0J", P_j},
-    {"0QUIT", P_quit},
-    {"0ABORT", P_abort},
-    {"1ABORT\"", P_abortq},
+    {(char *)"0(NEST)", P_nest},
+    {(char *)"0EXIT", P_exit},
+    {(char *)"0(LIT)", P_dolit},
+    {(char *)"0BRANCH", P_branch},
+    {(char *)"0?BRANCH", P_qbranch},
+    {(char *)"1IF", P_if},
+    {(char *)"1ELSE", P_else},
+    {(char *)"1THEN", P_then},
+    {(char *)"0?DUP", P_qdup},
+    {(char *)"1BEGIN", P_begin},
+    {(char *)"1UNTIL", P_until},
+    {(char *)"1AGAIN", P_again},
+    {(char *)"1WHILE", P_while},
+    {(char *)"1REPEAT", P_repeat},
+    {(char *)"1DO", P_do},
+    {(char *)"1?DO", P_qdo},
+    {(char *)"1LOOP", P_loop},
+    {(char *)"1+LOOP", P_ploop},
+    {(char *)"0(XDO)", P_xdo},
+    {(char *)"0(X?DO)", P_xqdo},
+    {(char *)"0(XLOOP)", P_xloop},
+    {(char *)"0(+XLOOP)", P_xploop},
+    {(char *)"0LEAVE", P_leave},
+    {(char *)"0I", P_i},
+    {(char *)"0J", P_j},
+    {(char *)"0QUIT", P_quit},
+    {(char *)"0ABORT", P_abort},
+    {(char *)"1ABORT\"", P_abortq},
 
 #ifdef SYSTEM
-    {"0SYSTEM", P_system},
+    {(char *)"0SYSTEM", P_system},
 #endif
 #ifdef TRACE
-    {"0TRACE", P_trace},
+    {(char *)"0TRACE", P_trace},
 #endif
 #ifdef WALKBACK
-    {"0WALKBACK", P_walkback},
+    {(char *)"0WALKBACK", P_walkback},
 #endif
 
 #ifdef WORDSUSED
-    {"0WORDSUSED", P_wordsused},
-    {"0WORDSUNUSED", P_wordsunused},
+    {(char *)"0WORDSUSED", P_wordsused},
+    {(char *)"0WORDSUNUSED", P_wordsunused},
 #endif
 
 #ifdef MEMSTAT
-    {"0MEMSTAT", atl_memstat},
+    {(char *)"0MEMSTAT", atl_memstat},
 #endif
 
-    {"0:", P_colon},
-    {"1;", P_semicolon},
-    {"0IMMEDIATE", P_immediate},
-    {"1[", P_lbrack},
-    {"0]", P_rbrack},
-    {"0CREATE", P_create},
-    {"0FORGET", P_forget},
-    {"0DOES>", P_does},
-    {"0'", P_tick},
-    {"1[']", P_bracktick},
-    {"0EXECUTE", P_execute},
-    {"0>BODY", P_body},
-    {"0STATE", P_state},
+    {(char *)"0:", P_colon},
+    {(char *)"1;", P_semicolon},
+    {(char *)"0IMMEDIATE", P_immediate},
+    {(char *)"1[", P_lbrack},
+    {(char *)"0]", P_rbrack},
+    {(char *)"0CREATE", P_create},
+    {(char *)"0FORGET", P_forget},
+    {(char *)"0DOES>", P_does},
+    {(char *)"0'", P_tick},
+    {(char *)"1[']", P_bracktick},
+    {(char *)"0EXECUTE", P_execute},
+    {(char *)"0>BODY", P_body},
+    {(char *)"0STATE", P_state},
 
 #ifdef DEFFIELDS
-    {"0FIND", P_find},
-    {"0>NAME", P_toname},
-    {"0>LINK", P_tolink},
-    {"0BODY>", P_frombody},
-    {"0NAME>", P_fromname},
-    {"0LINK>", P_fromlink},
-    {"0N>LINK", P_nametolink},
-    {"0L>NAME", P_linktoname},
-    {"0NAME>S!", P_fetchname},
-    {"0S>NAME!", P_storename},
+    {(char *)"0FIND", P_find},
+    {(char *)"0>NAME", P_toname},
+    {(char *)"0>LINK", P_tolink},
+    {(char *)"0BODY>", P_frombody},
+    {(char *)"0NAME>", P_fromname},
+    {(char *)"0LINK>", P_fromlink},
+    {(char *)"0N>LINK", P_nametolink},
+    {(char *)"0L>NAME", P_linktoname},
+    {(char *)"0NAME>S!", P_fetchname},
+    {(char *)"0S>NAME!", P_storename},
 #endif /* DEFFIELDS */
 
 #ifdef COMPILERW
-    {"1[COMPILE]", P_brackcompile},
-    {"1LITERAL", P_literal},
-    {"0COMPILE", P_compile},
-    {"0<MARK", P_backmark},
-    {"0<RESOLVE", P_backresolve},
-    {"0>MARK", P_fwdmark},
-    {"0>RESOLVE", P_fwdresolve},
+    {(char *)"1[COMPILE]", P_brackcompile},
+    {(char *)"1LITERAL", P_literal},
+    {(char *)"0COMPILE", P_compile},
+    {(char *)"0<MARK", P_backmark},
+    {(char *)"0<RESOLVE", P_backresolve},
+    {(char *)"0>MARK", P_fwdmark},
+    {(char *)"0>RESOLVE", P_fwdresolve},
 #endif /* COMPILERW */
 
 #ifdef CONIO
-    {"0.", P_dot},
-    {"0?", P_question},
-    {"0CR", P_cr},
-    {"0.S", P_dots},
-    {"1.\"", P_dotquote},
-    {"1.(", P_dotparen},
-    {"0TYPE", P_type},
-    {"0WORDS", P_words},
+    {(char *)"0.", P_dot},
+    {(char *)"0?", P_question},
+    {(char *)"0CR", P_cr},
+    {(char *)"0.S", P_dots},
+    {(char *)"1.\"", P_dotquote},
+    {(char *)"1.(", P_dotparen},
+    {(char *)"0TYPE", P_type},
+    {(char *)"0WORDS", P_words},
 #endif /* CONIO */
 
 #ifdef FILEIO
-    {"0FILE", P_file},
-    {"0FOPEN", P_fopen},
-    {"0FCLOSE", P_fclose},
-    {"0FDELETE", P_fdelete},
-    {"0FGETS", P_fgetline},
-    {"0FPUTS", P_fputline},
-    {"0FREAD", P_fread},
-    {"0FWRITE", P_fwrite},
-    {"0FGETC", P_fgetc},
-    {"0FPUTC", P_fputc},
-    {"0FTELL", P_ftell},
-    {"0FSEEK", P_fseek},
-    {"0FLOAD", P_fload},
+    {(char *)"0FILE", P_file},
+    {(char *)"0FOPEN", P_fopen},
+    {(char *)"0FCLOSE", P_fclose},
+    {(char *)"0FDELETE", P_fdelete},
+    {(char *)"0FGETS", P_fgetline},
+    {(char *)"0FPUTS", P_fputline},
+    {(char *)"0FREAD", P_fread},
+    {(char *)"0FWRITE", P_fwrite},
+    {(char *)"0FGETC", P_fgetc},
+    {(char *)"0FPUTC", P_fputc},
+    {(char *)"0FTELL", P_ftell},
+    {(char *)"0FSEEK", P_fseek},
+    {(char *)"0FLOAD", P_fload},
 #endif /* FILEIO */
 
 #ifdef EVALUATE
-    {"0EVALUATE", P_evaluate},
+    {(char *)"0EVALUATE", P_evaluate},
 #endif /* EVALUATE */
 
 #ifdef ATH
-    {"0.FEATURES", ATH_Features},
-    {"0BYE", ATH_bye},
+    {(char *)"0.FEATURES", ATH_Features},
+    {(char *)"0BYE", ATH_bye},
 #endif
     {NULL, (codeptr) 0}
 };
@@ -3336,7 +3336,7 @@ Exported void atl_error( char *kind) {
 
 Exported void stakover()
 {
-    trouble("Stack overflow");
+    trouble((char *)"Stack overflow");
     evalstat = ATL_STACKOVER;
 }
 
@@ -3344,7 +3344,7 @@ Exported void stakover()
 
 Exported void stakunder()
 {
-    trouble("Stack underflow");
+    trouble((char *)"Stack underflow");
     evalstat = ATL_STACKUNDER;
 }
 
@@ -3352,7 +3352,7 @@ Exported void stakunder()
 
 Exported void rstakover()
 {
-    trouble("Return stack overflow");
+    trouble((char *)"Return stack overflow");
     evalstat = ATL_RSTACKOVER;
 }
 
@@ -3360,7 +3360,7 @@ Exported void rstakover()
 
 Exported void rstakunder()
 {
-    trouble("Return stack underflow");
+    trouble((char *)"Return stack underflow");
     evalstat = ATL_RSTACKUNDER;
 }
 
@@ -3371,7 +3371,7 @@ Exported void rstakunder()
 
 Exported void heapover()
 {
-    trouble("Heap overflow");
+    trouble((char *)"Heap overflow");
     evalstat = ATL_HEAPOVER;
 }
 
@@ -3379,7 +3379,7 @@ Exported void heapover()
 
 Exported void badpointer()
 {
-    trouble("Bad pointer");
+    trouble((char *)"Bad pointer");
     evalstat = ATL_BADPOINTER;
 }
 
@@ -3387,7 +3387,7 @@ Exported void badpointer()
 
 static void notcomp()
 {
-    trouble("Compiler word outside definition");
+    trouble((char *)"Compiler word outside definition");
     evalstat = ATL_NOTINDEF;
 }
 
@@ -3395,7 +3395,7 @@ static void notcomp()
 
 static void divzero()
 {
-    trouble("Divide by zero");
+    trouble((char *)"Divide by zero");
     evalstat = ATL_DIVZERO;
 }
 
@@ -3421,7 +3421,7 @@ static void exword( dictword *wp) {
         Keybreak();		      /* Poll for asynchronous interrupt */
 #endif
         if (broken) {		      /* Did we receive a break signal */
-            trouble("Break signal");
+            trouble((char *)"Break signal");
             evalstat = ATL_BREAK;
             break;
         }
@@ -3459,20 +3459,20 @@ void atl_init() {
            save their compile addresses in static variables. */
 
 #define Cconst(cell, name)  cell = (stackitem) lookup(name); if(cell==0)abort()
-        Cconst(s_exit, "EXIT");
-        Cconst(s_lit, "(LIT)");
+        Cconst(s_exit, (char *)"EXIT");
+        Cconst(s_lit, (char *)"(LIT)");
 #ifdef REAL
         Cconst(s_flit, "(FLIT)");
 #endif
-        Cconst(s_strlit, "(STRLIT)");
-        Cconst(s_dotparen, ".(");
-        Cconst(s_qbranch, "?BRANCH");
-        Cconst(s_branch, "BRANCH");
-        Cconst(s_xdo, "(XDO)");
-        Cconst(s_xqdo, "(X?DO)");
-        Cconst(s_xloop, "(XLOOP)");
-        Cconst(s_pxloop, "(+XLOOP)");
-        Cconst(s_abortq, "ABORT\"");
+        Cconst(s_strlit, (char *)"(STRLIT)");
+        Cconst(s_dotparen, (char *)".(");
+        Cconst(s_qbranch, (char *)"?BRANCH");
+        Cconst(s_branch, (char *)"BRANCH");
+        Cconst(s_xdo, (char *)"(XDO)");
+        Cconst(s_xqdo, (char *)"(X?DO)");
+        Cconst(s_xloop, (char *)"(XLOOP)");
+        Cconst(s_pxloop, (char *)"(+XLOOP)");
+        Cconst(s_abortq, (char *)"ABORT\"");
 #undef Cconst
 
         if (stack == NULL) {	      /* Allocate stack if needed */
@@ -3548,9 +3548,9 @@ void atl_init() {
                               char *sfn;
                               FILE *sfd;
                           } stdfiles[] = {
-                              {"STDIN", NULL},
-                              {"STDOUT", NULL},
-                              {"STDERR", NULL}
+                              {(char *)"STDIN", NULL},
+                              {(char *)"STDOUT", NULL},
+                              {(char *)"STDERR", NULL}
                           };
         int i;
         dictword *dw;
@@ -3761,11 +3761,11 @@ int atl_prologue( char *sp) {
         char *pname;
         atl_int *pparam;
     } proname[] = {
-        {"STACK ", &atl_stklen},
-        {"RSTACK ", &atl_rstklen},
-        {"HEAP ", &atl_heaplen},
-        {"TEMPSTRL ", &atl_ltempstr},
-        {"TEMPSTRN ", &atl_ntempstr}
+        {(char *)"STACK ", &atl_stklen},
+        {(char *)"RSTACK ", &atl_rstklen},
+        {(char *)"HEAP ", &atl_heaplen},
+        {(char *)"TEMPSTRL ", &atl_ltempstr},
+        {(char *)"TEMPSTRN ", &atl_ntempstr}
     };
 
     if (strncmp(sp, "\\ *", 3) == 0) {
