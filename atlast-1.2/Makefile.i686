@@ -1,11 +1,11 @@
 
 #	Unix makefile for ATLAST
 
+CC = g++
 include profile.mk
 VERSION = 1.2
 
 COPTIONS = -m32 -g -Wall
-# CC = gcc
 
 LIBRARIES = -lm
 

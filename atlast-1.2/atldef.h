@@ -154,8 +154,8 @@ void stakover(), rstakover(), heapover(), badpointer(),
 /* Functions called by exported extensions. */
 extern void atl_primdef(struct primfcn *);
 extern void atl_error();
-extern dictword *atl_lookup(), *atl_vardef();
-extern stackitem *atl_body();
+extern dictword *atl_lookup(), *atl_vardef(char *, int );
+extern stackitem *atl_body(dictword *);
 extern int atl_exec();
 #ifdef EXPORT
 extern char *atl_fgetsp( char *, int , FILE *);
