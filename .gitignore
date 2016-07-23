@@ -5,3 +5,4 @@ primdeftest
 cscope.out
 .gdb_history
 atlsmall
+profile.mk
