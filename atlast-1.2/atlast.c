@@ -371,6 +371,11 @@ void ATH_Features() {
     printf("NOT WORDSUSED\n");
 #endif
 }
+
+// Time to leave.
+prim ATH_bye() {
+    exit(0);
+}
 #endif // ATH
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
@@ -2806,11 +2811,6 @@ prim P_system()
     S0 = system((char *) S0);
 }
 
-// Time to leave.
-prim ATH_bye() {
-    exit(0);
-}
-
 #endif /* SYSTEM */
 
 #ifdef TRACE
@@ -3124,7 +3124,6 @@ static struct primfcn primt[] = {
 
 #ifdef SYSTEM
     {"0SYSTEM", P_system},
-    {"0BYE", ATH_bye},
 #endif
 #ifdef TRACE
     {"0TRACE", P_trace},
@@ -3212,6 +3211,7 @@ static struct primfcn primt[] = {
 
 #ifdef ATH
     {"0.FEATURES", ATH_Features},
+    {"0BYE", ATH_bye},
 #endif
     {NULL, (codeptr) 0}
 };
