@@ -31,9 +31,7 @@
     just turn this code off or, better still, replace it
     with the equivalent on your system.  */
 
-static void ctrlc(sig)
-    int sig;
-{
+static void ctrlc( int sig) {
     if (sig == SIGINT)
         atl_break();
 }

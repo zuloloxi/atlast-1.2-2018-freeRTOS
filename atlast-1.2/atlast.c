@@ -251,7 +251,7 @@ static stackitem s_flit;
 #endif
 /*  Forward functions  */
 
-STATIC void exword(), trouble();
+STATIC void exword(dictword *), trouble(char *);
 #ifndef NOMEMCHECK
 STATIC void notcomp(), divzero();
 #endif
@@ -586,9 +586,7 @@ static int token( char **cp) {
 
 /*  LOOKUP  --	Look up token in the dictionary.  */
 
-static dictword *lookup(tkname)
-    char *tkname;
-{
+static dictword *lookup(char *tkname) {
     dictword *dw = dict;
 
     ucase(tkname);		      /* Force name to upper case */
@@ -630,11 +628,8 @@ static dictword *lookup(tkname)
     of line character is stored in the string buffer.
     */
 
-Exported char *atl_fgetsp(s, n, stream)
-    char *s;
-    int n;
-    FILE *stream;
-{
+// Exported char *atl_fgetsp(s, n, stream)
+Exported char *atl_fgetsp( char *s, int n, FILE *stream) {
     int i = 0, ch;
 
     while (True) {
@@ -699,9 +694,7 @@ void atl_memstat() {
     name and initial values for its attributes, returns
     the newly-allocated dictionary item. */
 
-static void enter(tkname)
-    char *tkname;
-{
+static void enter( char *tkname) {
     /* Allocate name buffer */
     createword->wname = alloc(((unsigned int) strlen(tkname) + 2));
     createword->wname[0] = 0;	      /* Clear flags */
@@ -3224,9 +3217,8 @@ static struct primfcn primt[] = {
     allocated word items, we get one buffer for all
     the items and link them internally within the buffer. */
 
-Exported void atl_primdef(pt)
-    struct primfcn *pt;
-{
+// Exported void atl_primdef(pt)
+Exported void atl_primdef( struct primfcn *pt) {
     struct primfcn *pf = pt;
     dictword *nw;
     int i, n = 0;
@@ -3314,9 +3306,7 @@ static void pwalkback()
 
 /*  TROUBLE  --  Common handler for serious errors.  */
 
-static void trouble(kind)
-    char *kind;
-{
+static void trouble( char *kind) {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
     sprintf(outBuffer,"\n%s.\n", kind); // EMBEDDED
@@ -3335,9 +3325,7 @@ static void trouble(kind)
 
 /*  ATL_ERROR  --  Handle error detected by user-defined primitive.  */
 
-Exported void atl_error(kind)
-    char *kind;
-{
+Exported void atl_error( char *kind) {
     trouble(kind);
     evalstat = ATL_APPLICATION;       /* Signify application-detected error */
 }
@@ -3415,9 +3403,7 @@ static void divzero()
 
 /*  EXWORD  --	Execute a word (and any sub-words it may invoke). */
 
-static void exword(wp)
-    dictword *wp;
-{
+static void exword( dictword *wp) {
     curword = wp;
 #ifdef TRACE
     if (atl_trace) {
@@ -3464,8 +3450,7 @@ static void exword(wp)
     ensure that the length allocated agrees with the lengths
     given by the atl_... cells.  */
 
-void atl_init()
-{
+void atl_init() {
     if (dict == NULL) {
         atl_primdef(primt);	      /* Define primitive words */
         dictprot = dict;	      /* Set protected mark in dictionary */
@@ -3596,9 +3581,7 @@ void atl_init()
     word item if found or NULL if the word isn't
     in the dictionary. */
 
-dictword *atl_lookup(name)
-    char *name;
-{
+dictword *atl_lookup( char *name) {
     V strcpy(tokbuf, name);	      /* Use built-in token buffer... */
     ucase(tokbuf);                    /* so ucase() doesn't wreck arg string */
     return lookup(tokbuf);	      /* Now use normal lookup() on it */
@@ -3607,9 +3590,7 @@ dictword *atl_lookup(name)
 /*  ATL_BODY  --  Returns the address of the body of a word, given
     its dictionary entry. */
 
-stackitem *atl_body(dw)
-    dictword *dw;
-{
+stackitem *atl_body( dictword *dw) {
     return ((stackitem *) dw) + Dictwordl;
 }
 
@@ -3618,9 +3599,7 @@ stackitem *atl_body(dw)
     returned.  The in-progress evaluation status is
     preserved. */
 
-int atl_exec(dw)
-    dictword *dw;
-{
+int atl_exec( dictword *dw) {
     int sestat = evalstat, restat;
 
     evalstat = ATL_SNORM;
@@ -3653,10 +3632,7 @@ int atl_exec(dw)
     the dictionary item for the new word, or NULL if
     the heap overflows. */
 
-dictword *atl_vardef(name, size)
-    char *name;
-    int size;
-{
+dictword *atl_vardef( char *name, int size) {
     dictword *di;
     int isize = (size + (sizeof(stackitem) - 1)) / sizeof(stackitem);
 
@@ -3685,9 +3661,7 @@ dictword *atl_vardef(name, size)
 
 /*  ATL_MARK  --  Mark current state of the system.  */
 
-void atl_mark(mp)
-    atl_statemark *mp;
-{
+void atl_mark( atl_statemark *mp) {
     mp->mstack = stk;		      /* Save stack position */
     mp->mheap = hptr;		      /* Save heap allocation marker */
     mp->mrstack = rstk; 	      /* Set return stack pointer */
@@ -3696,9 +3670,7 @@ void atl_mark(mp)
 
 /*  ATL_UNWIND	--  Restore system state to previously saved state.  */
 
-void atl_unwind(mp)
-    atl_statemark *mp;
-{
+void atl_unwind( atl_statemark *mp) {
 
     /* If atl_mark() was called before the system was initialised, and
        we've initialised since, we cannot unwind.  Just ignore the
@@ -3740,9 +3712,7 @@ void atl_break()
 
 /*  ATL_LOAD  --  Load a file into the system.	*/
 
-int atl_load(fp)
-    FILE *fp;
-{
+int atl_load( FILE *fp) {
     int es = ATL_SNORM;
     char s[134];
     atl_statemark mk;
@@ -3786,9 +3756,7 @@ int atl_load(fp)
     Returns 1 if the statement was part of the
     prologue and 0 otherwise. */
 
-int atl_prologue(sp)
-    char *sp;
-{
+int atl_prologue( char *sp) {
     static struct {
         char *pname;
         atl_int *pparam;

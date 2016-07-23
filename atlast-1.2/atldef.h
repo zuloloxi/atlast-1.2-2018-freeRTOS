@@ -18,10 +18,10 @@
 
 */
 
-#include "atlast.h"                   /* Define user linkage structures */
+// #include "atlast.h"                   /* Define user linkage structures */
 
 typedef void (*codeptr)();	      /* Machine code pointer */
-
+typedef double atl_real;          /* Real number type */
 /*  Dictionary word entry  */
 
 typedef struct dw {
@@ -152,12 +152,13 @@ void stakover(), rstakover(), heapover(), badpointer(),
 #endif
 
 /* Functions called by exported extensions. */
-extern void atl_primdef(), atl_error();
+extern void atl_primdef(struct primfcn *);
+extern void atl_error();
 extern dictword *atl_lookup(), *atl_vardef();
 extern stackitem *atl_body();
 extern int atl_exec();
 #ifdef EXPORT
-extern char *atl_fgetsp();
+extern char *atl_fgetsp( char *, int , FILE *);
 #endif
 
 /*  If explicit alignment is not requested, enable it in any case for
@@ -287,3 +288,5 @@ extern char *atl_fgetsp();
 #define Isfile(x) Hpc(x); if (*((stackitem *)(x))!=FileSent) {V printf("\nNot a file\n");return;}
 #define FileD(x)  ((FILE *) *(((stackitem *) (x)) + 1))
 #define Isopen(x) if (FileD(x) == NULL) {V printf("\nFile not open\n");return;}
+
+#include "atlast.h"                   /* Define user linkage structures */

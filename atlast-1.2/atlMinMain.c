@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "atldef.h"
 #include "atlast.h"
 #include "atlcfig.h"
 

@@ -5,7 +5,7 @@ include profile.mk
 
 VERSION = 1.2
 
-COPTIONS = -g -Wall
+COPTIONS = -g # -Wall
 # CC = gcc
 
 LIBRARIES = -lm
@@ -14,11 +14,11 @@ INCLUDE =
 
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 
-CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
+CFLAGS += $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest atlsmall
+APPS = atlast atlsmall # primdeftest 
 
 all:	$(APPS) atlsmall
 

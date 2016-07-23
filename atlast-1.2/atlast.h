@@ -17,8 +17,10 @@
 
 */
 
+#ifndef _ATLAST_H
+#define _ATLAST_H
 typedef long atl_int;		      /* Stack integer type */
-typedef double atl_real;	      /* Real number type */
+// typedef double atl_real;	      /* Real number type */
 
 /*  External symbols accessible by the calling program.  */
 
@@ -56,6 +58,11 @@ extern atl_int atl_errline;	      /* Line number where last atl_load()
 
 /*  Entry points  */
 
-extern void atl_init(), atl_mark(), atl_unwind(), atl_break();
-extern int atl_eval(), atl_load();
+// extern void atl_init(atl_statemark *);
+void atl_init();
+extern void atl_mark(atl_statemark *);
+void atl_unwind(atl_statemark *);
+extern void atl_break();
+extern int atl_eval(char *), atl_load(FILE *);
 extern void atl_memstat();
+#endif
