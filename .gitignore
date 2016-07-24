@@ -6,3 +6,7 @@ cscope.out
 .gdb_history
 atlsmall
 profile.mk
+# 
+# Mac OS X build artifacts
+#
+*.dSYM
