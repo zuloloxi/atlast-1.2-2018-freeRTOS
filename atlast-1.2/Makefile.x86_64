@@ -68,6 +68,10 @@ dist:
 	( cd dist ; tar cfvz ../atlast-$(VERSION).tar.gz atlast-$(VERSION) )
 	rm -rf dist
 
+install:	atlast
+	strip atlast
+	mv ./atlast /usr/local/bin
+
 lint:	lintatlast
 
 lintatlast:
