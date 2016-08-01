@@ -19,6 +19,12 @@ PROFILE_CHANGED="NO"
 DRY_RUN="NO"
 MAKE_FLAGS="-f "
 
+if [ $# -gt 0 ]; then
+    case $1 in
+        clean) ARGS="clean" ;;
+    esac
+fi
+
 echo 
 while getopts dla:hx:o:p: flag; do
     case $flag in
