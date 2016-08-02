@@ -19,7 +19,7 @@ PROFILE_CHANGED="NO"
 DRY_RUN="NO"
 MAKE_FLAGS="-f "
 
-if [ $# -gt 0 ]; then
+if [ $# -eq 1 ]; then
     case $1 in
         clean) ARGS="clean" ;;
     esac
