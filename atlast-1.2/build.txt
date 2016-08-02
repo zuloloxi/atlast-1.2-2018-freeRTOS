@@ -24,6 +24,13 @@ Help.
 
 Profile is ./basic.mk
 
+Runing this:
+
+./build.sh clean
+
+Now does a 'clean' allowing ./build.sh to be substitude for make in tools 
+such as eclipse.
+
 -a passes arguments to make, e.g.
 
 ./build.sh -a clean
