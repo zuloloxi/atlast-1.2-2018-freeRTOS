@@ -1582,6 +1582,13 @@ prim P_tan()			      /* Tangent */
 
 #ifdef CONIO
 
+prim ATH_hex() {
+    base = 16;
+}
+
+prim ATH_dec() {
+    base = 10;
+}
 /* Print top of stack, pop it */
 prim P_dot() {
     Sl(1);
@@ -3175,6 +3182,8 @@ static struct primfcn primt[] = {
 #endif /* COMPILERW */
 
 #ifdef CONIO
+    {(char *)"0HEX", ATH_hex},
+    {(char *)"0DECIMAL", ATH_dec},
     {(char *)"0.", P_dot},
     {(char *)"0?", P_question},
     {(char *)"0CR", P_cr},
