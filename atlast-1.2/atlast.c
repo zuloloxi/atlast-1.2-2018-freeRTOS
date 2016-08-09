@@ -16,6 +16,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 // #include <unistd.h>
 
 #ifdef ALIGNMENT
@@ -380,6 +381,52 @@ void ATH_Features() {
 prim ATH_bye() {
     exit(0);
 }
+
+void displayLineHex(uint8_t *a) {
+    int i;
+
+    for(i=0;i<16;i++) {
+        printf(" %02x",*(a++));
+    }
+}
+
+void displayLineAscii(uint8_t *a) {
+    int i;
+
+    printf(":");
+
+    for(i=0;i<16;i++) {
+        if( (*a < 0x20 ) || (*a > 128 )) {
+                printf(".");
+        } else {
+            printf("%c",*(a++));
+        }
+    }
+    printf("\n");
+}
+
+
+prim ATH_dump() {
+    Sl(2); // address len
+
+    int length = S0;
+    uint8_t *address = (uint8_t *) S1;
+    int lines=length/16;
+
+    if(lines ==0 ) {
+        lines=1;
+    }
+
+    for(int i = 0; i<length;i+=16) {
+        printf("%08x:", address);
+        displayLineHex( address );
+        displayLineAscii( address );
+        address +=16;
+    }
+
+    Pop2;
+}
+
 #endif // ATH
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
@@ -3215,6 +3262,7 @@ static struct primfcn primt[] = {
 #endif /* EVALUATE */
 
 #ifdef ATH
+    {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0BYE", ATH_bye},
 #endif
