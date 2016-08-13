@@ -1681,9 +1681,9 @@ prim P_dots() {
 
 #ifdef EMBEDDED
     char tmpBuffer[80];  // One line of the screen.
-        sprintf(outBuffer,"Stack: ");  // EMBEDDED
+    sprintf(outBuffer,"Stack: ");  // EMBEDDED
 #else
-        V printf("Stack: ");    // NOT EMBEDDED
+    V printf("Stack: ");    // NOT EMBEDDED
 #endif
         
     if (stk == stackbot) {
@@ -1696,10 +1696,10 @@ prim P_dots() {
     } else {
         for (tsp = stack; tsp < stk; tsp++) {
 #ifdef EMBEDDED
-            sprintf(tmpBuffer,(base == 16 ? "%lX" : "%ld "), *tsp); // NOT EMBEDDED
+            sprintf(tmpBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); // NOT EMBEDDED
             strcat(outBuffer,tmpBuffer);
 #else
-            V printf(base == 16 ? "%lX" : "%ld ", *tsp); // NOT EMBEDDED
+            V printf(base == 16 ? "%lX " : "%ld ", *tsp); // NOT EMBEDDED
 #endif
         }
     }
@@ -1767,8 +1767,8 @@ prim P_words()			      /* List words */
             break;
         }
 #else
-        /* If this system can't trap keystrokes, just stop the WORDS
-     NOT       listing after 20 words. */
+        // If this system can't trap keystrokes, just stop the WORDS NOT 
+        // listing after 20 words. 
         if (++key >= 20)
             break;
 #endif
