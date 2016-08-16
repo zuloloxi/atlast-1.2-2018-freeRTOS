@@ -5,7 +5,8 @@ CC = g++
 include profile.mk
 VERSION = 1.2
 
-COPTIONS = -m32 -g -Wall
+# COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
+COPTIONS = -m32 -g -w
 
 LIBRARIES = -lm
 

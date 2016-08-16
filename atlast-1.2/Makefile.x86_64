@@ -6,7 +6,7 @@ include profile.mk
 
 VERSION = 1.2
 
-COPTIONS = -g # -Wall
+COPTIONS = -g -Wunused-function -Wsign-compare # -Wall
 
 LIBRARIES = -lm
 
