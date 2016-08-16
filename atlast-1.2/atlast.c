@@ -1673,7 +1673,7 @@ prim ATH_qkey() {
 
 prim ATH_key() {
 #ifdef LINUX
-    Push = 0;
+    Push = getchar();
 #endif
 }
 

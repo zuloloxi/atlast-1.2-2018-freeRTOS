@@ -1,11 +1,8 @@
 /*			      ATLMAIN.C
 
                   Main driver program for interactive ATLAST
-
                   Designed and implemented in January of 1990 by John Walker.
-
                   This program is in the public domain.
-
 */
 
 #include <stdio.h>
@@ -66,6 +63,24 @@ void install_secondaries() {
     install_defer_at();
     install_defer_put();
     install_defer_is();
+}
+
+void atlast_init() {
+    int rc;
+
+    install_secondaries();
+
+    rc = atl_eval((char *)"defer emit");
+    rc = atl_eval((char *)"' (emit) is  emit");
+
+    rc = atl_eval((char *)"defer ?emit");
+    rc = atl_eval((char *)"' (?emit) is ?emit");
+
+    rc = atl_eval((char *)"defer key");
+    rc = atl_eval((char *)"' (key) is key");
+
+    rc = atl_eval((char *)"defer ?key");
+    rc = atl_eval((char *)"' (?key) is ?key");
 }
 
 int main(int argc, char *argv[]) {
@@ -191,7 +206,7 @@ int main(int argc, char *argv[]) {
     V signal(SIGINT, ctrlc);
 #endif /* HIGHC */
 
-    install_secondaries();
+    atlast_init();
 
     bool cmdRun = false;
     while (TRUE) {
