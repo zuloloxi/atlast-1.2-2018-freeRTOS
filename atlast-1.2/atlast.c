@@ -405,6 +405,7 @@ void displayLineAscii(uint8_t *a) {
     printf("\n");
 }
 
+static int token( char **);
 
 prim ATH_dump() {
     Sl(2); // address len
@@ -427,6 +428,18 @@ prim ATH_dump() {
     Pop2;
 }
 
+prim ATH_test() {
+    int i;
+    printf("Test\n");
+
+    i=token(&instream);
+
+    printf("%d=%s\n",i,tokbuf);
+    printf("here=%08x\n", hptr);
+
+    strcpy( (char *)hptr, tokbuf);
+
+}
 
 #endif // ATH
 
@@ -3294,6 +3307,7 @@ static struct primfcn primt[] = {
 #endif /* EVALUATE */
 
 #ifdef ATH
+    {(char *)"0TEST", ATH_test},
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
 //    {(char *)"0DEFER", ATH_defer},
