@@ -74,6 +74,10 @@ int main(int argc, char *argv[]) {
     FILE *ifp;
     char *include[20];
     int in = 0;
+    char t[132];  // command line buffer
+
+    memset(t,0,sizeof(t));
+
 #define PR(x) (void) fprintf(stderr, x)
 
     PR("ATLAST 1.2 (2007-10-07) This program is in the public domain.\n");
@@ -90,6 +94,9 @@ int main(int argc, char *argv[]) {
                 opt = toupper(opt);
             switch (opt) {
 
+                case 'C':
+                    strcpy(t,(cp+1));
+                    break;
                 case 'D':
                     defmode = TRUE;
                     break;
@@ -118,6 +125,7 @@ int main(int argc, char *argv[]) {
                 case 'U':
                     PR("Usage:  ATLAST [options] [inputfile]\n");
                     PR("        Options:\n");
+                    PR("           -Ccmd  Execute 'cmd' once started up.");
                     PR("           -D     Treat file as definitions\n");
                     PR("           -Hn    Heap length n\n");
                     PR("           -Ifile Include named definition file\n");
@@ -184,13 +192,25 @@ int main(int argc, char *argv[]) {
 #endif /* HIGHC */
 
     install_secondaries();
+
+    bool cmdRun = false;
     while (TRUE) {
-        char t[132];
+        //        char t[132];
 
         if (!fname)
             V printf(atl_comment ? "(  " :  /* Show pending comment */
                     /* Show compiling state */
                     (((heap != NULL) && state) ? ":> " : "-> "));
+
+        if( cmdRun == false) {
+            if (strlen(t) > 0) {
+
+                V atl_eval(t);
+                memset(t,0,sizeof(t));
+            }
+            cmdRun=true;
+        }
+
         if (fgets(t, 132, ifp) == NULL) {
             if (fname && defmode) {
                 fname = defmode = FALSE;

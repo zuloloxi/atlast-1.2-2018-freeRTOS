@@ -1630,6 +1630,33 @@ prim P_tan()			      /* Tangent */
 
 #ifdef CONIO
 
+// ?emit
+// Return true if I can output a char.
+//
+prim ATH_qemit() {
+#ifdef LINUX
+    Push = -1;
+#endif
+}
+
+prim ATH_emit() {
+#ifdef LINUX
+    Pop;
+#endif
+}
+
+prim ATH_qkey() {
+#ifdef LINUX
+    Push = 0;
+#endif
+}
+
+prim ATH_key() {
+#ifdef LINUX
+    Push = 0;
+#endif
+}
+
 prim ATH_hex() {
     base = 16;
 }
@@ -3230,6 +3257,10 @@ static struct primfcn primt[] = {
 #endif /* COMPILERW */
 
 #ifdef CONIO
+    {(char *)"0(KEY)", ATH_key},
+    {(char *)"0(?KEY)", ATH_qkey},
+    {(char *)"0(?EMIT)", ATH_qemit},
+    {(char *)"0(EMIT)", ATH_emit},
     {(char *)"0HEX", ATH_hex},
     {(char *)"0DECIMAL", ATH_dec},
     {(char *)"0.", P_dot},
