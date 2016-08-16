@@ -122,6 +122,17 @@ typedef enum {False = 0, True = 1} Boolean;
 
 /*  Globals visible to calling programs  */
 
+#ifdef LINUX
+#include <termios.h>
+static int      ttyfd = 0;   /* STDIN_FILENO is 0 by default */
+struct termios orig_termios; /* Terminal IO Structure */
+
+void fatal(char *message) {
+    fprintf(stderr, "fatal error: %s\n", message);
+    exit(1);
+}
+#endif
+
 atl_int atl_stklen = 100;	      /* Evaluation stack length */
 atl_int atl_rstklen = 100;	      /* Return stack length */
 atl_int atl_heaplen = 1000;	      /* Heap length */
@@ -195,7 +206,7 @@ static char *fopenmodes[] = {
 #ifndef FMspecial
         /* Default fopen() mode table for SVID-compatible systems not
            overridden by a special table above. */
-    (char *)"", (char *)"r", (char *) "", (char *)  "r+",
+        (char *)"", (char *)"r", (char *) "", (char *)  "r+",
     (char *)"", (char *)"r", (char *) "", (char *)  "r+",
     (char *)"", (char *)"", (char *)  "w", (char *) "w+",
     (char *)"", (char *)"", (char *)  "w", (char *) "w+"
@@ -397,7 +408,7 @@ void displayLineAscii(uint8_t *a) {
 
     for(i=0;i<16;i++) {
         if( (*a < 0x20 ) || (*a > 128 )) {
-                printf(".");
+            printf(".");
         } else {
             printf("%c",*(a++));
         }
@@ -456,13 +467,13 @@ static char *alloc(unsigned int size) {
 
     /* printf("\nAlloc %u", size); */
     if (cp == NULL) {
-        
+
 #ifdef EMBEDDED
         sprintf(outBuffer, "\n\nOut of memory!  %u bytes requested.\n", size); // EMBEDDED
 #else
         V fprintf(stderr, "\n\nOut of memory!  %u bytes requested.\n", size); // NOT EMBEDDED
 #endif
-        
+
         abort();
     }
     return cp;
@@ -621,7 +632,7 @@ static int token( char **cp) {
         /* See if the token is a number. */
 
         if (isdigit(tokbuf[0]) || tokbuf[0] == '-') {
-//            char tc;
+            //            char tc;
             char *tcp;
 
 #ifdef OS2
@@ -734,8 +745,8 @@ Exported char *atl_fgetsp( char *s, int n, FILE *stream) {
 void atl_memstat() {
     static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld\n";
 
-//    V printf("\n             Memory Usage Summary\n\n");
-//    V printf("                 Current   Maximum    Items     Percent\n");
+    //    V printf("\n             Memory Usage Summary\n\n");
+    //    V printf("                 Current   Maximum    Items     Percent\n");
     V printf("  Memory Area     usage     used    allocated   in use \n");
 
     V printf(fmt, "Stack",
@@ -1355,9 +1366,9 @@ prim P_strform()		      /* Format integer using sprintf() */
     Sl(2);
     Hpc(S0);
     Hpc(S1);
-    
+
     V sprintf((char *) S0, (char *) S1, S2);  // NOT EMBEDDED
-    
+
     Npop(3);
 }
 
@@ -1552,9 +1563,9 @@ prim P_fleq()			      /* Test less than or equal */
 prim P_fdot()			      /* Print floating point top of stack */
 {
     Sl(Realsize);
-    
+
     V printf("%g ", REAL0);
-    
+
     Realpop;
 }
 
@@ -1648,7 +1659,90 @@ prim P_tan()			      /* Tangent */
 /*  Console I/O primitives  */
 
 #ifdef CONIO
+#ifdef LINUX
+#define NB_DISABLE 0
+#define NB_ENABLE 1
 
+/*
+ * reset tty - useful also for restoring the terminal when this process
+ * wishes to temporarily relinquish the tty
+ */
+
+int tty_reset(void) {
+        extern struct termios orig_termios; /* TERMinal I/O Structure */
+
+            /* flush and reset */
+            if (tcsetattr(ttyfd, TCSAFLUSH, &orig_termios) < 0) { 
+                        return -1;
+                            }    
+                return 0;
+}
+void nonblock(int state) {
+    struct termios ttystate;
+
+    // get the terminal state
+    tcgetattr(STDIN_FILENO, &ttystate);
+
+    if (state==NB_ENABLE) {    
+        // turn off canonical mode
+        ttystate.c_lflag &= ~ICANON;
+        // minimum of number input read.
+        ttystate.c_cc[VMIN] = 1; 
+    } else if (state==NB_DISABLE) {
+        // turn on canonical mode
+        ttystate.c_lflag |= ICANON;
+    }    
+    // set the terminal attributes.
+    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+}
+
+void tty_raw(void) {
+    struct termios  raw;
+
+    extern struct termios orig_termios; /* TERMinal I/O Structure */
+
+    raw = orig_termios; /* copy original and then modify below */
+
+    /*
+     * input modes - clear indicated ones giving: no break, no CR to NL,
+     * no parity check, no strip char, no start/stop output (sic) control
+     */
+    raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+
+    /*
+     * output modes - clear giving: no post processing such as NL to
+     * CR+NL
+     */
+    raw.c_oflag &= ~(OPOST);
+
+    /* control modes - set 8 bit chars */
+    raw.c_cflag |= (CS8);
+
+    /*
+     * local modes - clear giving: echoing off, canonical off (no erase
+     * with backspace, ^U,...),  no extended functions, no signal chars
+     * (^Z,^C)
+     */
+    raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+    /*
+     * control chars - set return condition: min number of bytes and
+     * timer
+     */
+    //    raw.c_cc[VMIN] = 5;
+    //    raw.c_cc[VTIME] = 8;    /* after 5 bytes or .8 seconds after first byte seen      */
+    //    raw.c_cc[VMIN] = 0;
+    //    raw.c_cc[VTIME] = 0;    /* immediate - anything       */
+    //    raw.c_cc[VMIN] = 2;
+    //    raw.c_cc[VTIME] = 0;    /* after two bytes, no timer  */
+    //    raw.c_cc[VMIN] = 0;
+    //    raw.c_cc[VTIME] = 8;    /* after a byte or .8 seconds */
+
+    /* put terminal in raw mode after flushing */
+    if (tcsetattr(ttyfd, TCSAFLUSH, &raw) < 0)
+        fatal("can't set raw mode");
+}
+#endif
 // ?emit
 // Return true if I can output a char.
 //
@@ -1701,7 +1795,7 @@ prim P_question()		      /* Print value at address */
 {
     Sl(1);
     Hpc(S0);
-    
+
 #ifdef EMBEDDED
     sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), *((stackitem *) S0)); // NOT EMBEDDED
 #else
@@ -1733,7 +1827,7 @@ prim P_dots() {
 #else
     V printf("Stack: ");    // NOT EMBEDDED
 #endif
-        
+
     if (stk == stackbot) {
 #ifdef EMBEDDED
         sprintf(outBuffer,"Empty.");  // NOT EMBEDDED
@@ -1779,7 +1873,7 @@ prim P_dotparen()		      /* Print literal string that follows */
 prim P_type() {
     Sl(1);
     Hpc(S0);
-    
+
 #ifdef EMBEDDED
     if(strlen(outBuffer) > 0) {
         strcat(outBuffer,(char *)S0);
@@ -1789,7 +1883,7 @@ prim P_type() {
 #else
     V printf("%s", (char *) S0); // NOT EMBEDDED
 #endif
-    
+
     Pop;
 }
 
@@ -1808,7 +1902,7 @@ prim P_words()			      /* List words */
 #else
         V printf("\n%s", dw->wname + 1); // NOT EMBEDDED
 #endif
-        
+
         dw = dw->wnext;
 #ifdef Keyhit
         if (kbquit()) {
@@ -2567,7 +2661,7 @@ prim P_abortq() 		      /* Abort, printing message */
 #else
         V printf("%s", (char *) ip);  // NOT EMBEDDED
 #endif
-        
+
 #ifdef WALKBACK
         pwalkback();
 #endif /* WALKBACK */
@@ -3317,7 +3411,7 @@ static struct primfcn primt[] = {
     {(char *)"0TEST", ATH_test},
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
-//    {(char *)"0DEFER", ATH_defer},
+    //    {(char *)"0DEFER", ATH_defer},
     {(char *)"0BYE", ATH_bye},
 #endif
     {NULL, (codeptr) 0}
@@ -3395,7 +3489,7 @@ static void pwalkback()
 #else
         V printf("Walkback:\n"); // NOT EMBEDDED
 #endif
-        
+
         if (curword != NULL) {
 #ifdef EMBEDDED
             sprintf(outBuffer,"   %s\n", curword->wname + 1); // EMBEDDED
