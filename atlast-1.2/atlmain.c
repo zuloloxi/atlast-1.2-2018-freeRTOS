@@ -37,7 +37,36 @@ static void ctrlc( int sig) {
 }
 #endif /* HIGHC */
 
+
 /*  MAIN  --  Main program.  */
+#define DEFER ": defer create ['] abort , does> @ execute ;"
+#define DEFER_AT ": defer@ >body @ ;"
+#define DEFER_PUT ": defer!  >body ! ;"
+#define DEFER_IS ": is ' defer!  ; immediate"
+
+
+void install_defer() {
+    int rc = atl_eval( (char *)DEFER );
+}
+
+void install_defer_at() {
+    int rc = atl_eval( (char *)DEFER_AT );
+}
+
+void install_defer_put() {
+    int rc = atl_eval( (char *)DEFER_PUT );
+}
+
+void install_defer_is() {
+    int rc = atl_eval( (char *)DEFER_IS );
+}
+
+void install_secondaries() {
+    install_defer();
+    install_defer_at();
+    install_defer_put();
+    install_defer_is();
+}
 
 int main(int argc, char *argv[]) {
     int i;
@@ -153,6 +182,8 @@ int main(int argc, char *argv[]) {
 #ifndef HIGHC
     V signal(SIGINT, ctrlc);
 #endif /* HIGHC */
+
+    install_secondaries();
     while (TRUE) {
         char t[132];
 

@@ -427,6 +427,7 @@ prim ATH_dump() {
     Pop2;
 }
 
+
 #endif // ATH
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
@@ -3264,6 +3265,7 @@ static struct primfcn primt[] = {
 #ifdef ATH
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
+//    {(char *)"0DEFER", ATH_defer},
     {(char *)"0BYE", ATH_bye},
 #endif
     {NULL, (codeptr) 0}
@@ -3374,6 +3376,7 @@ static void trouble( char *kind) {
 #ifdef WALKBACK
     pwalkback();
 #endif /* WALKBACK */
+
     P_abort();			      /* Abort */
     atl_comment = state = Falsity;    /* Reset all interpretation state */
     forgetpend = defpend = stringlit =
