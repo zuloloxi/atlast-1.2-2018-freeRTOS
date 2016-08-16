@@ -39,10 +39,10 @@ static void ctrlc( int sig) {
 
 
 /*  MAIN  --  Main program.  */
-#define DEFER ": defer create ['] abort , does> @ execute ;"
-#define DEFER_AT ": defer@ >body @ ;"
+#define DEFER     ": defer create ['] abort , does> @ execute ;"
+#define DEFER_AT  ": defer@ >body @ ;"
 #define DEFER_PUT ": defer!  >body ! ;"
-#define DEFER_IS ": is ' defer!  ; immediate"
+#define DEFER_IS  ": is ' defer!  ; immediate"
 
 
 void install_defer() {

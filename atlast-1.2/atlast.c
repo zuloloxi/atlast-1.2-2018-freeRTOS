@@ -1660,6 +1660,7 @@ prim ATH_qemit() {
 
 prim ATH_emit() {
 #ifdef LINUX
+    putchar((uint8_t) S0);
     Pop;
 #endif
 }

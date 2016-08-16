@@ -1,4 +1,4 @@
 
 ATLCONFIG := -DMEMSTAT -DATH -DFILEIO -DLINUX
-CFLAGS := -Wwrite-strings -Wunused-variable
+CFLAGS := -w # -Wwrite-strings -Wunused-variable
 CC=g++
