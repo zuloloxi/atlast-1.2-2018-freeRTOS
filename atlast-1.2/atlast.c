@@ -430,6 +430,8 @@ prim ATH_dump() {
 
 prim ATH_test() {
     int i;
+    int len;
+
     printf("Test\n");
 
     i=token(&instream);
@@ -437,7 +439,11 @@ prim ATH_test() {
     printf("%d=%s\n",i,tokbuf);
     printf("here=%08x\n", hptr);
 
-    strcpy( (char *)hptr, tokbuf);
+    len=strlen( tokbuf );
+    strncpy( (char *)hptr, tokbuf, len);
+
+    Push = (stackitem)tokbuf;
+    Push = (stackitem)len;
 
 }
 
