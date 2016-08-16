@@ -1663,32 +1663,48 @@ prim P_tan()			      /* Tangent */
 #define NB_DISABLE 0
 #define NB_ENABLE 1
 
+#define EMPTY '\0'
+static char cbuf = EMPTY;
+
 /*
  * reset tty - useful also for restoring the terminal when this process
  * wishes to temporarily relinquish the tty
  */
 
 int tty_reset(void) {
-        extern struct termios orig_termios; /* TERMinal I/O Structure */
+    extern struct termios orig_termios; /* TERMinal I/O Structure */
 
-            /* flush and reset */
-            if (tcsetattr(ttyfd, TCSAFLUSH, &orig_termios) < 0) { 
-                        return -1;
-                            }    
-                return 0;
+    /* flush and reset */
+    if (tcsetattr(ttyfd, TCSAFLUSH, &orig_termios) < 0) { 
+        return -1;
+    }    
+    return 0;
 }
-void nonblock(int state) {
+
+int kbhit() {
+    struct timeval  tv;  
+    fd_set          fds; 
+    tv.tv_sec = 0; 
+    tv.tv_usec = 0; 
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    //STDIN_FILENO is 0
+    select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
+}
+
+void nonblock(int State) {
     struct termios ttystate;
 
     // get the terminal state
     tcgetattr(STDIN_FILENO, &ttystate);
 
-    if (state==NB_ENABLE) {    
+    if ( State == NB_ENABLE) {    
         // turn off canonical mode
         ttystate.c_lflag &= ~ICANON;
         // minimum of number input read.
         ttystate.c_cc[VMIN] = 1; 
-    } else if (state==NB_DISABLE) {
+    } else if ( State == NB_DISABLE) {
         // turn on canonical mode
         ttystate.c_lflag |= ICANON;
     }    
@@ -1761,13 +1777,21 @@ prim ATH_emit() {
 
 prim ATH_qkey() {
 #ifdef LINUX
-    Push = 0;
+    tty_raw();
+    nonblock(0);
+
+    if(kbhit() !=0) {
+        cbuf = fgetc(stdin);
+    } else {
+        cbuf = EMPTY;
+    }
+    tty_reset();
+//    nonblock(1);
 #endif
 }
 
 prim ATH_key() {
 #ifdef LINUX
-    Push = getchar();
 #endif
 }
 
