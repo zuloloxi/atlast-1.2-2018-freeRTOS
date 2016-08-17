@@ -226,6 +226,9 @@ int main(int argc, char *argv[]) {
             cmdRun=true;
         }
 
+        // TODO: Replace fgets with a common, forth like word
+        // to allow simple redirection.
+        //
         if (fgets(t, 132, ifp) == NULL) {
             if (fname && defmode) {
                 fname = defmode = FALSE;
