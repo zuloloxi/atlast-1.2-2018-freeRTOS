@@ -397,6 +397,12 @@ prim ATH_memsafe() {
     ath_safe_memory = (S0 == 0) ? Falsity : Truth;
     Pop;
 }
+
+prim ATH_qmemsafe() {
+    So(1);
+    Push = ath_safe_memory;
+}
+
 // Time to leave.
 prim ATH_bye() {
     exit(0);
@@ -3352,6 +3358,7 @@ static struct primfcn primt[] = {
 
 #ifdef ATH
     {(char *)"0MEMSAFE",ATH_memsafe},
+    {(char *)"0?MEMSAFE",ATH_qmemsafe},
     {(char *)"0TEST", ATH_test},
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
