@@ -3134,6 +3134,7 @@ static struct primfcn primt[] = {
 
     {(char *)"0VARIABLE", P_variable},
     {(char *)"0CONSTANT", P_constant},
+    {(char *)"0VALUE", P_constant},
     {(char *)"0!", P_bang},
     {(char *)"0@", P_at},
     {(char *)"0+!", P_plusbang},

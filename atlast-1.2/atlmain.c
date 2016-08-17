@@ -42,6 +42,7 @@ static void ctrlc( int sig) {
 #define DEFER_IS  ": is ' defer!  ; immediate"
 
 
+
 void install_defer() {
     int rc = atl_eval( (char *)DEFER );
 }
@@ -70,6 +71,7 @@ void atlast_init() {
 
     install_secondaries();
 
+    rc = atl_eval((char *)": to ' >body ! ; immediate");
     rc = atl_eval((char *)"defer emit");
     rc = atl_eval((char *)"' (emit) is  emit");
 
