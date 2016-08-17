@@ -1660,104 +1660,7 @@ prim P_tan()			      /* Tangent */
 
 #ifdef CONIO
 #ifdef LINUX
-#define NB_DISABLE 0
-#define NB_ENABLE 1
 
-#define EMPTY '\0'
-static char cbuf = EMPTY;
-
-/*
- * reset tty - useful also for restoring the terminal when this process
- * wishes to temporarily relinquish the tty
- */
-
-int tty_reset(void) {
-    extern struct termios orig_termios; /* TERMinal I/O Structure */
-
-    /* flush and reset */
-    if (tcsetattr(ttyfd, TCSAFLUSH, &orig_termios) < 0) { 
-        return -1;
-    }    
-    return 0;
-}
-
-int kbhit() {
-    struct timeval  tv;  
-    fd_set          fds; 
-    tv.tv_sec = 0; 
-    tv.tv_usec = 0; 
-    FD_ZERO(&fds);
-    FD_SET(STDIN_FILENO, &fds);
-    //STDIN_FILENO is 0
-    select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
-    return FD_ISSET(STDIN_FILENO, &fds);
-}
-
-void nonblock(int State) {
-    struct termios ttystate;
-
-    // get the terminal state
-    tcgetattr(STDIN_FILENO, &ttystate);
-
-    if ( State == NB_ENABLE) {    
-        // turn off canonical mode
-        ttystate.c_lflag &= ~ICANON;
-        // minimum of number input read.
-        ttystate.c_cc[VMIN] = 1; 
-    } else if ( State == NB_DISABLE) {
-        // turn on canonical mode
-        ttystate.c_lflag |= ICANON;
-    }    
-    // set the terminal attributes.
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
-}
-
-void tty_raw(void) {
-    struct termios  raw;
-
-    extern struct termios orig_termios; /* TERMinal I/O Structure */
-
-    raw = orig_termios; /* copy original and then modify below */
-
-    /*
-     * input modes - clear indicated ones giving: no break, no CR to NL,
-     * no parity check, no strip char, no start/stop output (sic) control
-     */
-    raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-
-    /*
-     * output modes - clear giving: no post processing such as NL to
-     * CR+NL
-     */
-    raw.c_oflag &= ~(OPOST);
-
-    /* control modes - set 8 bit chars */
-    raw.c_cflag |= (CS8);
-
-    /*
-     * local modes - clear giving: echoing off, canonical off (no erase
-     * with backspace, ^U,...),  no extended functions, no signal chars
-     * (^Z,^C)
-     */
-    raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
-
-    /*
-     * control chars - set return condition: min number of bytes and
-     * timer
-     */
-    //    raw.c_cc[VMIN] = 5;
-    //    raw.c_cc[VTIME] = 8;    /* after 5 bytes or .8 seconds after first byte seen      */
-    //    raw.c_cc[VMIN] = 0;
-    //    raw.c_cc[VTIME] = 0;    /* immediate - anything       */
-    //    raw.c_cc[VMIN] = 2;
-    //    raw.c_cc[VTIME] = 0;    /* after two bytes, no timer  */
-    //    raw.c_cc[VMIN] = 0;
-    //    raw.c_cc[VTIME] = 8;    /* after a byte or .8 seconds */
-
-    /* put terminal in raw mode after flushing */
-    if (tcsetattr(ttyfd, TCSAFLUSH, &raw) < 0)
-        fatal("can't set raw mode");
-}
 #endif
 // ?emit
 // Return true if I can output a char.
@@ -1777,16 +1680,7 @@ prim ATH_emit() {
 
 prim ATH_qkey() {
 #ifdef LINUX
-    tty_raw();
-    nonblock(0);
-
-    if(kbhit() !=0) {
-        cbuf = fgetc(stdin);
-    } else {
-        cbuf = EMPTY;
-    }
-    tty_reset();
-//    nonblock(1);
+    Push = 0;
 #endif
 }
 
