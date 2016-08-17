@@ -146,6 +146,8 @@ atl_int atl_redef = Truth;	      /* Allow redefinition without issuing
                                      the "not unique" message. */
 atl_int atl_errline = 0;	      /* Line where last atl_load failed */
 
+//ATH
+atl_int ath_safe_memory = Truth;
 /*  Local variables  */
 
 /* The evaluation stack */
@@ -387,7 +389,14 @@ void ATH_Features() {
     printf("NOT WORDSUSED\n");
 #endif
 }
-
+// If ath_safe_memory is non zero then ensure memeory access
+// is within the heap.
+//
+prim ATH_memsafe() {
+    Sl(1);
+    ath_safe_memory = (S0 == 0) ? Falsity : Truth;
+    Pop;
+}
 // Time to leave.
 prim ATH_bye() {
     exit(0);
@@ -1056,25 +1065,36 @@ prim P_here()			      /* Push current heap address */
     Push = (stackitem) hptr;
 }
 
+// TODO To allow acces to memeory outside of heap, such as
+// Shared memeory or IO device add a value to test around the
+// Hpc call, to switch off memory bounds checking.
+//
 prim P_bang()			      /* Store value into address */
 {
     Sl(2);
-    Hpc(S0);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((stackitem *) S0) = S1;
     Pop2;
 }
 
-prim P_at()			      /* Fetch value from address */
-{
+/* Fetch value from address */
+prim P_at() {
     Sl(1);
-    Hpc(S0);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     S0 = *((stackitem *) S0);
 }
 
 prim P_plusbang()		      /* Add value at specified address */
 {
     Sl(2);
-    Hpc(S0);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((stackitem *) S0) += S1;
     Pop2;
 }
@@ -1101,7 +1121,9 @@ prim P_comma()			      /* Store one item on heap */
 prim P_cbang()			      /* Store byte value into address */
 {
     Sl(2);
-    Hpc(S0);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((unsigned char *) S0) = S1;
     Pop2;
 }
@@ -1109,7 +1131,9 @@ prim P_cbang()			      /* Store byte value into address */
 prim P_cat()			      /* Fetch byte value from address */
 {
     Sl(1);
-    Hpc(S0);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     S0 = *((unsigned char *) S0);
 }
 
@@ -3327,6 +3351,7 @@ static struct primfcn primt[] = {
 #endif /* EVALUATE */
 
 #ifdef ATH
+    {(char *)"0MEMSAFE",ATH_memsafe},
     {(char *)"0TEST", ATH_test},
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0.FEATURES", ATH_Features},
