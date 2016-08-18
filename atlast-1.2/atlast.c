@@ -273,6 +273,10 @@ STATIC void notcomp(), divzero();
 STATIC void pwalkback();
 #endif
 
+bool initIO() {
+    return true;
+}
+
 #ifdef ATH
 void ATH_Features() {
 #ifdef ARRAY

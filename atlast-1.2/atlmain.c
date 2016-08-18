@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
     char *include[20];
     int in = 0;
     char t[132];  // command line buffer
+    extern bool initIO();
 
     memset(t,0,sizeof(t));
 
@@ -209,6 +210,10 @@ int main(int argc, char *argv[]) {
 #endif /* HIGHC */
 
     atlast_init();
+    if (false == initIO()) {
+        fprintf(stderr,"Fatel error initialising IO\n");
+    }
+
 
     bool cmdRun = false;
     while (TRUE) {
