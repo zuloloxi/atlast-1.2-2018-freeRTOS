@@ -458,6 +458,30 @@ prim ATH_dump() {
     Pop2;
 }
 
+prim ATH_erase() {
+    Sl(2);
+
+    int length = S0;
+    uint8_t *address = (uint8_t *) S1;
+
+    memset(address,0,length);
+
+    Pop2;
+}
+
+prim ATH_fill() {
+    Sl(3);
+
+    uint8_t d = S0;
+    int length = S1;
+    uint8_t *address = (uint8_t *) S2 ;
+
+    memset(address,d,length);
+
+    Pop2;
+    Pop;
+}
+
 prim ATH_test() {
     int i;
     int len;
@@ -3365,6 +3389,8 @@ static struct primfcn primt[] = {
     {(char *)"0?MEMSAFE",ATH_qmemsafe},
     {(char *)"0TEST", ATH_test},
     {(char *)"0DUMP", ATH_dump},
+    {(char *)"0ERASE", ATH_erase},
+    {(char *)"0FILL", ATH_fill},
     {(char *)"0.FEATURES", ATH_Features},
     //    {(char *)"0DEFER", ATH_defer},
     {(char *)"0BYE", ATH_bye},
