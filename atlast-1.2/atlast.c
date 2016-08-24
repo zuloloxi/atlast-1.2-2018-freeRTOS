@@ -1171,6 +1171,33 @@ prim P_cat()			      /* Fetch byte value from address */
     S0 = *((unsigned char *) S0);
 }
 
+#ifdef ATH
+prim ATH_wbang() {
+    Sl(2);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
+
+    uint16_t *ptr=(uint16_t *)S0;
+    uint16_t data=S1;
+
+    *ptr=(uint16_t)(data & 0xffff);
+
+    Pop2;
+}
+
+/* Fetch byte value from address */
+prim ATH_wat() {
+
+    Sl(1);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
+    S0 = *((uint16_t *) S0);
+}
+#endif
+
 prim P_ccomma() 		      /* Store one byte on heap */
 {
     unsigned char *chp;
@@ -3394,6 +3421,9 @@ static struct primfcn primt[] = {
     {(char *)"0.FEATURES", ATH_Features},
     //    {(char *)"0DEFER", ATH_defer},
     {(char *)"0BYE", ATH_bye},
+    {(char *)"0W!", ATH_wbang},
+    {(char *)"0W@", ATH_wat },
+
 #endif
     {NULL, (codeptr) 0}
 };
