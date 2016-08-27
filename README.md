@@ -9,6 +9,8 @@ I want to add a few features and use as the basis for a scriptable unit test fra
 
 I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as to usage.)
 
+27 August 2016 Now build with g++ and I have started to replace character io with a generic messaging class.  Current version behaves as before, ultimately will be able to have the console of IPC on Linux, and others.  Currently x86_64 only.
+
 Below is Michael's original README.
 
 =================
