@@ -28,10 +28,11 @@ atlast: $(ATLOBJ)
 tst: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o tst $(LIBRARIES) /usr/local/lib/C++/Obj/Boiler.o -I/usr/local/lib/C++/include 
 
-atlsmall: $(ATLOBJ) atlMinMain.c
-	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
-
 CFLAGS += -I/usr/local/lib/C++/include 
+
+atlsmall: $(ATLOBJ) atlMinMain.c
+	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.c atlast.o -o atlsmall $(LIBRARIES) /usr/local/lib/C++/Obj/Console.o -I/usr/local/lib/C++/include 
+
 
 atlast.o:   atlast.c atldef.h atlcfig.h
 atldef.h:   atlast.h

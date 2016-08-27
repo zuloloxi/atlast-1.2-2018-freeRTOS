@@ -19,6 +19,8 @@
 #include <stdint.h>
 #include <iostream>
 using namespace std;
+#include <message.h>
+#include <Console.h>
 
 // #include <unistd.h>
 
@@ -491,8 +493,10 @@ prim ATH_fill() {
     Pop;
 }
 
+/*
 #include "message.h"
 #include "Boiler.h"
+*/
 prim ATH_test() {
     /*
     int i;
@@ -511,18 +515,22 @@ prim ATH_test() {
     Push = (stackitem)tokbuf;
     Push = (stackitem)len;
     */
+    /*
     Message *tst;
     tst = new Boiler();
     Push=(stackitem) tst;
+    */
 
 }
 
 prim ATH_objdump() {
-    Boiler *tst;
+    Message *tst;
 
+    /*
     tst=(Boiler *)S0;
 
     tst->dump();
+    */
 
 }
 
