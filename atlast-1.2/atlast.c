@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <iostream>
+using namespace std;
+
 // #include <unistd.h>
 
 #ifdef ALIGNMENT
@@ -392,6 +395,12 @@ void ATH_Features() {
 #else
     printf("NOT WORDSUSED\n");
 #endif
+
+#ifdef ATH
+    printf("    ATH CUSTOM\n");
+#else
+    printf("NOT ATH CUSTOM\n");
+#endif
 }
 // If ath_safe_memory is non zero then ensure memeory access
 // is within the heap.
@@ -482,7 +491,10 @@ prim ATH_fill() {
     Pop;
 }
 
+#include "message.h"
+#include "Boiler.h"
 prim ATH_test() {
+    /*
     int i;
     int len;
 
@@ -498,8 +510,22 @@ prim ATH_test() {
 
     Push = (stackitem)tokbuf;
     Push = (stackitem)len;
+    */
+    Message *tst;
+    tst = new Boiler();
+    Push=(stackitem) tst;
 
 }
+
+prim ATH_objdump() {
+    Boiler *tst;
+
+    tst=(Boiler *)S0;
+
+    tst->dump();
+
+}
+
 
 #endif // ATH
 
@@ -3415,6 +3441,7 @@ static struct primfcn primt[] = {
     {(char *)"0MEMSAFE",ATH_memsafe},
     {(char *)"0?MEMSAFE",ATH_qmemsafe},
     {(char *)"0TEST", ATH_test},
+    {(char *)"0OBJDUMP", ATH_objdump},
     {(char *)"0DUMP", ATH_dump},
     {(char *)"0ERASE", ATH_erase},
     {(char *)"0FILL", ATH_fill},
