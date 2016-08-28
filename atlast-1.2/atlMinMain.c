@@ -28,7 +28,8 @@ int main() {
         atl_eval(t);
 
         if(strlen(outBuffer) > 0) {
-            printf("%s\n", outBuffer);
+            sysConsole->writePipe(outBuffer, strlen(outBuffer));
+
             outBuffer[0]='\0';
         }
     }
