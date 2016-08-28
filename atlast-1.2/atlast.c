@@ -37,10 +37,6 @@ using namespace std;
 #endif
 
 extern Console *sysConsole;
-// extern char outBuffer[];
-#ifdef EMBEDDED
-// extern char *outBuffer;
-#endif
 
 #ifdef Macintosh
 /* Macintoshes need 32K segments, else barfage ensues */
