@@ -18,7 +18,8 @@ CFLAGS += $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast atlsmall primdeftest 
+# TODO Only build atlsmall until I fix atlast
+APPS = atlsmall #  atlast primdeftest 
 
 all:	$(APPS) atlsmall
 

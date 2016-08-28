@@ -7,12 +7,16 @@
 #include "atlast.h"
 #include "atlcfig.h"
 
+#ifdef EMBEDDED
+char outBuffer[255];
+#endif
+// Global so that atlast.c can see it.
+Message *sysConsole;
 
 int main() {
     char t[132];
     char prompt[] = "C++ -> ";
     
-    Message *sysConsole;
     
     sysConsole = new Console();
     

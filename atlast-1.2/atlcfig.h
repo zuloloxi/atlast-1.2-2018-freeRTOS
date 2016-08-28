@@ -34,6 +34,3 @@
                             // to a global buffer.
                             //
 
-#ifdef EMBEDDED
-char outBuffer[255];
-#endif

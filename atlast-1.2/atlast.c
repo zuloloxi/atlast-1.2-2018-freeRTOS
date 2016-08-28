@@ -36,8 +36,10 @@ using namespace std;
 #include <unistd.h>
 #endif
 
+extern Console *sysConsole;
+// extern char outBuffer[];
 #ifdef EMBEDDED
-extern char *outBuffer;
+// extern char *outBuffer;
 #endif
 
 #ifdef Macintosh
@@ -497,6 +499,7 @@ prim ATH_fill() {
 #include "message.h"
 #include "Boiler.h"
 */
+
 prim ATH_test() {
     /*
     int i;
@@ -524,13 +527,8 @@ prim ATH_test() {
 }
 
 prim ATH_objdump() {
-    Message *tst;
 
-    /*
-    tst=(Boiler *)S0;
-
-    tst->dump();
-    */
+    sysConsole->dump();
 
 }
 
@@ -540,13 +538,15 @@ prim ATH_objdump() {
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
 
 static char *alloc(unsigned int size) {
+    char buffer[132];
     char *cp = (char *)malloc(size);
 
     /* printf("\nAlloc %u", size); */
     if (cp == NULL) {
 
 #ifdef EMBEDDED
-        sprintf(outBuffer, "\n\nOut of memory!  %u bytes requested.\n", size); // EMBEDDED
+        sprintf(buffer, "\n\nOut of memory!  %u bytes requested.\n", size); // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V fprintf(stderr, "\n\nOut of memory!  %u bytes requested.\n", size); // NOT EMBEDDED
 #endif
@@ -664,7 +664,9 @@ static int token( char **cp) {
             if (rstring) {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                sprintf(outBuffer,"\nRunaway string: %s\n", tokbuf); // EMBEDDED
+                char buffer[132];
+                sprintf(buffer,"\nRunaway string: %s\n", tokbuf); // EMBEDDED
+                sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                 V printf("\nRunaway string: %s\n", tokbuf); // NOT EMBEDDED
 #endif
@@ -1388,14 +1390,16 @@ prim P_array()			      /* Declare array */
 
 #ifdef STRING
 
-prim P_strlit() 		      /* Push address of string literal */
-{
+/* Push address of string literal */
+prim P_strlit() {
+    char buffer[132];
     So(1);
     Push = (stackitem) (((char *) ip) + 1);
 #ifdef TRACE
     if (atl_trace) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\"%s\" ", (((char *) ip) + 1)); // EMBEDDED
+        sprintf(buffer,"\"%s\" ", (((char *) ip) + 1)); // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("\"%s\" ", (((char *) ip) + 1)); // NOT EMBEDDED
 #endif
@@ -1785,27 +1789,36 @@ prim P_tan()			      /* Tangent */
 // Return true if I can output a char.
 //
 prim ATH_qemit() {
-#ifdef LINUX
-    Push = -1;
-#endif
+    bool rc;
+    
+    rc = sysConsole->qemit();
+    
+    Push=rc;
 }
 
 prim ATH_emit() {
-#ifdef LINUX
-    putchar((uint8_t) S0);
+    uint8_t rc;
+    
+    Sl(1);
+    rc = sysConsole->emit((uint8_t)S0);
+    
     Pop;
-#endif
 }
 
 prim ATH_qkey() {
-#ifdef LINUX
-    Push = 0;
-#endif
+    bool rc;
+    
+    rc = sysConsole->qkey();
+    
+    So(1);
+    Push = rc;
 }
 
 prim ATH_key() {
-#ifdef LINUX
-#endif
+    uint8_t k;
+    k=sysConsole->key();
+    So(1);
+    Push = k;
 }
 
 prim ATH_hex() {
@@ -1818,9 +1831,12 @@ prim ATH_dec() {
 /* Print top of stack, pop it */
 prim P_dot() {
     Sl(1);
+    char buffer[32];
 
 #ifdef EMBEDDED
-    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), S0);  // EMBEDDED
+//    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), S0);  // EMBEDDED
+    sprintf(buffer,(base == 16 ? "%lX" : "%ld "), S0);  // EMBEDDED
+    sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
     V printf(base == 16 ? "%lX" : "%ld ", S0); // NOT EMBEDDED
 #endif
@@ -1828,13 +1844,22 @@ prim P_dot() {
     Pop;
 }
 
-prim P_question()		      /* Print value at address */
-{
+/* Print value at address */
+prim P_question() {
+    char buffer[32];
     Sl(1);
     Hpc(S0);
+    stackitem tmp;
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
+    tmp = *((stackitem *) S0);
 
 #ifdef EMBEDDED
-    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), *((stackitem *) S0)); // NOT EMBEDDED
+    sprintf(buffer,(base == 16 ? "%lX" : "%ld "), tmp);  // EMBEDDED
+    sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
+//    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), *((stackitem *) S0)); // NOT EMBEDDED
 #else
     V printf(base == 16 ? "%lX" : "%ld ", *((stackitem *) S0)); // NOT EMBEDDED
 #endif
@@ -1844,11 +1869,14 @@ prim P_question()		      /* Print value at address */
 /* Carriage return */
 prim P_cr() {
 #ifdef EMBEDDED
+    sysConsole->emit('\n');
+    /*
     if(strlen(outBuffer) > 0 ) {
         strcat(outBuffer,"\n");
     } else {
         sprintf(outBuffer,"\n"); // EMBEDDED
     }
+    */
 #else
     V printf("\n"); // NOT EMBEDDED
 #endif
@@ -1860,14 +1888,16 @@ prim P_dots() {
 
 #ifdef EMBEDDED
     char tmpBuffer[80];  // One line of the screen.
-    sprintf(outBuffer,"Stack: ");  // EMBEDDED
+    sprintf(tmpBuffer,"Stack: ");  // EMBEDDED
+    sysConsole->writePipe((void *)tmpBuffer,strlen((char *)tmpBuffer));
 #else
     V printf("Stack: ");    // NOT EMBEDDED
 #endif
 
     if (stk == stackbot) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"Empty.");  // NOT EMBEDDED
+        sprintf(tmpBuffer,"Empty.");  // NOT EMBEDDED
+        sysConsole->writePipe((void *)tmpBuffer,strlen((char *)tmpBuffer));
 #else
         V printf("Empty."); // NOT EMBEDDED
 
@@ -1875,8 +1905,9 @@ prim P_dots() {
     } else {
         for (tsp = stack; tsp < stk; tsp++) {
 #ifdef EMBEDDED
-            sprintf(tmpBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); // NOT EMBEDDED
-            strcat(outBuffer,tmpBuffer);
+            sprintf(tmpBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); // EMBEDDED
+            sysConsole->writePipe((void *)tmpBuffer,strlen((char *)tmpBuffer));
+            // strcat(outBuffer,tmpBuffer);
 #else
             V printf(base == 16 ? "%lX " : "%ld ", *tsp); // NOT EMBEDDED
 #endif
@@ -1884,21 +1915,23 @@ prim P_dots() {
     }
 }
 
-prim P_dotquote()		      /* Print literal string that follows */
-{
+/* Print literal string that follows */
+prim P_dotquote() {
     Compiling;
     stringlit = True;		      /* Set string literal expected */
     Compconst(s_dotparen);	      /* Compile .( word */
 }
 
-prim P_dotparen()		      /* Print literal string that follows */
-{
+/* Print literal string that follows */
+prim P_dotparen() {
     if (ip == NULL) {		      /* If interpreting */
         stringlit = True;	      /* Set to print next string constant */
     } else {			      /* Otherwise, */
         /* print string literal in in-line code. */
 #ifdef EMBEDDED
-        sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
+//        sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
+    char *tmp = ((char *) ip) + 1;
+    sysConsole->writePipe((void *)tmp,strlen((char *)tmp));
 #else
         V printf("%s", ((char *) ip) + 1);  // NOT EMBEDDED
 #endif
@@ -1912,11 +1945,16 @@ prim P_type() {
     Hpc(S0);
 
 #ifdef EMBEDDED
+//    outBuffer[0]='\0';
+    
+    sysConsole->writePipe((void *)S0,strlen((char *)S0));
+    /*
     if(strlen(outBuffer) > 0) {
         strcat(outBuffer,(char *)S0);
     } else {
         sprintf(outBuffer,"%s", (char *) S0); // EMBEDDED
     }
+    */
 #else
     V printf("%s", (char *) S0); // NOT EMBEDDED
 #endif
@@ -1924,8 +1962,8 @@ prim P_type() {
     Pop;
 }
 
-prim P_words()			      /* List words */
-{
+/* List words */
+prim P_words() {
 #ifndef Keyhit
     int key = 0;
 #endif
@@ -1935,7 +1973,9 @@ prim P_words()			      /* List words */
 
 #ifdef EMBEDDED
         // TODO Not sure how, but fix this.
-        sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+//        sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+        sysConsole->writePipe( (void *)(dw->wname + 1), strlen((char *)(dw->wname + 1)));
+        P_cr();
 #else
         V printf("\n%s", dw->wname + 1); // NOT EMBEDDED
 #endif
@@ -1952,14 +1992,15 @@ prim P_words()			      /* List words */
             break;
 #endif
     }
+    /*
 #ifdef EMBEDDED
     sprintf(outBuffer,"\n"); // EMBEDDED
 #else
     V printf("\n"); // NOT EMBEDDED
 #endif
+*/
 }
 #endif /* CONIO */
-
 #ifdef FILEIO
 
 prim P_file()			      /* Declare file */
@@ -2379,13 +2420,15 @@ prim P_2at()			      /* Fetch double value from address */
 
 /*  Data transfer primitives  */
 
-prim P_dolit()			      /* Push instruction stream literal */
-{
+// Push instruction stream literal
+prim P_dolit() {
     So(1);
+    char buffer[16];
 #ifdef TRACE
     if (atl_trace) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"%ld ", (long) *ip); // NOT EMBEDDED
+        sprintf(buffer,"%ld ", (long) *ip); // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("%ld ", (long) *ip); // NOT EMBEDDED
 #endif
@@ -2686,15 +2729,16 @@ prim P_abort()			      /* Abort, clearing data stack */
     P_quit();			      /* Shut down execution */
 }
 
-prim P_abortq() 		      /* Abort, printing message */
-{
+/* Abort, printing message */
+prim P_abortq() {
     if (state) {
         stringlit = True;	      /* Set string literal expected */
         Compconst(s_abortq);	      /* Compile ourselves */
     } else {
         /* Otherwise, print string literal in in-line code. */
 #ifdef EMBEDDED
-        sprintf(outBuffer,"%s", (char *) ip);  // EMBEDDED
+//        sprintf(outBuffer,"%s", (char *) ip);  // EMBEDDED
+        sysConsole->writePipe((void *)ip,strlen((char *)ip));
 #else
         V printf("%s", (char *) ip);  // NOT EMBEDDED
 #endif
@@ -2819,9 +2863,10 @@ prim P_semicolon()		      /* End compilation */
     createword = NULL;		      /* Flag no word being created */
 }
 
-prim P_tick()			      /* Take address of next word */
-{
+/* Take address of next word */
+prim P_tick() {
     int i;
+    char buffer[255];
 
     /* Try to get next symbol from the input stream.  If
        we can't, and we're executing a compiled word,
@@ -2839,14 +2884,16 @@ prim P_tick()			      /* Take address of next word */
                 Push = (stackitem) di; /* Push word compile address */
             } else {
 #ifdef EMBEDDED
-                sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
+                sprintf(buffer," '%s' undefined ", tokbuf); // EMBEDDED
+                sysConsole->writePipe((char *)buffer,strlen((char *)buffer));
 #else
                 V printf(" '%s' undefined ", tokbuf); // NOT EMBEDDED
 #endif
             }
         } else {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\nWord not specified when expected.\n"); // EMBEDDED
+            sprintf(buffer,"\nWord not specified when expected.\n"); // EMBEDDED
+            sysConsole->writePipe((char *)buffer,strlen((char *)buffer));
 #else
             V printf("\nWord not specified when expected.\n"); // NOT EMBEDDED
 #endif
@@ -2861,7 +2908,8 @@ prim P_tick()			      /* Take address of next word */
             tickpend = True;	      /* Set tick pending */
         } else {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\nWord requested by ` not on same input line.\n"); // EMBEDDED
+            sprintf(buffer,"\nWord requested by ` not on same input line.\n"); // EMBEDDED
+            sysConsole->writePipe((char *)buffer,strlen((char *)buffer));
 #else
             V printf("\nWord requested by ` not on same input line.\n"); // NOT EMBEDDED
 #endif
@@ -2931,11 +2979,14 @@ prim P_toname() 		      /* Find name field from compile addr */
     S0 += DfOff(wname);
 }
 
-prim P_tolink() 		      /* Find link field from compile addr */
-{
+/* Find link field from compile addr */
+prim P_tolink() {
+    char buffer[80];
+    
     if (DfOff(wnext) != 0) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\n>LINK Foulup--wnext is not at zero!\n");  // EMBEDDED
+        sprintf(buffer,"\n>LINK Foulup--wnext is not at zero!\n");  // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("\n>LINK Foulup--wnext is not at zero!\n");  // NOT EMBEDDED
 #endif
@@ -2956,11 +3007,14 @@ prim P_fromname()		      /* Get compile address from name */
     S0 -= DfOff(wname);
 }
 
-prim P_fromlink()		      /* Get compile address from link */
-{
+/* Get compile address from link */
+prim P_fromlink() {
+    char buffer[80];
+    
     if (DfOff(wnext) != 0) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\nLINK> Foulup--wnext is not at zero!\n"); // EMBEDDED
+        sprintf(buffer,"\nLINK> Foulup--wnext is not at zero!\n"); // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("\nLINK> Foulup--wnext is not at zero!\n"); // NOT EMBEDDED
 #endif
@@ -3062,14 +3116,16 @@ prim P_walkback()		      /* Set or clear error walkback */
 
 #ifdef WORDSUSED
 
-prim P_wordsused()		      /* List words used by program */
-{
+/* List words used by program */
+prim P_wordsused() {
+    char buffer[80];
     dictword *dw = dict;
 
     while (dw != NULL) {
         if (*(dw->wname) & WORDUSED) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sprintf(buffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
             V printf("\n%s", dw->wname + 1); // NOT EMBEDDED
 #endif
@@ -3081,21 +3137,25 @@ prim P_wordsused()		      /* List words used by program */
 #endif
         dw = dw->wnext;
     }
+    /*
 #ifdef EMBEDDED
     sprintf(outBuffer,"\n"); // EMBEDDED
 #else
     V printf("\n"); // NOT EMBEDDED
 #endif
+*/
 }
 
-prim P_wordsunused()		      /* List words not used by program */
-{
+/* List words not used by program */
+prim P_wordsunused() {
+    char buffer[80];
     dictword *dw = dict;
 
     while (dw != NULL) {
         if (!(*(dw->wname) & WORDUSED)) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sprintf(buffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
             V printf("\n%s", dw->wname + 1); // NOT EMBEDDED
 #endif
@@ -3107,11 +3167,13 @@ prim P_wordsunused()		      /* List words not used by program */
 #endif
         dw = dw->wnext;
     }
+    /*
 #ifdef EMBEDDED
     sprintf(outBuffer,"\n");  // EMBEDDED
 #else
     V printf("\n");  // NOT EMBEDDED
 #endif
+*/
 }
 #endif /* WORDSUSED */
 
@@ -3409,10 +3471,10 @@ static struct primfcn primt[] = {
 #endif /* COMPILERW */
 
 #ifdef CONIO
-    {(char *)"0(KEY)", ATH_key},
-    {(char *)"0(?KEY)", ATH_qkey},
-    {(char *)"0(?EMIT)", ATH_qemit},
-    {(char *)"0(EMIT)", ATH_emit},
+    {(char *)"0KEY", ATH_key},
+    {(char *)"0?KEY", ATH_qkey},
+    {(char *)"0?EMIT", ATH_qemit},
+    {(char *)"0EMIT", ATH_emit},
     {(char *)"0HEX", ATH_hex},
     {(char *)"0DECIMAL", ATH_dec},
     {(char *)"0.", P_dot},
@@ -3527,18 +3589,21 @@ Exported void atl_primdef( struct primfcn *pt) {
 
 /*  PWALKBACK  --  Print walkback trace.  */
 
-static void pwalkback()
-{
+static void pwalkback() {
+    char buffer[80];
+    
     if (atl_walkback && ((curword != NULL) || (wbptr > wback))) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"Walkback:\n"); // EMBEDDED
+        sprintf(buffer,"Walkback:\n"); // EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("Walkback:\n"); // NOT EMBEDDED
 #endif
 
         if (curword != NULL) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"   %s\n", curword->wname + 1); // EMBEDDED
+            sprintf(buffer,"   %s\n", curword->wname + 1); // EMBEDDED
+            sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
             V printf("   %s\n", curword->wname + 1); // NOT EMBEDDED
 #endif
@@ -3546,7 +3611,8 @@ static void pwalkback()
         while (wbptr > wback) {
             dictword *wb = *(--wbptr);
 #ifdef EMBEDDED
-            sprintf(outBuffer,"   %s\n", wb->wname + 1); // EMBEDDED
+            sprintf(buffer,"   %s\n", wb->wname + 1); // EMBEDDED
+            sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
             V printf("   %s\n", wb->wname + 1); // NOT EMBEDDED
 #endif
@@ -3558,9 +3624,11 @@ static void pwalkback()
 /*  TROUBLE  --  Common handler for serious errors.  */
 
 static void trouble( char *kind) {
+    char buffer[80];
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-    sprintf(outBuffer,"\n%s.\n", kind); // EMBEDDED
+    sprintf(buffer,"\n%s.\n", kind); // EMBEDDED
+    sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
     V printf("\n%s.\n", kind); // NOT EMBEDDED
 #endif
@@ -3657,10 +3725,12 @@ static void divzero()
 
 static void exword( dictword *wp) {
     curword = wp;
+    char buffer[80];
 #ifdef TRACE
     if (atl_trace) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); //  EMBEDDED
+        sprintf(buffer,"\nTrace: %s ", curword->wname + 1); //  EMBEDDED
+        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
         V printf("\nTrace: %s ", curword->wname + 1); // NOT EMBEDDED
 #endif
@@ -3682,7 +3752,8 @@ static void exword( dictword *wp) {
 #ifdef TRACE
         if (atl_trace) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); // EMBEDDED
+            sprintf(buffer,"\nTrace: %s ", curword->wname + 1); // EMBEDDED
+            sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
             V printf("\nTrace: %s ", curword->wname + 1); // NOT EMBEDDED
 #endif
@@ -3965,6 +4036,7 @@ void atl_break()
 /*  ATL_LOAD  --  Load a file into the system.	*/
 
 int atl_load( FILE *fp) {
+    char buffer[132];
     int es = ATL_SNORM;
     char s[134];
     atl_statemark mk;
@@ -3990,7 +4062,8 @@ int atl_load( FILE *fp) {
     if ((es == ATL_SNORM) && (atl_comment == Truth)) {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\nRunaway `(' comment.\n"); // EMBEDDED
+        sprintf(buffer,"\nRunaway `(' comment.\n"); // EMBEDDED
+        sysConsole->writePipe((void *)buffer, strlen((char *)buffer));
 #else
         V printf("\nRunaway `(' comment.\n"); // NOT EMBEDDED
 #endif
@@ -4071,6 +4144,7 @@ int atl_eval(char *sp) {
     }
 #endif /* PROLOGUE */
 
+    char buffer[80];
     while ((evalstat == ATL_SNORM) && (i = token(&instream)) != TokNull) {
         dictword *di;
 
@@ -4090,7 +4164,8 @@ int atl_eval(char *sp) {
                             if (dw == dictprot) {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                                sprintf(outBuffer,"\nForget protected.\n"); //  EMBEDDED
+                                sprintf(buffer,"\nForget protected.\n"); //  EMBEDDED
+                                sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                                 V printf("\nForget protected.\n"); // NOT EMBEDDED
 #endif
@@ -4139,7 +4214,9 @@ int atl_eval(char *sp) {
                     } else {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                        sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        char buffer[80];
+                        sprintf(buffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                         V printf(" '%s' undefined ", tokbuf); // NOT EMBEDDED
 #endif
@@ -4155,7 +4232,9 @@ int atl_eval(char *sp) {
                     } else {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                        sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        char buffer[80];
+                        sprintf(buffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                         V printf(" '%s' undefined ", tokbuf); // NOT EMBEDDED
 #endif
@@ -4170,7 +4249,10 @@ int atl_eval(char *sp) {
                     ucase(tokbuf);
                     if (atl_redef && (lookup(tokbuf) != NULL)) {
 #ifdef EMBEDDED
-                        sprintf(outBuffer,"\n%s isn't unique.", tokbuf); // NOT EMBEDDED
+                        char buffer[80];
+
+                        sprintf(buffer,"\n%s isn't unique.", tokbuf); // NOT EMBEDDED
+                        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                         V printf("\n%s isn't unique.", tokbuf); // NOT EMBEDDED
 #endif
@@ -4206,7 +4288,9 @@ int atl_eval(char *sp) {
                     } else {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                        sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        char buffer[80];
+                        sprintf(buffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                         V printf(" '%s' undefined ", tokbuf); // NOT EMBEDDED
 #endif
@@ -4272,7 +4356,9 @@ int atl_eval(char *sp) {
                         hptr += l;
                     } else {
 #ifdef EMBEDDED
-                        sprintf(outBuffer,"%s", tokbuf); // EMBEDDED
+                        char buffer[80];
+                        sprintf(buffer,"%s", tokbuf); // EMBEDDED
+                        sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                         V printf("%s", tokbuf); // NOT EMBEDDED
 #endif
@@ -4299,7 +4385,8 @@ int atl_eval(char *sp) {
 #endif /* STRING */
             default:
 #ifdef EMBEDDED
-                sprintf(outBuffer,"\nUnknown token type %d\n", i); // EMBEDDED
+                sprintf(buffer,"\nUnknown token type %d\n", i); // EMBEDDED
+                sysConsole->writePipe((void *)buffer,strlen((char *)buffer));
 #else
                 V printf("\nUnknown token type %d\n", i); // NOT EMBEDDED
 #endif
