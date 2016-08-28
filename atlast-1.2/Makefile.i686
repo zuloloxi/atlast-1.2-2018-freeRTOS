@@ -18,10 +18,10 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest atlsmall
+APPS = atlsmall # atlast primdeftest
 
-# all:	$(APPS) atlsmall
-all:	atlsmall
+all:	$(APPS)
+# all:	atlsmall
 
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
@@ -76,7 +76,7 @@ lint:	lintatlast
 lintatlast:
 	lint atlast.c atlmain.c $(LIBRARIES) $(ATLCONFIG)
 
-install:	atlast
-	strip atlast
-	mv ./atlast /usr/local/bin
+install:	atlsmall
+	strip atlsmall
+	mv ./atlsmall /usr/local/bin
 
