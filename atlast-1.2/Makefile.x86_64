@@ -19,9 +19,10 @@ CFLAGS += $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 ATLOBJ = atlast.o atlmain.o
 
 # TODO Only build atlsmall until I fix atlast
-APPS = atlsmall #  atlast primdeftest 
+APPS = atlsmall atlast primdeftest 
 
-all:	$(APPS) atlsmall
+# all:	$(APPS) atlsmall
+all:	atlsmall
 
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
@@ -75,9 +76,9 @@ dist:
 	( cd dist ; tar cfvz ../atlast-$(VERSION).tar.gz atlast-$(VERSION) )
 	rm -rf dist
 
-install:	atlast
-	strip atlast
-	mv ./atlast /usr/local/bin
+install:	atlsmall
+	strip atlsmall
+	mv ./atlsmall /usr/local/bin
 
 lint:	lintatlast
 

@@ -18,15 +18,18 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest atlsmall
+APPS = atlsmall # atlast primdeftest
 
-all:	$(APPS) atlsmall
+all:	$(APPS)
+# all:	atlsmall
 
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
 
+CFLAGS += -I/usr/local/lib/C++/include
+
 atlsmall: $(ATLOBJ) atlMinMain.c
-	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
+	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.c atlast.o -o atlsmall $(LIBRARIES) /usr/local/lib/C++/Obj/Console.o -I/usr/local/lib/C++/include 
 
 atlast.o:   atlast.c atldef.h atlcfig.h
 atldef.h:   atlast.h
@@ -73,7 +76,7 @@ lint:	lintatlast
 lintatlast:
 	lint atlast.c atlmain.c $(LIBRARIES) $(ATLCONFIG)
 
-install:	atlast
-	strip atlast
-	mv ./atlast /usr/local/bin
+install:	atlsmall
+	strip atlsmall
+	mv ./atlsmall /usr/local/bin
 
