@@ -10,3 +10,4 @@ profile.mk
 # Mac OS X build artifacts
 #
 *.dSYM
+tst

@@ -11,6 +11,8 @@ I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as t
 
 27 August 2016 Now build with g++ and I have started to replace character io with a generic messaging class.  Current version behaves as before, ultimately will be able to have the console of IPC on Linux, and others.  Currently x86_64 only.
 
+29 August This is now wholly in C++ and dependent on a set of classes from my Tools repo (Tools/Linux/C++/portableMessages
+
 Below is Michael's original README.
 
 =================
