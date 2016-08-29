@@ -1783,40 +1783,99 @@ prim P_tan()			      /* Tangent */
 #ifdef LINUX
 
 #endif
+prim ATH_brQemit() {
+    bool rc;
+    
+    Sl(1);
+    rc = ((Message *)S0)->qemit();
+    Pop;
+    So(1);
+    Push = rc;
+    
+}
+
 // ?emit
 // Return true if I can output a char.
 //
 prim ATH_qemit() {
+    /*
     bool rc;
     
     rc = sysConsole->qemit();
     
     Push=rc;
+    */
+    
+    Push = (stackitem)sysConsole;
+    ATH_brQemit();
+}
+
+prim ATH_brEmit() {
+    uint8_t rc;
+    Sl(2);
+    
+    rc = ((Message *)S0)->emit((uint8_t)S1);
+    Pop2;
 }
 
 prim ATH_emit() {
-    uint8_t rc;
     
     Sl(1);
+    Push = (stackitem)sysConsole;
+    
+    ATH_brEmit();
+    /*
     rc = sysConsole->emit((uint8_t)S0);
     
     Pop;
+    */
+}
+
+prim ATH_brQkey() {
+    bool rc;
+    Sl(1);
+    
+    rc = ((Message *)S0)->qkey();
+    Pop;
+    
+    So(1);
+    Push = rc;
+    
 }
 
 prim ATH_qkey() {
+    /*
     bool rc;
     
     rc = sysConsole->qkey();
     
     So(1);
     Push = rc;
+    */
+    Push = (stackitem) sysConsole;
+    ATH_brQkey();
+    
+}
+
+prim ATH_brKey() {
+    uint8_t k;
+    
+    Sl(1);
+    k=((Message *)S0)->key();
+    Pop;
+    So(1);
+    Push = k;
 }
 
 prim ATH_key() {
+    /*
     uint8_t k;
     k=sysConsole->key();
     So(1);
     Push = k;
+    */
+    Push=(stackitem)sysConsole;
+    ATH_brKey();
 }
 
 prim ATH_hex() {
@@ -3469,10 +3528,18 @@ static struct primfcn primt[] = {
 #endif /* COMPILERW */
 
 #ifdef CONIO
+    {(char *)"0(KEY)", ATH_brKey},
     {(char *)"0KEY", ATH_key},
+    
+    {(char *)"0(?KEY)", ATH_brQkey},
     {(char *)"0?KEY", ATH_qkey},
+    
+    {(char *)"0(?EMIT)", ATH_brQemit},
     {(char *)"0?EMIT", ATH_qemit},
+    
+    {(char *)"0(EMIT)", ATH_brEmit},
     {(char *)"0EMIT", ATH_emit},
+    
     {(char *)"0HEX", ATH_hex},
     {(char *)"0DECIMAL", ATH_dec},
     {(char *)"0.", P_dot},
