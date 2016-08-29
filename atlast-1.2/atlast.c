@@ -519,12 +519,14 @@ prim ATH_test() {
     tst = new Boiler();
     Push=(stackitem) tst;
     */
+    Push = (stackitem )sysConsole;
 
 }
 
 prim ATH_objdump() {
 
-    sysConsole->dump();
+    ((Message *)S0)->dump();
+    Pop;
 
 }
 
