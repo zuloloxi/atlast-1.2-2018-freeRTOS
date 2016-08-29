@@ -1,4 +1,3 @@
-
 #	Unix makefile for ATLAST
 CC = g++
 
