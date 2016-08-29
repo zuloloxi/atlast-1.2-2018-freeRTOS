@@ -1783,6 +1783,20 @@ prim P_tan()			      /* Tangent */
 #ifdef LINUX
 
 #endif
+
+prim ATH_getConsole() {
+    
+    So(1);
+    Push = (stackitem) sysConsole;
+}
+
+prim ATH_setConsole() {
+    Sl(1)
+    
+    sysConsole = (Console *) S0;
+    Pop;
+}
+
 prim ATH_brQemit() {
     bool rc;
     
@@ -3528,6 +3542,9 @@ static struct primfcn primt[] = {
 #endif /* COMPILERW */
 
 #ifdef CONIO
+    {(char *)"0GET-CONSOLE", ATH_getConsole },
+    {(char *)"0SET-CONSOLE", ATH_setConsole },
+    
     {(char *)"0(KEY)", ATH_brKey},
     {(char *)"0KEY", ATH_key},
     
