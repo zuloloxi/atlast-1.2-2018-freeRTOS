@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# set -x
 
 CPU=`uname -m`
 OS=`uname -s`
