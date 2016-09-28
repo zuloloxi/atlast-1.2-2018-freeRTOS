@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include <message.h>
-#include <Console.h>
+// #include <message.h>
+#include "Console.h"
 #include "atldef.h"
 #include "atlast.h"
 #include "atlcfig.h"
 
 // Global so that atlast.c can see it.
-Message *sysConsole;
+Console *sysConsole;
 
 int main() {
     char t[132];

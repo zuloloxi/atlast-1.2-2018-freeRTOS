@@ -19,8 +19,8 @@
 #include <stdint.h>
 #include <iostream>
 using namespace std;
-#include <message.h>
-#include <Console.h>
+// #include <message.h>
+#include "Console.h"
 
 // #include <unistd.h>
 
@@ -525,7 +525,7 @@ prim ATH_test() {
 
 prim ATH_objdump() {
 
-    ((Message *)S0)->dump();
+    ((Console *)S0)->dump();
     Pop;
 
 }
@@ -1801,7 +1801,7 @@ prim ATH_brQemit() {
     bool rc;
     
     Sl(1);
-    rc = ((Message *)S0)->qemit();
+    rc = ((Console *)S0)->qemit();
     Pop;
     So(1);
     Push = rc;
@@ -1828,7 +1828,7 @@ prim ATH_brEmit() {
     uint8_t rc;
     Sl(2);
     
-    rc = ((Message *)S0)->emit((uint8_t)S1);
+    rc = ((Console *)S0)->emit((uint8_t)S1);
     Pop2;
 }
 
@@ -1849,7 +1849,7 @@ prim ATH_brQkey() {
     bool rc;
     Sl(1);
     
-    rc = ((Message *)S0)->qkey();
+    rc = ((Console *)S0)->qkey();
     Pop;
     
     So(1);
@@ -1875,7 +1875,7 @@ prim ATH_brKey() {
     uint8_t k;
     
     Sl(1);
-    k=((Message *)S0)->key();
+    k=((Console *)S0)->key();
     Pop;
     So(1);
     Push = k;
