@@ -169,6 +169,8 @@ void Console::dump() {
     
     cout << "Class Dump\n\n";
     cout << "Debug   :" << verbose << "\n";
+    cout << "EOL     :" << lineEndings << "\n";
+    cout << "Editing :" << lineEdit << "\n";
     
 }
 
