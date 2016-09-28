@@ -18,12 +18,11 @@ int main() {
     sysConsole = new Console();
     
     sysConsole->ioctl(IOCTL_EOL, true);
+    sysConsole->ioctl(IOCTL_EDIT,true);
 
     atl_init();
     while(1) {
-        
         sysConsole->writePipe((char *)prompt,sizeof(prompt));
-
         sysConsole->readPipe((char *)t, sizeof(t));
         atl_eval(t);
     }

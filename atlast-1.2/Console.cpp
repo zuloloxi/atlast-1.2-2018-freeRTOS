@@ -99,6 +99,16 @@ int Console::readPipe(void *msg,int len ) {
     
     for( i=0; i< len; i++) {
         k = key();
+
+        // Check if lineEditing enabled and if key is a special character.
+
+        if(lineEdit) {
+            if( k == 0x08 ) {
+                // BS
+                printf("\h \h");
+                i--;
+            }
+        }
         
         ((char *)msg)[i] = k;
         
@@ -128,6 +138,9 @@ int Console::ioctl(uint8_t cmd , int param ) {
     switch( cmd ) {
         case IOCTL_EOL:
             lineEndings = (bool) param;
+            break;
+        case IOCTL_EDIT:
+            lineEdit = (bool) param;
             break;
     }
 }

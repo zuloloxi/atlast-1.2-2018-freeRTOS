@@ -31,10 +31,10 @@ atlast: $(ATLOBJ)
 atlsmall: $(ATLOBJ) atlMinMain.cpp
 	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.cpp atlast.o -o atlsmall $(LIBRARIES) Console.o
 
-Console.o:   Console.cpp atldef.h atlcfig.h
+Console.o:   Console.cpp atldef.h atlcfig.h Console.h
 	$(CC) $(CFLAGS) -c -DEMBEDDED Console.cpp -o Console.o 
 
-atlast.o:   atlast.cpp atldef.h atlcfig.h
+atlast.o:   atlast.cpp atldef.h atlcfig.h Console.o
 	$(CC) $(CFLAGS) -c -DEMBEDDED atlast.cpp -o atlast.o 
 
 atldef.h:   atlast.h

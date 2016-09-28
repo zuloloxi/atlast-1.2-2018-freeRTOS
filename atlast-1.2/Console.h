@@ -28,7 +28,8 @@
 #define NB_ENABLE 0
 
 enum IOCTL { 
-    IOCTL_EOL
+    IOCTL_EOL,
+    IOCTL_EDIT
 };
 
 class Console {
@@ -43,6 +44,7 @@ protected:
     bool verbose;
     void *qid;
     bool lineEndings;    // True if readPipe returns on line endings.
+    bool lineEdit;      // If true certain characters (^h, del) will be used to edit a line
     
 public:
     Console() ;
