@@ -11,7 +11,6 @@
    This program is in the public domain.
 
 */
-
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -414,6 +413,33 @@ prim ATH_memsafe() {
 prim ATH_qmemsafe() {
     So(1);
     Push = ath_safe_memory;
+}
+
+prim ATH_realq() {
+    So(1);
+#ifdef REAL
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_mathq() {
+    So(1);
+#ifdef MATH
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_fileioq() {
+    So(1);
+#ifdef FILEIO
+    Push=-1;
+#else
+    Push=0;
+#endif
 }
 
 // Time to leave.
@@ -3602,6 +3628,9 @@ static struct primfcn primt[] = {
     {(char *)"0BYE", ATH_bye},
     {(char *)"0W!", ATH_wbang},
     {(char *)"0W@", ATH_wat },
+    {(char *)"0?REAL", ATH_realq },
+    {(char *)"0?MATH", ATH_mathq },
+    {(char *)"0?FILEIO", ATH_fileioq },
 
 #endif
     {NULL, (codeptr) 0}
