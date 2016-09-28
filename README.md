@@ -13,6 +13,8 @@ I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as t
 
 29 August This is now wholly in C++ and dependent on a set of classes from my Tools repo (Tools/Linux/C++/portableMessages
 
+28 September 2016 Backed off a little from the above.  Console IO is through the class Console.  Removed the virtual class so it's better suited for embedded.
+
 Below is Michael's original README.
 
 =================
