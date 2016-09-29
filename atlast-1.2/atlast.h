@@ -59,6 +59,12 @@ extern atl_int atl_errline;	      /* Line number where last atl_load()
 /*  Entry points  */
 
 // extern void atl_init(atl_statemark *);
+/** @brief atl_init
+ * Initialise atlast
+ *
+ * @param None
+ * @return None
+ */
 void atl_init();
 extern void atl_mark(atl_statemark *);
 void atl_unwind(atl_statemark *);
