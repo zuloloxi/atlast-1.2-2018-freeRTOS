@@ -404,6 +404,14 @@ void ATH_Features() {
 // If ath_safe_memory is non zero then ensure memeory access
 // is within the heap.
 //
+/* @brief MAkes memeory access 'safe'
+ *
+ * Normally maemory access is restricted to a pool.  Access words validate that the addres is one within the bounds of the pool and return an exception.  This, however, restricts access to hardware such as registers.  memsafe turns thi on and off.  By default access is safe.
+ *
+ * @param flag true | false
+ * @return None.
+ *
+ */
 prim ATH_memsafe() {
     Sl(1);
     ath_safe_memory = (S0 == 0) ? Falsity : Truth;
