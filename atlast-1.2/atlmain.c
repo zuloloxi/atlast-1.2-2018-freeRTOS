@@ -15,6 +15,7 @@
 
 #include <signal.h>
 #include "atldef.h"
+#include "atlcfig.h"
 
 #define FALSE	0
 #define TRUE	1
@@ -49,8 +50,10 @@ int main(int argc, char *argv[]) {
     int in = 0;
 #define PR(x) (void) fprintf(stderr, x)
 
+#ifdef BANNER
     PR("ATLAST 1.2 (2007-10-07) This program is in the public domain.\n");
     printf("Compiled: %s\n",__DATE__);
+#endif
 
     ifp = stdin;
     for (i = 1; i < argc; i++) {

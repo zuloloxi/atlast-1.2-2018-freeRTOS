@@ -287,3 +287,5 @@ extern char *atl_fgetsp();
 #define Isfile(x) Hpc(x); if (*((stackitem *)(x))!=FileSent) {V printf("\nNot a file\n");return;}
 #define FileD(x)  ((FILE *) *(((stackitem *) (x)) + 1))
 #define Isopen(x) if (FileD(x) == NULL) {V printf("\nFile not open\n");return;}
+
+typedef enum {False = 0, True = 1} Boolean;
