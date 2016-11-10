@@ -281,6 +281,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef BREAK
@@ -290,6 +292,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef COMPILERW
@@ -299,6 +303,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef CONIO
@@ -308,6 +314,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef DEFFIELDS
@@ -317,6 +325,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef DOUBLE
@@ -326,6 +336,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef EVALUATE
@@ -335,6 +347,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef FILEIO
@@ -344,6 +358,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef MATH
@@ -353,6 +369,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef MEMMESSAGE
@@ -362,6 +380,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef PROLOGUE
@@ -371,6 +391,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef REAL
@@ -380,6 +402,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef SHORTCUTA
@@ -389,6 +413,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef SHORTCUTC
@@ -398,6 +424,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef STRING
@@ -407,6 +435,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef SYSTEM
@@ -416,6 +446,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef TRACE
@@ -425,6 +457,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef WALKBACK
@@ -434,6 +468,8 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef WORDSUSED
@@ -443,7 +479,32 @@ void ATH_Features() {
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
 #endif
+
+#ifdef ATH
+    sprintf(outBuffer,"    CUSTOM\n");
+#else
+    sprintf(outBuffer,"NOT CUSTOM\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf(outBuffer);
+#endif
+
+#ifdef FREERTOS
+    sprintf(outBuffer,"    FREERTOS\n");
+#else
+    sprintf(outBuffer,"NOT FREERTOS\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf(outBuffer);
+#endif
+
 }
 prim ATH_memsafe() {
     Sl(1);
