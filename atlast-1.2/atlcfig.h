@@ -1,3 +1,5 @@
+#ifndef __ATLAST_CFIG
+#define __ATLAST_CFIG
 // #define EMBEDDED            // Mods for use in an embedded system.
                             // anything that results in output to stdout, or stderr goes
                             // to a global buffer.
@@ -27,6 +29,7 @@
 #define WALKBACK              /* Walkback trace */
 #define WORDSUSED             /* Logging of words used and unused */
 #define BANNER
+#define ATH
 // #define Keyhit
 // 
 // Stuff added by me
@@ -35,6 +38,5 @@
 // 
 
 
-#ifdef EMBEDDED
 char outBuffer[255];
 #endif

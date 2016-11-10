@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "atlcfig.h"
 // #define MEMSTAT
@@ -140,6 +141,10 @@ atl_int atl_comment = Falsity;	      /* Currently ignoring a comment */
 atl_int atl_redef = Truth;	      /* Allow redefinition without issuing
                                      the "not unique" message. */
 atl_int atl_errline = 0;	      /* Line where last atl_load failed */
+
+#ifdef ATH
+atl_int ath_safe_memory = Truth;
+#endif
 
 /*  Local variables  */
 
@@ -270,119 +275,316 @@ STATIC void pwalkback();
 #ifdef ATH
 void ATH_Features() {
 #ifdef ARRAY
-    printf("    ARRAY\n");
+    sprintf(outBuffer,"\n\n    ARRAY\n");
 #else
-    printf("NOT ARRAY\n");
+    sprintf(outBuffer,"NOT ARRAY\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef BREAK
-    printf("    BREAK\n");
+    sprintf(outBuffer,"    BREAK\n");
 #else
-    printf("NOT BREAK\n");
+    sprintf(outBuffer,"NOT BREAK\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef COMPILERW
-    printf("    COMPILERW\n");
+    sprintf(outBuffer,"    COMPILERW\n");
 #else
-    printf("NOT COMPILERW\n");
+    sprintf(outBuffer,"NOT COMPILERW\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef CONIO
-    printf("    CONIO\n");
+    sprintf(outBuffer,"    CONIO\n");
 #else
-    printf("NOT CONIO\n");
+    sprintf(outBuffer,"NOT CONIO\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef DEFFIELDS
-    printf("    DEFFIELDS\n");
+    sprintf(outBuffer,"    DEFFIELDS\n");
 #else
-    printf("NOT DEFFIELDS\n");
+    sprintf(outBuffer,"NOT DEFFIELDS\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef DOUBLE
-    printf("    DOUBLE\n");
+    sprintf(outBuffer,"    DOUBLE\n");
 #else
-    printf("NOT DOUBLE\n");
+    sprintf(outBuffer,"NOT DOUBLE\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef EVALUATE
-    printf("    EVALUATE\n");
+    sprintf(outBuffer,"    EVALUATE\n");
 #else
-    printf("NOT EVALUATE\n");
+    sprintf(outBuffer,"NOT EVALUATE\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef FILEIO
-    printf("    FILEIO\n");
+    sprintf(outBuffer,"    FILEIO\n");
 #else
-    printf("NOT FILEIO\n");
+    sprintf(outBuffer,"NOT FILEIO\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef MATH
-    printf("    MATH\n");
+    sprintf(outBuffer,"    MATH\n");
 #else
-    printf("NOT MATH\n");
+    sprintf(outBuffer,"NOT MATH\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef MEMMESSAGE
-    printf("    MEMMESSAGE\n");
+    sprintf(outBuffer,"    MEMMESSAGE\n");
 #else
-    printf("NOT MEMMESSAGE\n");
+    sprintf(outBuffer,"NOT MEMMESSAGE\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef PROLOGUE
-    printf("    PROLOGUE\n");
+    sprintf(outBuffer,"    PROLOGUE\n");
 #else
-    printf("NOT PROLOGUE\n");
+    sprintf(outBuffer,"NOT PROLOGUE\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef REAL
-    printf("    REAL\n");
+    sprintf(outBuffer,"    REAL\n");
 #else
-    printf("NOT REAL\n");
+    sprintf(outBuffer,"NOT REAL\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef SHORTCUTA
-    printf("    SHORTCUTA\n");
+    sprintf(outBuffer,"    SHORTCUTA\n");
 #else
-    printf("NOT SHORTCUTA\n");
+    sprintf(outBuffer,"NOT SHORTCUTA\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef SHORTCUTC
-    printf("    SHORTCUTC\n");
+    sprintf(outBuffer,"    SHORTCUTC\n");
 #else
-    printf("NOT SHORTCUTC\n");
+    sprintf(outBuffer,"NOT SHORTCUTC\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef STRING
-    printf("    STRING\n");
+    sprintf(outBuffer,"    STRING\n");
 #else
-    printf("NOT STRING\n");
+    sprintf(outBuffer,"NOT STRING\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef SYSTEM
-    printf("    SYSTEM\n");
+    sprintf(outBuffer,"    SYSTEM\n");
 #else
-    printf("NOT SYSTEM\n");
+    sprintf(outBuffer,"NOT SYSTEM\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef TRACE
-    printf("    TRACE\n");
+    sprintf(outBuffer,"    TRACE\n");
 #else
-    printf("NOT TRACE\n");
+    sprintf(outBuffer,"NOT TRACE\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef WALKBACK
-    printf("    WALKBACK\n");
+    sprintf(outBuffer,"    WALKBACK\n");
 #else
-    printf("NOT WALKBACK\n");
+    sprintf(outBuffer,"NOT WALKBACK\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 
 #ifdef WORDSUSED
-    printf("    WORDSUSED\n");
+    sprintf(outBuffer,"    WORDSUSED\n");
 #else
-    printf("NOT WORDSUSED\n");
+    sprintf(outBuffer,"NOT WORDSUSED\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 }
+prim ATH_memsafe() {
+    Sl(1);
+    ath_safe_memory = (S0 == 0) ? Falsity : Truth;
+    Pop;
+}
+
+prim ATH_qmemsafe() {
+    So(1);
+    Push = ath_safe_memory;
+}
+// TODO Tidy this up.  Make non embedded version still copy to outBuffer,
+// but change output method.
+//
+void displayLineHex(uint8_t *a) {
+    int i;
+
+    for(i=0;i<16;i++) {
+#ifdef EMBEDDED
+        sprintf(outBuffer," %02x",*(a++));
+#endif
+
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+        printf(" %02x",*(a++));
+#endif
+    }
+}
+
+void displayLineAscii(uint8_t *a) {
+    int i;
+
+#ifdef EMBEDDED
+    sprintf(outBuffer,":");
+#else
+    printf(":");
+#endif
+#ifdef FREERTOS
+    txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+#endif
+
+    for(i=0;i<16;i++) {
+        if( (*a < 0x20 ) || (*a > 128 )) {
+#ifdef EMBEDDED
+            sprintf(outBuffer,".");
+#else
+            printf(".");
+#endif
+#ifdef FREERTOS
+    txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+            printf(".");
+#endif
+        } else {
+#ifdef EMBEDDED
+    sprintf(outBuffer,"%c",*(a++));
+#endif
+#ifdef FREERTOS
+    txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+            printf("%c",*(a++));
+#endif
+        }
+    }
+#ifdef EMBEDDED
+    sprintf(outBuffer,"\n");
+#endif
+#ifdef FREERTOS
+    txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+    printf("\n");
+#endif
+}
+
+
+prim ATH_dump() {
+    Sl(2); // address len
+
+    int length = S0;
+    uint8_t *address = (uint8_t *) S1;
+    int lines=length/16;
+
+    if(lines ==0 ) {
+        lines=1;
+    }
+
+    int i=0;
+    for( i = 0; i<length;i+=16) {
+#ifdef EMBEDDED
+        sprintf(outBuffer,"%08x:", (unsigned int)address);
+#else
+        printf("%08x:", (unsigned int)address);
+#endif
+#ifdef FREERTOS
+    txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+    printf("%s", outBuffer);
+#endif
+        displayLineHex( address );
+        displayLineAscii( address );
+        address +=16;
+    }
+
+    Pop2;
+}
+
+prim ATH_erase() {
+    Sl(2);
+
+    int length = S0;
+    uint8_t *address = (uint8_t *) S1;
+
+    memset(address,0,length);
+
+    Pop2;
+}
+
+prim ATH_fill() {
+    Sl(3);
+
+    uint8_t d = S0;
+    int length = S1;
+    uint8_t *address = (uint8_t *) S2 ;
+
+    memset(address,d,length);
+
+    Pop2;
+    Pop;
+}
+
+prim ATH_hex() {
+    base = 16;
+}
+
+prim ATH_dec() {
+    base = 10;
+}
+
+
 #endif // ATH
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
@@ -1040,7 +1242,9 @@ prim P_here()			      /* Push current heap address */
 prim P_bang()			      /* Store value into address */
 {
     Sl(2);
-    Hpc(S0);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((stackitem *) S0) = S1;
     Pop2;
 }
@@ -1048,14 +1252,20 @@ prim P_bang()			      /* Store value into address */
 prim P_at()			      /* Fetch value from address */
 {
     Sl(1);
-    Hpc(S0);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     S0 = *((stackitem *) S0);
 }
 
 prim P_plusbang()		      /* Add value at specified address */
 {
     Sl(2);
-    Hpc(S0);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((stackitem *) S0) += S1;
     Pop2;
 }
@@ -1074,7 +1284,10 @@ prim P_allot()			      /* Allocate heap bytes */
 prim P_comma()			      /* Store one item on heap */
 {
     Sl(1);
-    Ho(1);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     Hstore = S0;
     Pop;
 }
@@ -1082,15 +1295,47 @@ prim P_comma()			      /* Store one item on heap */
 prim P_cbang()			      /* Store byte value into address */
 {
     Sl(2);
-    Hpc(S0);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     *((unsigned char *) S0) = S1;
     Pop2;
 }
+#ifdef ATH
+prim ATH_wbang() {
+    Sl(2);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
+
+    uint16_t *ptr=(uint16_t *)S0;
+    uint16_t data=S1;
+
+    *ptr=(uint16_t)(data & 0xffff);
+
+    Pop2;
+}
+
+/* Fetch byte value from address */
+prim ATH_wat() {
+
+    Sl(1);
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
+    S0 = *((uint16_t *) S0);
+}
+#endif
 
 prim P_cat()			      /* Fetch byte value from address */
 {
     Sl(1);
-    Hpc(S0);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     S0 = *((unsigned char *) S0);
 }
 
@@ -1099,7 +1344,10 @@ prim P_ccomma() 		      /* Store one byte on heap */
     unsigned char *chp;
 
     Sl(1);
-    Ho(1);
+
+    if ( ath_safe_memory == Truth ) {
+        Hpc(S0);
+    }
     chp = ((unsigned char *) hptr);
     *chp++ = S0;
     hptr = (stackitem *) chp;
@@ -1720,7 +1968,7 @@ prim P_dots() {
     } else {
         for (tsp = stack; tsp < stk; tsp++) {
 #ifdef EMBEDDED
-            sprintf(tmpBuffer,(base == 16 ? "%lX" : "%ld "), *tsp); //  EMBEDDED
+            sprintf(tmpBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); //  EMBEDDED
             strcat(outBuffer,tmpBuffer);
 #else
             V printf(base == 16 ? "%lX" : "%ld ", *tsp); // NOT EMBEDDED
@@ -3338,6 +3586,15 @@ static struct primfcn primt[] = {
 #endif /* EVALUATE */
 
 #ifdef ATH
+	{(char *)"0MEMSAFE",ATH_memsafe},
+	{(char *)"0?MEMSAFE",ATH_qmemsafe},
+	{(char *)"0DUMP",ATH_dump},
+	{(char *)"0FILL",ATH_fill},
+	{(char *)"0ERASE",ATH_erase},
+	{(char *)"0W@",ATH_wat},
+	{(char *)"0W!",ATH_wbang},
+	{(char *)"0HEX",ATH_hex},
+	{(char *)"0DEC",ATH_dec},
     {"0.FEATURES", ATH_Features},
 #endif
     {NULL, (codeptr) 0}
