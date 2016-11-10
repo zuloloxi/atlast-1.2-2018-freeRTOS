@@ -491,7 +491,7 @@ void ATH_Features() {
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
 #else
-	 printf(outBuffer);
+	 printf("%s",outBuffer);
 #endif
 
 #ifdef FREERTOS
@@ -502,7 +502,7 @@ void ATH_Features() {
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
 #else
-	 printf(outBuffer);
+	 printf("%s",outBuffer);
 #endif
 
 }
