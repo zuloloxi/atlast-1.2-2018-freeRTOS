@@ -30,10 +30,6 @@ int main() {
         (void)fgets(t,132,stdin);
         atl_eval(t);
 
-        if(strlen(outBuffer) > 0) {
-            printf("%s\n", outBuffer);
-            outBuffer[0]='\0';
-        }
     }
     return 0;
 }
