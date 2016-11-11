@@ -100,6 +100,9 @@ extern UART_HandleTypeDef *console;
 #define max(a,b) ((a) >  (b) ?	(a) : (b))
 #define min(a,b) ((a) <= (b) ?	(a) : (b))
 
+// ATH runflag, setup at the end of atl_init
+dictword *rf;
+
 /*  Globals imported  */
 
 /*  Data types	*/
@@ -645,6 +648,9 @@ prim ATH_dec() {
     base = 10;
 }
 
+prim ATH_bye() {
+    *((int *) atl_body(rf)) = 0;
+}
 
 #endif // ATH
 
@@ -3656,7 +3662,8 @@ static struct primfcn primt[] = {
 	{(char *)"0W!",ATH_wbang},
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DEC",ATH_dec},
-    {"0.FEATURES", ATH_Features},
+	{(char *)"0BYE",ATH_bye},
+    {(char *)"0.FEATURES", ATH_Features},
 #endif
     {NULL, (codeptr) 0}
 };
@@ -4046,6 +4053,10 @@ void atl_init()
         }
 #endif /* FILEIO */
         dictprot = dict;	      /* Protect all standard words */
+    }
+    rf = atl_vardef("runflag",sizeof(int));
+    if( rf != NULL) {
+        *((int *) atl_body(rf)) = -1;
     }
 }
 

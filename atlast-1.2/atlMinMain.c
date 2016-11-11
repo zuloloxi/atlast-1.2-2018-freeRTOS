@@ -2,12 +2,28 @@
 #include <string.h>
 #include "atlast.h"
 #include "atlcfig.h"
+#include "atldef.h"
 
 int main() {
     char t[132];
+    dictword *var;
+    int *tst;
+    extern dictword *rf;
 
     atl_init();
-    while(1) {
+
+    var = atl_vardef("TEST",4);
+
+    if(var == NULL) {
+        fprintf(stderr,"Vardef failed\n");
+    } else {
+        *((int *)atl_body(var))=42;
+    }
+
+    tst = (int *) atl_body(rf);
+
+
+    while(*tst) {
         (void)memset(outBuffer,0,sizeof(outBuffer));
         printf("-> ");
 
@@ -19,4 +35,5 @@ int main() {
             outBuffer[0]='\0';
         }
     }
+    return 0;
 }
