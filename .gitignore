@@ -1,5 +1,6 @@
 *.swp
 atlast
+atsmall
 *.o
 primdeftest
 cscope.out
