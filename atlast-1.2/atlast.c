@@ -508,6 +508,17 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 
+#ifdef ANSI
+    sprintf(outBuffer,"    ANSI\n");
+#else
+    sprintf(outBuffer,"NOT ANSI\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+
 }
 prim ATH_memsafe() {
     Sl(1);
@@ -649,6 +660,22 @@ prim ATH_bye() {
 }
 
 #endif // ATH
+#ifdef ANSI
+prim ANSI_cell() {
+    So(1);
+    Push = sizeof(int);
+}
+
+prim ANSI_cells() {
+    Sl(1);
+    S0 = S0 * sizeof(int);
+}
+
+prim ANSI_cellplus() {
+    Sl(1);
+    S0 = S0 + sizeof(int);
+}
+#endif // ANSI
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
 
@@ -3661,6 +3688,12 @@ static struct primfcn primt[] = {
 	{(char *)"0DEC",ATH_dec},
 	{(char *)"0BYE",ATH_bye},
     {(char *)"0.FEATURES", ATH_Features},
+#endif
+
+#ifdef ANSI
+    {(char *)"0CELL", ANSI_cell},
+    {(char *)"0CELLS", ANSI_cells},
+    {(char *)"0CELL+", ANSI_cellplus},
 #endif
     {NULL, (codeptr) 0}
 };

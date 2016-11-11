@@ -32,6 +32,7 @@
 #define WORDSUSED             /* Logging of words used and unused */
 #define BANNER
 #define ATH
+#define ANSI                /* Enable ANSI compatability words */
 // #define Keyhit
 // 
 // Stuff added by me
