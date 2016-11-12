@@ -277,16 +277,31 @@ STATIC void pwalkback();
 
 #ifdef ATH
 void ATH_Features() {
+
 #ifdef ARRAY
     sprintf(outBuffer,"\n\n    ARRAY\n");
 #else
     sprintf(outBuffer,"NOT ARRAY\n");
 #endif
+
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
+
+#ifdef EMBEDDED
+    sprintf(outBuffer,"    EMBEDDED\n");
+#else
+    sprintf(outBuffer,"NOT EMBEDDED\n");
+#endif
+
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+
 
 #ifdef BREAK
     sprintf(outBuffer,"    BREAK\n");
@@ -487,9 +502,9 @@ void ATH_Features() {
 #endif
 
 #ifdef ATH
-    sprintf(outBuffer,"    CUSTOM\n");
+    sprintf(outBuffer,"\n    ATH CUSTOM\n");
 #else
-    sprintf(outBuffer,"NOT CUSTOM\n");
+    sprintf(outBuffer,"\nNOT ATH CUSTOM\n");
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
