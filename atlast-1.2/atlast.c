@@ -2911,7 +2911,10 @@ prim P_abortq() 		      /* Abort, printing message */
     } else {
         /* Otherwise, print string literal in in-line code. */
 #ifdef EMBEDDED
-        sprintf(outBuffer,"%s", (char *) ip);  // EMBEDDED
+        //sprintf(outBuffer,"%s", (char *) ip);  // EMBEDDED
+        (void) memset(outBuffer,0,sizeof(outBuffer));
+
+        sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;

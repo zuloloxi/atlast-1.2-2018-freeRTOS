@@ -48,6 +48,10 @@ int main(int argc, char *argv[]) {
     FILE *ifp;
     char *include[20];
     int in = 0;
+
+    extern dictword *rf;
+    int *tst;
+
 #define PR(x) (void) fprintf(stderr, x)
 
 #ifdef BANNER
@@ -122,6 +126,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // OK, so init the system
+    //
+    atl_init();
+
+
     /* If any include files were named, load each in turn before
        we execute the program. */
 
@@ -158,7 +167,9 @@ int main(int argc, char *argv[]) {
 #ifndef HIGHC
     V signal(SIGINT, ctrlc);
 #endif /* HIGHC */
-    while (TRUE) {
+
+    tst = (int *) atl_body(rf);
+    while (*tst) {
         char t[132];
 
         if (!fname)
