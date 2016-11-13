@@ -2,7 +2,7 @@
 #define __ATLAST_CFIG
 // TODO Remove all references to EMBEDDED in io words.
 // Output to a buffer is the norm.
-// #define EMBEDDED            // Mods for use in an embedded system.
+#define EMBEDDED            // Mods for use in an embedded system.
                             // anything that results in output to stdout, or stderr goes
                             // to a global buffer.
                             //
