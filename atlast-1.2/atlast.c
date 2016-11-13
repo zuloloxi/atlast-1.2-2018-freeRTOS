@@ -535,6 +535,16 @@ void ATH_Features() {
 #endif
 
 }
+
+prim ATH_qfileio() {
+    So(1);
+
+#ifdef FILEIO
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
 prim ATH_memsafe() {
     Sl(1);
     ath_safe_memory = (S0 == 0) ? Falsity : Truth;
@@ -3705,6 +3715,7 @@ static struct primfcn primt[] = {
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DEC",ATH_dec},
 	{(char *)"0BYE",ATH_bye},
+	{(char *)"0?FILEIO",ATH_qfileio},
     {(char *)"0.FEATURES", ATH_Features},
 #endif
 
