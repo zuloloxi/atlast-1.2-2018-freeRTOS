@@ -17,7 +17,7 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest atlsmall
+APPS = atlast atlsmall # primdeftest
 
 all:	$(APPS)
 
@@ -66,6 +66,11 @@ dist:
 	find dist -type f -exec chmod 644 {} \;
 	( cd dist ; tar cfvz ../atlast-$(VERSION).tar.gz atlast-$(VERSION) )
 	rm -rf dist
+
+install:	atlast atlsmall
+	strip $(APPS)
+	mkdir -p /usr/local/bin
+	mv ./atlast /usr/local/bin
 
 lint:	lintatlast
 
