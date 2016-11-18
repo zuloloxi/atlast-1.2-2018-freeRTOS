@@ -589,9 +589,10 @@ void displayLineAscii(uint8_t *a) {
 #endif
 
     for(i=0;i<16;i++) {
-        if( (*a < 0x20 ) || (*a > 128 )) {
+        if( (*a < 0x20 ) || (*a > 0x80 )) {
 #ifdef EMBEDDED
             sprintf(outBuffer,".");
+            a++;
 #endif
 #ifdef FREERTOS
             txBuffer(console, (uint8_t *)outBuffer) ;
@@ -701,6 +702,38 @@ prim ANSI_cellplus() {
     Sl(1);
     S0 = S0 + sizeof(int);
 }
+
+prim ANSI_chars() {
+	Sl(1);
+
+	S0 = sizeof(uint8_t) * S0;
+
+}
+
+prim ANSI_allocate() {
+	void *ptr=NULL;
+	Sl(1);
+	So(2);
+
+	ptr=malloc(S0);
+	if(ptr != NULL) {
+		memset(ptr,0,S0);
+		Pop;
+		Push=(stackitem)ptr;
+		Push=0;
+	} else {
+		Push=0;
+		Push=-1;
+	}
+}
+
+prim ANSI_free() {
+	if(S0 != 0 ) {
+		free((void *)S0);
+	}
+	Push=0;
+}
+
 #endif // ANSI
 
 #ifdef FREERTOS
@@ -709,9 +742,11 @@ prim FR_getQid() {
 
 	Sl(1);
 
-	S0 = task[S0]->iam;
+	S0 = (stackitem)task[S0]->iam;
 
 }
+
+
 
 prim FR_getMessage() {
 	extern struct taskData *task[LAST_TASK];
@@ -722,13 +757,13 @@ prim FR_getMessage() {
 	Sl(2);
 
 	timeout=S0;
-	qh=S1;
+	qh = (QueueHandle_t) S1;
 	qh=task[TST_HARNESS]->iam;
 
 	// evt = osMessageGet(qh,timeout);
 	evt = osMessageGet(qh,timeout);
 	Pop;
-	S0 = evt.value.p;
+	S0 = (stackitem)evt.value.p;
 }
 #endif
 
@@ -1437,11 +1472,17 @@ prim P_allot()			      /* Allocate heap bytes */
 prim P_comma()			      /* Store one item on heap */
 {
     Sl(1);
+    stackitem t1;
 
-    if ( ath_safe_memory == Truth ) {
-        Hpc(S0);
-    }
+//    if ( ath_safe_memory == Truth ) {
+//        Hpc(S0);
+//    }
     Hstore = S0;
+    /*
+    t1=S0;
+    *hptr = t1;
+    hptr++;
+    */
     Pop;
 }
 
@@ -3778,6 +3819,9 @@ static struct primfcn primt[] = {
     {(char *)"0CELL", ANSI_cell},
     {(char *)"0CELLS", ANSI_cells},
     {(char *)"0CELL+", ANSI_cellplus},
+    {(char *)"0CHARS", ANSI_chars},
+    {(char *)"0ALLOCATE", ANSI_allocate},
+    {(char *)"0FREE", ANSI_free},
 #endif
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
