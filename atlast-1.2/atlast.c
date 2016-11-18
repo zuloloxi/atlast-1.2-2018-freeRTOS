@@ -35,6 +35,7 @@
 #ifdef FREERTOS
 #include "usart.h"
 #include "ATH_serial.h"
+#include "tasks.h"
 extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
 #endif
@@ -701,6 +702,35 @@ prim ANSI_cellplus() {
     S0 = S0 + sizeof(int);
 }
 #endif // ANSI
+
+#ifdef FREERTOS
+prim FR_getQid() {
+	extern struct taskData *task[LAST_TASK];
+
+	Sl(1);
+
+	S0 = task[S0]->iam;
+
+}
+
+prim FR_getMessage() {
+	extern struct taskData *task[LAST_TASK];
+	osEvent evt;
+	uint32_t timeout;
+	volatile QueueHandle_t qh;
+
+	Sl(2);
+
+	timeout=S0;
+	qh=S1;
+	qh=task[TST_HARNESS]->iam;
+
+	// evt = osMessageGet(qh,timeout);
+	evt = osMessageGet(qh,timeout);
+	Pop;
+	S0 = evt.value.p;
+}
+#endif
 
 /*  ALLOC  --  Allocate memory and error upon exhaustion.  */
 
@@ -2018,9 +2048,33 @@ prim P_tan()			      /* Tangent */
 /* Print top of stack, pop it */
 prim P_dot() {
     Sl(1);
+//    stackitem top=S0;
+    int top=S0;
 
 #ifdef EMBEDDED
-    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), S0);  // EMBEDDED
+    switch(base) {
+    case 10:
+#ifdef FREERTOS
+    	itoa(top,outBuffer,10);
+#else
+        sprintf(outBuffer,"%d",top);
+#endif
+    	break;
+    case 16:
+#ifdef FREERTOS
+    	itoa(top,outBuffer,16);
+#else
+        sprintf(outBuffer,"%x",top);
+#endif
+    	break;
+    default:
+#ifdef FREERTOS
+    	itoa(top,outBuffer,10);
+#else
+        sprintf(outBuffer,"%d",top);
+#endif
+    	break;
+    }
 #endif
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
@@ -2037,7 +2091,8 @@ prim P_question()		      /* Print value at address */
     Hpc(S0);
     
 #ifdef EMBEDDED
-    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), *((stackitem *) S0)); // EMBEDDED
+//    sprintf(outBuffer,(base == 16 ? "%lX" : "%ld "), *((stackitem *) S0)); // EMBEDDED
+    sprintf(outBuffer,"Hello\n");
 #endif
 #ifdef FREERTOS
     txBuffer(console, (uint8_t *)outBuffer) ;
@@ -2068,8 +2123,8 @@ prim P_dots() {
     sprintf(outBuffer,"Stack: ");  // EMBEDDED
 #endif
 #ifdef FREERTOS
-   	outBuffer[0]=0;
     txBuffer(console, (uint8_t *)outBuffer) ;
+   	outBuffer[0]=0;
 #else
         V printf("Stack: ");    // NOT EMBEDDED
 #endif
@@ -2088,16 +2143,16 @@ prim P_dots() {
     } else {
         for (tsp = stack; tsp < stk; tsp++) {
 #ifdef EMBEDDED
-            sprintf(tmpBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); //  EMBEDDED
-            strcat(outBuffer,tmpBuffer);
-#endif
-        }
+        	// TODO If you change the stack size change this
+            sprintf(outBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); //  EMBEDDED
 #ifdef FREERTOS
             txBuffer(console, (uint8_t *)outBuffer) ;
 #else
              printf("%s",outBuffer);
 #endif
-    }
+#endif
+        }
+}
 }
 
 prim P_dotquote()		      /* Print literal string that follows */
@@ -3724,6 +3779,10 @@ static struct primfcn primt[] = {
     {(char *)"0CELLS", ANSI_cells},
     {(char *)"0CELL+", ANSI_cellplus},
 #endif
+#ifdef FREERTOS
+    {(char *)"0QID@", FR_getQid},
+    {(char *)"0MESSAGE@", FR_getMessage},
+#endif
     {NULL, (codeptr) 0}
 };
 
@@ -4266,7 +4325,7 @@ void atl_break()
 #endif /* BREAK */
 
 /*  ATL_LOAD  --  Load a file into the system.	*/
-
+#ifdef FILEIO
 int atl_load(fp)
     FILE *fp;
 {
@@ -4311,7 +4370,7 @@ int atl_load(fp)
     instream = sinstr;		      /* Unstack input stream */
     return es;
 }
-
+#endif
 /*  ATL_PROLOGUE  --  Recognise and process prologue statement.
     Returns 1 if the statement was part of the
     prologue and 0 otherwise. */
