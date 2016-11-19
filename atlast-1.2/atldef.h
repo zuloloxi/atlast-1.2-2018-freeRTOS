@@ -289,3 +289,6 @@ extern char *atl_fgetsp();
 #define Isopen(x) if (FileD(x) == NULL) {V printf("\nFile not open\n");return;}
 
 typedef enum {False = 0, True = 1} Boolean;
+
+// ATH Additions
+#define MAX_LINE 80

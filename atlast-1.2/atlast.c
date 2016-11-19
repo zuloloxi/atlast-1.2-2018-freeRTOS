@@ -689,6 +689,21 @@ prim ATH_bye() {
     *((int *) atl_body(rf)) = 0;
 }
 
+uint8_t readLineFromArray(uint8_t *src, uint8_t *dest) {
+    uint8_t ch;
+    int i;
+    static uint32_t offset=0;
+    
+    for(i=0;i<MAX_LINE;i++) {
+        ch=*(src+(offset++));
+        if( ch == 0 || ch == '\n' || ch == '\r' ) {
+            *dest=0;
+            break;
+        } else {
+            *(dest++)=ch;
+        }
+    }
+}
 #endif // ATH
 #ifdef ANSI
 prim ANSI_cell() {
@@ -2163,7 +2178,6 @@ prim P_dots() {
     stackitem *tsp;
 
 #ifdef EMBEDDED
-    char tmpBuffer[80];  // One line of the screen.
     sprintf(outBuffer,"Stack: ");  // EMBEDDED
 #endif
 #ifdef FREERTOS
