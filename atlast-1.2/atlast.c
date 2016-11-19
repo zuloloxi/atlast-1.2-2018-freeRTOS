@@ -1749,8 +1749,19 @@ prim P_string() 		      /* Create string buffer */
 prim P_strcpy() 		      /* Copy string to address on stack */
 {
     Sl(2);
-    Hpc(S0);
-    Hpc(S1);
+    // Hpc checks that the pointer is an address inside the heap.
+    // This prevents you writing to random memory addresses.
+    // However sometimes you want to write to memory that has been
+    // allocated by malloc, or a hardware address.
+    // NOTE Use with caution
+    // TODO Should I set ath_safe_memory to Truth after use ?  this means 
+    // every acces to memory outside of heap would have to be prefixed with
+    // 0 memsafe
+    //
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S1);
+    }
     V strcpy((char *) S0, (char *) S1);
     Pop2;
 }
@@ -1758,8 +1769,10 @@ prim P_strcpy() 		      /* Copy string to address on stack */
 prim P_strcat() 		      /* Append string to address on stack */
 {
     Sl(2);
-    Hpc(S0);
-    Hpc(S1);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S1);
+    }
     V strcat((char *) S0, (char *) S1);
     Pop2;
 }
@@ -1767,7 +1780,9 @@ prim P_strcat() 		      /* Append string to address on stack */
 prim P_strlen() 		      /* Take length of string on stack top */
 {
     Sl(1);
-    Hpc(S0);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+    }
     S0 = strlen((char *) S0);
 }
 
@@ -1776,8 +1791,10 @@ prim P_strcmp() 		      /* Compare top two strings on stack */
     int i;
 
     Sl(2);
-    Hpc(S0);
-    Hpc(S1);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S1);
+    }
     i = strcmp((char *) S1, (char *) S0);
     S1 = (i == 0) ? 0L : ((i > 0) ? 1L : -1L);
     Pop;
@@ -1786,8 +1803,10 @@ prim P_strcmp() 		      /* Compare top two strings on stack */
 prim P_strchar()		      /* Find character in string */
 {
     Sl(2);
-    Hpc(S0);
-    Hpc(S1);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S1);
+    }
     S1 = (stackitem) strchr((char *) S1, *((char *) S0));
     Pop;
 }
@@ -1798,8 +1817,10 @@ prim P_substr() 		      /* Extract and store substring */
     char *ss, *sp, *se, *ds;
 
     Sl(4);
-    Hpc(S0);
-    Hpc(S3);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S3);
+    }
     sl = strlen(ss = ((char *) S3));
     se = ss + sl;
     sp = ((char *) S3) + S2;
@@ -1815,8 +1836,10 @@ prim P_substr() 		      /* Extract and store substring */
 prim P_strform()		      /* Format integer using sprintf() */
 {                                     /* value "%ld" str -- */
     Sl(2);
-    Hpc(S0);
-    Hpc(S1);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+        Hpc(S1);
+    }
     
     V sprintf((char *) S0, (char *) S1, S2);  // NOT EMBEDDED
     
@@ -1841,7 +1864,9 @@ prim P_strint() 		      /* String to integer */
 
     Sl(1);
     So(1);
-    Hpc(S0);
+    if( ath_safe_memory == Truth) {
+        Hpc(S0);
+    }
     is = strtoul((char *) S0, &eptr, 0);
     S0 = (stackitem) eptr;
     Push = is;
