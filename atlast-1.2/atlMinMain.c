@@ -5,7 +5,10 @@
 #include "atlcfig.h"
 #include "atldef.h"
 
-uint8_t nvramrc[] = ": tst 10 0 do\ni . cr\nloop\n;\n";
+// uint8_t nvramrc[] = ": tst \n10 0 do \ni . cr \nloop \n; \n \n";
+//
+
+#include "atlsrc.h"
 
 int main() {
     char t[132];

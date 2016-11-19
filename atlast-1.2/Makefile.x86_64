@@ -24,7 +24,7 @@ all:	$(APPS)
 atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
 
-atlsmall: $(ATLOBJ) atlMinMain.c
+atlsmall: $(ATLOBJ) atlMinMain.c atlsrc.h
 	$(CC) $(CFLAGS)  atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
 
 atlast.o:   atlast.c atldef.h atlcfig.h
