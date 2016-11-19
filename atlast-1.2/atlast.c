@@ -18,8 +18,11 @@
 #include <stdint.h>
 #include <string.h>
 #include "atlcfig.h"
+
+#ifdef LINUX
+#include <unistd.h>
+#endif
 // #define MEMSTAT
-// #include <unistd.h>
 
 /*
 #ifdef ALIGNMENT
