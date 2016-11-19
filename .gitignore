@@ -6,3 +6,4 @@ primdeftest
 cscope.out
 .gdb_history
 tst
+atlsrc.h
