@@ -7,6 +7,8 @@ It is a fork of Michael Henderson's (aka quoha) of Atlast.
 
 I want to add a few features and use as the basis for a scriptable unit test framework.
 
+See also my forthSrc repo for example scripts.  This will increase of time :)
+
 Below is Michael's original README.
 
 =================

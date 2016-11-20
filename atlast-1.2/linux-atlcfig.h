@@ -6,7 +6,12 @@
                             // anything that results in output to stdout, or stderr goes
                             // to a global buffer.
                             //
+// Define OS platform here
 // #define FREERTOS
+//
+// LINUX should apply to any UNIX like system, such as
+// MacOS X, Solaris, QNX, Cygwin ....
+#define LINUX
 #define INDIVIDUALLY
 
 #define ARRAY                 /* Array subscripting words */

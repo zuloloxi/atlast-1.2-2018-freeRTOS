@@ -1,0 +1,7 @@
+\ this is a comment
+: tst 
+    10 0 do \ and so is this
+        i . cr
+    loop
+;
+
