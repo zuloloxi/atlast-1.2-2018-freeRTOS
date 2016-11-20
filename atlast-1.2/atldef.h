@@ -18,6 +18,7 @@
 
 */
 
+#include <stdint.h>
 #include "atlast.h"                   /* Define user linkage structures */
 
 typedef void (*codeptr)();	      /* Machine code pointer */
@@ -156,6 +157,7 @@ extern void atl_primdef(), atl_error();
 extern dictword *atl_lookup(), *atl_vardef();
 extern stackitem *atl_body();
 extern int atl_exec();
+
 #ifdef EXPORT
 extern char *atl_fgetsp();
 #endif

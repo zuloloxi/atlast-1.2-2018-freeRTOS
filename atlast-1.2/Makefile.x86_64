@@ -17,7 +17,7 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast primdeftest atlsmall
+APPS = atlast atlsmall # primdeftest 
 
 all:	$(APPS)
 
