@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "atlcfig.h"
+// #include "atldef.h"
 
 #ifdef LINUX
 #include <unistd.h>
@@ -692,7 +693,7 @@ prim ATH_bye() {
 int8_t readLineFromArray(uint8_t *src, uint8_t *dest) {
     uint8_t ch;
     int i;
-    int8_t len;
+    int8_t len=0;
     static uint32_t offset=0;
     
     for(i=0;i<MAX_LINE;i++) {
@@ -771,8 +772,6 @@ prim FR_getQid() {
 
 }
 
-
-
 prim FR_getMessage() {
 	extern struct taskData *task[LAST_TASK];
 	osEvent evt;
@@ -789,6 +788,23 @@ prim FR_getMessage() {
 	evt = osMessageGet(qh,timeout);
 	Pop;
 	S0 = (stackitem)evt.value.p;
+}
+
+prim FR_putMessage() {
+	struct cmdMessage *out;
+	volatile QueueHandle_t dest;
+	osStatus rc = osOK;
+
+	Sl(2);
+
+	dest = (QueueHandle_t ) S0;
+	out = (struct CmdMessage *)S1;
+	Pop2;
+
+	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
+
+	Push=rc;
+
 }
 #endif
 
@@ -2274,8 +2290,11 @@ prim P_dotparen()		      /* Print literal string that follows */
 /* Print string pointed to by stack */
 prim P_type() {
     Sl(1);
-    Hpc(S0);
     
+    if( ath_safe_memory == Truth) {
+    	Hpc(S0);
+    }
+
 #ifdef EMBEDDED
     sprintf(outBuffer,"%s", (char *) S0); // EMBEDDED
 #endif
@@ -3858,7 +3877,7 @@ static struct primfcn primt[] = {
 	{(char *)"0W@",ATH_wat},
 	{(char *)"0W!",ATH_wbang},
 	{(char *)"0HEX",ATH_hex},
-	{(char *)"0DEC",ATH_dec},
+	{(char *)"0DECIMAL",ATH_dec},
 	{(char *)"0BYE",ATH_bye},
 	{(char *)"0?FILEIO",ATH_qfileio},
     {(char *)"0.FEATURES", ATH_Features},
@@ -3875,6 +3894,7 @@ static struct primfcn primt[] = {
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
     {(char *)"0MESSAGE@", FR_getMessage},
+    {(char *)"0MESSAGE!", FR_putMessage},
 #endif
     {NULL, (codeptr) 0}
 };

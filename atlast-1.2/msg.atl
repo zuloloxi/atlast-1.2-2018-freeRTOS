@@ -1,0 +1,13 @@
+
+0 memsafe
+
+struct
+    cell field sender
+    1 chars field fields
+    8 chars field cmd
+    16 chars field key
+    32 chars field value
+endstruct /msg
+
+
+
