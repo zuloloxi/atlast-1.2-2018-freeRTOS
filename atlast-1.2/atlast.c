@@ -18,6 +18,10 @@
 #include <stdint.h>
 #include <string.h>
 #include "atlcfig.h"
+#ifdef PUBSUB
+#include "Small.h"
+#endif
+
 // #include "atldef.h"
 
 #ifdef LINUX
@@ -319,16 +323,31 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 
+//
 #ifdef COMPILERW
     sprintf(outBuffer,"    COMPILERW\n");
 #else
     sprintf(outBuffer,"NOT COMPILERW\n");
 #endif
+
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
+//
+#ifdef PUBSUB
+    sprintf(outBuffer,"    PUBSUB\n");
+#else
+    sprintf(outBuffer,"NOT PUBSUB\n");
+#endif
+
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+//
 
 #ifdef CONIO
     sprintf(outBuffer,"    CONIO\n");
@@ -754,6 +773,8 @@ prim ANSI_allocate() {
 }
 
 prim ANSI_free() {
+	Sl(1);
+
 	if(S0 != 0 ) {
 		free((void *)S0);
 	}
@@ -804,6 +825,78 @@ prim FR_putMessage() {
 	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
 
 	Push=rc;
+
+}
+
+prim FR_mkdb() {
+	So(1);
+
+	struct Small *db = newSmall();
+
+	Push = (stackitem) db;
+
+}
+prim FR_publish() {
+	char *name;
+	struct Small *db;
+	bool rc;
+
+	Sl(2);
+
+	name=S0;
+	db=S1;
+
+	rc=dbPublish(db,name);
+
+	Pop2;
+
+	Push=rc;
+}
+
+prim FR_addRecord() {
+	struct Small *db;
+	char *n;
+	char *v;
+	bool rc;
+
+	Sl(3);
+	So(1);
+
+	v=(char *)S0;
+	n=(char *)S1;
+	db=(struct Small *)S2;
+
+	rc = addRecord(db,n,v);
+
+	Npop(3);
+
+	Push=rc;
+
+}
+//    char *dbLookup(struct Small *db, const char *n);
+
+prim FR_lookup() {
+
+	struct Small *db;
+	char *key;
+	char *value;
+
+	Sl(2);
+	So(1);
+
+	key=(char *)S0;
+	db=(struct Small *)S1;
+
+	value = dbLookup(db,key);
+	Pop2;
+
+	Push = value;
+
+	if( value == NULL) {
+		Push = true;
+	} else {
+		Push = false;
+	}
 
 }
 #endif
@@ -1192,11 +1285,11 @@ static void enter(tkname)
 // TODO, not sure what to do here
 static Boolean kbquit() {
 
-	Boolean rc=false;
+	Boolean rc=False;
 
 	if(rxReady(console)) {
 		(void) rxByte(console );
-		rc=true;
+		rc=True;
 	}
 
 	return rc;
@@ -3895,6 +3988,12 @@ static struct primfcn primt[] = {
     {(char *)"0QID@", FR_getQid},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
+#endif
+#ifdef PUBSUB
+	{(char *)"0MKDB",     FR_mkdb},
+	{(char *)"0ADD-RECORD",  FR_addRecord},
+	{(char *)"0LOOKUP",  FR_lookup},
+	{(char *)"0PUBLISH",  FR_publish},
 #endif
     {NULL, (codeptr) 0}
 };
