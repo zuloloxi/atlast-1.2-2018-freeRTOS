@@ -48,6 +48,7 @@ extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
 #endif
 #endif
+static int token( char **);
 
 #ifdef Macintosh
 /* Macintoshes need 32K segments, else barfage ensues */
@@ -558,6 +559,18 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 
+}
+
+prim ATH_Instream() {
+    Push=instream;
+}
+
+prim ATH_Token() {
+    int r;
+
+    r=token(&instream);
+    V strcpy(strbuf[cstrbuf], tokbuf);
+    Push = (stackitem) strbuf[cstrbuf];
 }
 
 prim ATH_qfileio() {
@@ -3974,6 +3987,8 @@ static struct primfcn primt[] = {
 	{(char *)"0BYE",ATH_bye},
 	{(char *)"0?FILEIO",ATH_qfileio},
     {(char *)"0.FEATURES", ATH_Features},
+    {(char *)"0TIB", ATH_Instream},
+    {(char *)"0TOKEN", ATH_Token},
 #endif
 
 #ifdef ANSI
