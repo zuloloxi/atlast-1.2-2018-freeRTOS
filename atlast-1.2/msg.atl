@@ -1,5 +1,8 @@
-
 0 memsafe
+
+1 constant TST_HARNESS
+
+TST_HARNESS constant iam
 
 struct
     cell field sender
@@ -9,5 +12,61 @@ struct
     32 chars field value
 endstruct /msg
 
+variable init_run
+variable out
 
+
+: init
+	init_run @ 0= if
+        here /msg allot out !
+        out @ /msg erase
+
+        -1 init_run !
+	then
+;
+
+
+: mkmsg-set
+    init_run if
+        iam qid@ out @ sender !
+        3 out @ fields !
+        "SET"  out @ cmd strcpy
+        "RUN"  out @ key strcpy
+        "TRUE" out @ value strcpy
+    then
+;
+
+: mkmsg-sub
+    init_run if
+        iam qid@ out @ sender !
+        2 out @ fields !
+        "SUB"  out @ cmd strcpy
+        "COUNTER"  out @ key strcpy
+    then
+;
+
+
+: send
+    init_run if
+        out @  tst_rx qid@ message!
+    then
+;
+
+
+: disp
+    init_run if
+        out @ /msg dump
+    then
+;
+
+mkdb constant db
+
+: eval-msg \ addr
+    >r
+    db
+    r@ key  
+    r> value 
+
+    add-record
+;
 

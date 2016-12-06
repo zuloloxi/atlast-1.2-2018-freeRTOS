@@ -9,6 +9,7 @@ VERSION = 1.2
 COPTIONS = -m32 -g -w
 
 # LIBRARIES = -lm
+LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++
 
 INCLUDE =
 
@@ -27,6 +28,7 @@ atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/C++/include
+CFLAGS += -I/usr/local/lib/Small
 
 atlsmall: $(ATLOBJ) atlMinMain.c
 	$(CC) $(CFLAGS) atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)

@@ -44,6 +44,10 @@
 #include "usart.h"
 #include "ATH_serial.h"
 #include "tasks.h"
+#include "cmsis_os.h"
+
+extern osPoolId mpool_id;
+
 extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
 #endif
@@ -797,6 +801,25 @@ prim ANSI_free() {
 #endif // ANSI
 
 #ifdef FREERTOS
+
+prim FR_CmdParse() {
+	Sl(2);
+
+	char *res=NULL;
+
+	struct Small *db=(struct Small *)S1;
+	struct cmdMessage *msg=(struct cmdMessage *)S0;
+
+	Pop;
+
+	res=cmdParse(db, msg);
+	S0=(stackitem)res;
+}
+
+
+prim FR_getPoolId() {
+	Push=(stackitem)mpool_id;
+}
 prim FR_getQid() {
 	extern struct taskData *task[LAST_TASK];
 
@@ -813,6 +836,7 @@ prim FR_getMessage() {
 	volatile QueueHandle_t qh;
 
 	Sl(2);
+	So(2);
 
 	timeout=S0;
 	qh = (QueueHandle_t) S1;
@@ -820,8 +844,9 @@ prim FR_getMessage() {
 
 	// evt = osMessageGet(qh,timeout);
 	evt = osMessageGet(qh,timeout);
-	Pop;
-	S0 = (stackitem)evt.value.p;
+//	Pop;
+	S1 = (stackitem)evt.value.p;
+	S0 = (stackitem)evt.status;
 }
 
 prim FR_putMessage() {
@@ -838,8 +863,9 @@ prim FR_putMessage() {
 	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
 
 	Push=rc;
-
 }
+#endif
+#ifdef PUBSUB
 
 prim FR_mkdb() {
 	So(1);
@@ -4003,6 +4029,8 @@ static struct primfcn primt[] = {
     {(char *)"0QID@", FR_getQid},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
+    {(char *)"0POOL@", FR_getPoolId } ,
+    {(char *)"0CMD-PARSE", FR_CmdParse },
 #endif
 #ifdef PUBSUB
 	{(char *)"0MKDB",     FR_mkdb},
