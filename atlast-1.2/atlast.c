@@ -2478,7 +2478,7 @@ prim P_words()			      /* List words */
 #else
         /* If this system can't trap keystrokes, just stop the WORDS
      NOT       listing after 20 words. */
-        if (++key >= 20)
+        if (++key >= 200)
             break;
 #endif
     }

@@ -6,7 +6,7 @@ include profile.mk
 VERSION = 1.2
 
 # COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
-COPTIONS = -g -w
+COPTIONS = -g -w 
 
 # LIBRARIES = -lm
 LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++
@@ -19,7 +19,7 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlsmall atlast primdeftest
+APPS = atlsmall atlast # primdeftest
 
 all:	$(APPS)
 # all:	atlsmall
