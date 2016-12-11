@@ -38,7 +38,7 @@
 #define BANNER
 #define ATH
 #define ANSI                /* Enable ANSI compatability words */
-#define PUBSUB              // Use the Small pub/sub system
+// #define PUBSUB              // Use the Small pub/sub system
 // #define Keyhit
 // 
 // Stuff added by me
