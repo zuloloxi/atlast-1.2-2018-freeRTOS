@@ -4,7 +4,7 @@
 #ifndef __ATL_SRC
 #define __ATL_SRC
 
-uint8_t nvramrc[] = "";
+uint8_t nvramrc[] = ": dofield\ndoes> \ndup @ \nswap \ncell+ @ \n-rot \n+ swap\ndrop \n;\n: field \ncreate\n2dup\nswap\n,\n,\n+\ndofield\n;\n0 constant struct\n: endstruct\ncreate\n,\ndoes>\n@\n;\n";
 
 #endif
 
