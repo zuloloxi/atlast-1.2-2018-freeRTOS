@@ -293,9 +293,9 @@ STATIC void pwalkback();
 void ATH_Features() {
 
 #ifdef ARRAY
-    sprintf(outBuffer,"\n\n    ARRAY\n");
+    sprintf(outBuffer,"\n    ARRAY\n");
 #else
-    sprintf(outBuffer,"NOT ARRAY\n");
+    sprintf(outBuffer,"\nNOT ARRAY\n");
 #endif
 
 #ifdef FREERTOS
@@ -530,6 +530,7 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 
+// ------------------
 #ifdef ATH
     sprintf(outBuffer,"\n    ATH CUSTOM\n");
 #else
@@ -540,6 +541,18 @@ void ATH_Features() {
 #else
 	 printf("%s",outBuffer);
 #endif
+// ------------------
+#ifdef PUBSUB
+    sprintf(outBuffer,"    PUBSUB\n");
+#else
+    sprintf(outBuffer,"NOT PUBSUB\n");
+#endif
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+// ------------------
 
 #ifdef FREERTOS
     sprintf(outBuffer,"    FREERTOS\n");
