@@ -1,0 +1,47 @@
+Name:   mkdb
+Stack:  - - dbHandle
+Description:
+    Create an empty pub/sub database, and return the object id.
+
+Name:   publish
+Stack:  db  name
+Description:
+
+Name:   publish
+Stack:  dbHandle name -- bool
+Description:
+    Mark a variable as published.  True indicates failure, generally because the named value
+    does not exist.
+
+Name:   add-record
+Stack:  dbHandle name value -- bool
+Description:
+    If an entry with the key 'name' exists then it value is updated.  bIf it does not exist
+    then a new record is created.
+
+Name:   message@
+Stack:  qh timeout -- <address of message> <osStatus>
+Description:
+    Read a essage from qh, and wait for 'timeout' milliseconds.  Returns a pointer to the message
+    and the status, which indicates the reason for returning (e.g. osEventMessage, or osEventTimeout).
+
+Name:   message!
+Stack:  qh msg -- rc
+Description:
+    Send the message pointed to by 'msg' to the queue 'qh'.  Rc indicates the result.
+
+Name:
+Stack:
+Description:
+
+Name:
+Stack:
+Description:
+
+Name:
+Stack:
+Description:
+
+Name:
+Stack:
+Description:
