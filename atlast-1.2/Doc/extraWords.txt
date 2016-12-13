@@ -15,6 +15,16 @@ Description:
     If an entry with the key 'name' exists then it value is updated.  If it does not exist
     then a new record is created.
 
+Name:   lookup
+Stack:  dbHandle name -- value bool
+Description:    
+    Returns the value associated with the name, and a failure flag.
+
+Name:   lookup-rec
+Stack:  dbHandle name -- rec_ptr bool
+Description:    
+    Returns a pointer to the record associated with name, and a failure flag.
+
 Name:   message@
 Stack:  qh timeout -- <address of message> <osStatus>
 Description:

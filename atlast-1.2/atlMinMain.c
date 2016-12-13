@@ -4,6 +4,7 @@
 #include "atlast.h"
 #include "atlcfig.h"
 #include "atldef.h"
+#include "atlsrc.h"
 
 // uint8_t nvramrc[] = ": tst \n10 0 do \ni . cr \nloop \n; \n \n";
 //

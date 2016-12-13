@@ -904,6 +904,24 @@ prim FR_publish() {
 
 	Push=rc;
 }
+#ifdef LINUX
+prim FR_displayRecord() {
+    struct nlist *rec; 
+    Sl(1);
+
+    rec=(struct nlist *)S0;
+    printf("Name      : %s\n", nlistGetName(rec));
+    printf("Value     : %s\n", nlistGetDef(rec));
+    printf("Published :" );
+
+    if(dbAmIPublished(rec)) {
+        printf("True\n");
+    } else {
+        printf("False\n");
+    }
+    Pop;
+}
+#endif
 
 prim FR_addRecord() {
 	struct Small *db;
@@ -926,6 +944,29 @@ prim FR_addRecord() {
 
 }
 //    char *dbLookup(struct Small *db, const char *n);
+
+prim FR_lookupRecord() {
+	struct Small *db;
+	char *key;
+	struct nlist *rec;
+
+	Sl(2);
+	So(1);
+
+	key=(char *)S0;
+	db=(struct Small *)S1;
+    Pop2;
+
+	rec = dbLookupRec(db,key);
+
+    Push = rec;
+
+    if( rec == NULL ) {
+        Push = true;
+    } else {
+        Push = false;
+    }
+}
 
 prim FR_lookup() {
 
@@ -4049,7 +4090,11 @@ static struct primfcn primt[] = {
 	{(char *)"0MKDB",     FR_mkdb},
 	{(char *)"0ADD-RECORD",  FR_addRecord},
 	{(char *)"0LOOKUP",  FR_lookup},
+	{(char *)"0LOOKUP-REC",  FR_lookupRecord},
 	{(char *)"0PUBLISH",  FR_publish},
+#ifdef LINUX
+	{(char *)"0.RECORD",  FR_displayRecord},
+#endif
 #endif
     {NULL, (codeptr) 0}
 };
