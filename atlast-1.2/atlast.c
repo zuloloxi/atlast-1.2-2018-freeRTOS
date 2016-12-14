@@ -833,6 +833,29 @@ prim FR_CmdParse() {
 prim FR_getPoolId() {
 	Push=(stackitem)mpool_id;
 }
+
+prim FR_poolAllocate() {
+	osPoolId pool;
+	Sl(1);
+
+	pool=(osPoolId)S0;
+
+	struct cmdMessage *msg=osPoolAlloc(pool);
+}
+prim FR_poolFree() {
+
+	osStatus rc=osOK;;
+	osPoolId pool;
+
+	Sl(2);
+	struct cmdMessage *msg=(struct cmdMessage *)S0;
+	pool=(osPoolId)S1;
+
+	rc=osPoolFree(pool, msg);
+	Pop2;
+	Push=rc;
+}
+
 prim FR_getQid() {
 	extern struct taskData *task[LAST_TASK];
 
@@ -841,6 +864,7 @@ prim FR_getQid() {
 	S0 = (stackitem)task[S0]->iam;
 
 }
+
 
 prim FR_getMessage() {
 	extern struct taskData *task[LAST_TASK];
@@ -4100,8 +4124,13 @@ static struct primfcn primt[] = {
     {(char *)"0QID@", FR_getQid},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
+
     {(char *)"0POOL@", FR_getPoolId } ,
+    {(char *)"0POOL-FREE", FR_poolFree } ,
+    {(char *)"0POOL-ALLOCATE", FR_poolAllocate } ,
+
     {(char *)"0CMD-PARSE", FR_CmdParse },
+
 #endif
 #ifdef PUBSUB
 	{(char *)"0MKDB",     FR_mkdb},
