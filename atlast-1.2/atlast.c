@@ -895,8 +895,8 @@ prim FR_publish() {
 
 	Sl(2);
 
-	name=S0;
-	db=S1;
+	name=(char *)S0;
+	db=(struct Small *)S1;
 
 	rc=dbPublish(db,name);
 
@@ -904,24 +904,41 @@ prim FR_publish() {
 
 	Push=rc;
 }
-#ifdef LINUX
+
 prim FR_displayRecord() {
     struct nlist *rec; 
     Sl(1);
+    char localBuffer[80];
 
     rec=(struct nlist *)S0;
-    printf("Name      : %s\n", nlistGetName(rec));
-    printf("Value     : %s\n", nlistGetDef(rec));
-    printf("Published :" );
+    sprintf(localBuffer,"Name      : %s\n", nlistGetName(rec));
+#ifdef LINUX
+    printf("%s",localBuffer);
+#else
+	txBuffer(console, (uint8_t *)localBuffer) ;
+#endif
+    sprintf(localBuffer,"Value     : %s\n", (char *)nlistGetDef(rec));
+#ifdef LINUX
+    printf("%s",localBuffer);
+#else
+	txBuffer(console, (uint8_t *)localBuffer) ;
+#endif
+
+
+    sprintf(localBuffer, "Published :" );
 
     if(dbAmIPublished(rec)) {
-        printf("True\n");
+        strcat(localBuffer,"True\n");
     } else {
-        printf("False\n");
+        strcat(localBuffer,"False\n");
     }
+#ifdef LINUX
+    printf("%s",localBuffer);
+#else
+	txBuffer(console, (uint8_t *)localBuffer) ;
+#endif
     Pop;
 }
-#endif
 
 prim FR_addRecord() {
 	struct Small *db;
@@ -4092,9 +4109,7 @@ static struct primfcn primt[] = {
 	{(char *)"0LOOKUP",  FR_lookup},
 	{(char *)"0LOOKUP-REC",  FR_lookupRecord},
 	{(char *)"0PUBLISH",  FR_publish},
-#ifdef LINUX
 	{(char *)"0.RECORD",  FR_displayRecord},
-#endif
 #endif
     {NULL, (codeptr) 0}
 };
