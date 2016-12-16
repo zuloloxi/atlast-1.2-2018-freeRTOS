@@ -734,7 +734,6 @@ prim ATH_hex() {
 prim ATH_dec() {
     base = 10;
 }
-
 /*
 prim ATH_bye() {
     *((int *) atl_body(rf)) = 0;
@@ -4109,7 +4108,7 @@ static struct primfcn primt[] = {
 	{(char *)"0W!",ATH_wbang},
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DECIMAL",ATH_dec},
-	{(char *)"0BYE",ATH_bye},
+//	{(char *)"0BYE",ATH_bye},
 	{(char *)"0?FILEIO",ATH_qfileio},
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
@@ -4535,7 +4534,6 @@ void atl_init()
     }
     /*
     rf = atl_vardef("runflag",sizeof(int));
-
     if( rf != NULL) {
         *((int *) atl_body(rf)) = -1;
     }
