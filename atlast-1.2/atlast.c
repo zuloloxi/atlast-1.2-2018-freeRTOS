@@ -841,6 +841,8 @@ prim FR_poolAllocate() {
 	pool=(osPoolId)S0;
 
 	struct cmdMessage *msg=osPoolAlloc(pool);
+	S0=(stackitem) msg;
+	Push=sizeof(struct cmdMessage);
 }
 prim FR_poolFree() {
 
