@@ -31,7 +31,7 @@
 #define SHORTCUTA             /* Shortcut integer arithmetic words */
 #define SHORTCUTC             /* Shortcut integer comparison */
 #define STRING                /* String functions */
-// #define SYSTEM                /* System command function */
+#define SYSTEM                /* System command function */
 #define TRACE                 /* Execution tracing */
 #define WALKBACK              /* Walkback trace */
 #define WORDSUSED             /* Logging of words used and unused */

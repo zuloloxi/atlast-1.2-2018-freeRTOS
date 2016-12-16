@@ -18,7 +18,7 @@ int main() {
     uint8_t lineBuffer[MAX_LINE];
     dictword *var;
     int *tst;
-    extern dictword *rf;
+//    extern dictword *rf;
 
     atl_init();
 
@@ -36,7 +36,7 @@ int main() {
         *((int *)atl_body(var))=42;
     }
 
-    tst = (int *) atl_body(rf);
+    // tst = (int *) atl_body(rf);
 
 
     while(*tst) {

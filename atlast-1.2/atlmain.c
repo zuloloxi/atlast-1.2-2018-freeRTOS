@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     char *include[20];
     int in = 0;
 
-    extern dictword *rf;
+    //    extern dictword *rf;
     int *tst;
 
 #define PR(x) (void) fprintf(stderr, x)
@@ -129,6 +129,23 @@ int main(int argc, char *argv[]) {
     // OK, so init the system
     //
     atl_init();
+#ifdef PUBSUB
+    dictword *atlastTable;
+
+    atlastTable = atl_vardef("TABLE", sizeof( void *));
+    int8_t len=0;
+
+    struct Small *table;
+    table = newSmall();
+
+    uint8_t lineBuffer[MAX_LINE];
+
+    atlastTable = (struct Small *) atl_body( atlastTable );
+
+    void *ptr=atl_body(atlastTable);
+
+    ptr=(void *)table;
+#endif
 
 
     /* If any include files were named, load each in turn before
@@ -168,7 +185,7 @@ int main(int argc, char *argv[]) {
     V signal(SIGINT, ctrlc);
 #endif /* HIGHC */
 
-    tst = (int *) atl_body(rf);
+//    tst = (int *) atl_body(rf);
     while (*tst) {
         char t[132];
 

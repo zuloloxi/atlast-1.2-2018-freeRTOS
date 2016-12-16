@@ -115,7 +115,7 @@ static int token( char **);
 #define min(a,b) ((a) <= (b) ?	(a) : (b))
 
 // ATH runflag, setup at the end of atl_init
-dictword *rf;
+// dictword *rf;
 
 /*  Globals imported  */
 
@@ -735,9 +735,11 @@ prim ATH_dec() {
     base = 10;
 }
 
+/*
 prim ATH_bye() {
     *((int *) atl_body(rf)) = 0;
 }
+*/
 
 int8_t readLineFromArray(uint8_t *src, uint8_t *dest) {
     uint8_t ch;
@@ -4531,10 +4533,13 @@ void atl_init()
 #endif /* FILEIO */
         dictprot = dict;	      /* Protect all standard words */
     }
+    /*
     rf = atl_vardef("runflag",sizeof(int));
+
     if( rf != NULL) {
         *((int *) atl_body(rf)) = -1;
     }
+    */
 }
 
 /*  ATL_LOOKUP	--  Look up a word in the dictionary.  Returns its
