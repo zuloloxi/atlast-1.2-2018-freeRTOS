@@ -1,6 +1,5 @@
-0 memsafe
 
-1 constant TST_HARNESS
+0 memsafe
 
 TST_HARNESS constant iam
 
@@ -14,7 +13,7 @@ endstruct /msg
 
 variable init_run
 variable out
-
+/msg string cmd-buffer
 
 : init
 	init_run @ 0= if
@@ -26,22 +25,13 @@ variable out
 ;
 
 
-: mkmsg-set
+: mkmsg 
     init_run if
         iam qid@ out @ sender !
         3 out @ fields !
         "SET"  out @ cmd strcpy
         "RUN"  out @ key strcpy
         "TRUE" out @ value strcpy
-    then
-;
-
-: mkmsg-sub
-    init_run if
-        iam qid@ out @ sender !
-        2 out @ fields !
-        "SUB"  out @ cmd strcpy
-        "COUNTER"  out @ key strcpy
     then
 ;
 
@@ -52,21 +42,61 @@ variable out
     then
 ;
 
+: mkmsg-sub
+    init_run @ if
+        iam qid@ out @ sender !
+        2 out @ fields !
+        "SUB"  out @ cmd strcpy
+        "COUNTER"  out @ key strcpy
+    then
+;
+
+: mkmsg-get
+    init_run @ if
+        iam qid@ out @ sender !
+        2 out @ fields !
+        "GET"  out @ cmd strcpy
+        "COUNTER"  out @ key strcpy
+    then
+;
 
 : disp
-    init_run if
+    init_run @ if
         out @ /msg dump
     then
 ;
 
-mkdb constant db
-
-: eval-msg \ addr
+: .struct \ addr --
     >r
-    db
-    r@ key  
-    r> value 
 
-    add-record
+    r@ sender @ . cr
+    r@ fields @ . cr
+    r@ cmd type cr
+    r> value type cr
+    cr
+
 ;
+
+
+: msg-get
+    tst_rx qid@ -1 message@
+    0x10 = if
+        30 dump
+     else
+        drop
+    then
+;
+
+: cmd-eval  \ cmd-addr
+    >r
+    r@ cmd   cmd-buffer strcpy
+    r@ " "   cmd-buffer strcat
+    r@ key   cmd-buffer strcat
+    r@ " "   cmd-buffer strcat
+    r> value cmd-buffer strcat
+    cmd-buffer evaluate
+;
+
+
+
 

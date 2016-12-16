@@ -129,22 +129,19 @@ int main(int argc, char *argv[]) {
     // OK, so init the system
     //
     atl_init();
-#ifdef PUBSUB
-    dictword *atlastTable;
-
-    atlastTable = atl_vardef("TABLE", sizeof( void *));
     int8_t len=0;
-
-    struct Small *table;
-    table = newSmall();
-
     uint8_t lineBuffer[MAX_LINE];
+    char t[132];
+#ifdef PUBSUB
+    struct Small *table = newSmall();
 
-    atlastTable = (struct Small *) atl_body( atlastTable );
+#ifdef LINUX
+    sprintf(t,"0x%x constant TABLE",table);
+    atl_eval(t);
+    memset(t,0x00,sizeof(t));
+#else
+#endif
 
-    void *ptr=atl_body(atlastTable);
-
-    ptr=(void *)table;
 #endif
 
 
@@ -187,7 +184,6 @@ int main(int argc, char *argv[]) {
 
 //    tst = (int *) atl_body(rf);
     while (*tst) {
-        char t[132];
 
         if (!fname)
             V printf(atl_comment ? "(  " :  /* Show pending comment */
