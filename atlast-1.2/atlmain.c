@@ -18,6 +18,17 @@
 #include "atldef.h"
 #include "atlcfig.h"
 
+#ifdef PUBSUB
+#include "Small.h"
+
+#ifdef PTHREAD
+#include <pthread.h>
+#include <mqueue.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#endif
+#endif
+
 #define FALSE	0
 #define TRUE	1
 
@@ -49,9 +60,21 @@ struct Small *table;
 
 void *doSmall(void *arg) {
     bool runFlag=true;
+    char *queueName ;
+    mqd_t mq;
+    struct mq_attr attr;
 
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
+
+    queueName = dbLookup(table,"QNAME");
+
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 10;
+    attr.mq_msgsize = sizeof(struct cmdMessage);
+    attr.mq_curmsgs = 0;
+
+    mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
 
     while(runFlag) {
     }

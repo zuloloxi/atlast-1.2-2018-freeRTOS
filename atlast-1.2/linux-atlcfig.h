@@ -51,11 +51,18 @@
 
 
 char outBuffer[255];
-#endif
 
 #ifdef PUBSUB
 #ifdef PTHREAD
 #include <pthread.h>
 extern pthread_mutex_t lock;
+
+struct cmdMessage {
+    char cmd[6];
+    char key[16];
+    char defn[32];
+};
 #endif
+#endif
+
 #endif
