@@ -17,10 +17,15 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "atlcfig.h"
 #ifdef PUBSUB
 #include "Small.h"
+
+#ifdef PTHREAD
+#include <pthread.h>
 #endif
+#endif
+
+#include "atlcfig.h"
 
 // #include "atldef.h"
 
@@ -345,6 +350,18 @@ void ATH_Features() {
     sprintf(outBuffer,"    PUBSUB\n");
 #else
     sprintf(outBuffer,"NOT PUBSUB\n");
+#endif
+
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+//
+#ifdef PTHREAD
+    sprintf(outBuffer,"    PTHREAD\n");
+#else
+    sprintf(outBuffer,"NOT PTHREAD\n");
 #endif
 
 #ifdef FREERTOS
@@ -966,6 +983,17 @@ prim FR_displayRecord() {
 #endif
     Pop;
 }
+
+#ifdef PUBSUB
+#ifdef PTHREAD
+#warning "startComms PTHREAD"
+// extern pthread_mutex_t lock;
+
+prim FR_startComms() {
+    pthread_mutex_unlock(&lock);
+}
+#endif
+#endif
 
 prim FR_addRecord() {
 	struct Small *db;
@@ -4142,6 +4170,9 @@ static struct primfcn primt[] = {
 	{(char *)"0LOOKUP-REC",  FR_lookupRecord},
 	{(char *)"0PUBLISH",  FR_publish},
 	{(char *)"0.RECORD",  FR_displayRecord},
+#ifdef PTHREAD
+	{(char *)"0START-COMMS",  FR_startComms},
+#endif
 #endif
     {NULL, (codeptr) 0}
 };

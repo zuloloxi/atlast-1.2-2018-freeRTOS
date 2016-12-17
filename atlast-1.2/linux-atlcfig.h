@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #ifndef __ATLAST_CFIG
 #define __ATLAST_CFIG
 // TODO Remove all references to EMBEDDED in io words.
@@ -39,6 +40,8 @@
 #define ATH
 #define ANSI                /* Enable ANSI compatability words */
 #define PUBSUB              // Use the Small pub/sub system
+#define PTHREAD             // Pthreaded pubsub
+// 
 // #define Keyhit
 // 
 // Stuff added by me
@@ -48,4 +51,11 @@
 
 
 char outBuffer[255];
+#endif
+
+#ifdef PUBSUB
+#ifdef PTHREAD
+#include <pthread.h>
+extern pthread_mutex_t lock;
+#endif
 #endif

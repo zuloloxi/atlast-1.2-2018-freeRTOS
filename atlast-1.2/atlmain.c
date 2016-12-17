@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <signal.h>
+#include <stdbool.h>
 #include "atldef.h"
 #include "atlcfig.h"
 
@@ -32,13 +33,33 @@
     just turn this code off or, better still, replace it
     with the equivalent on your system.  */
 
-static void ctrlc(sig)
-    int sig;
-{
+static void ctrlc(int sig) {
     if (sig == SIGINT)
         atl_break();
 }
 #endif /* HIGHC */
+
+#ifdef PUBSUB
+#ifdef PTHREAD
+#warning "Define lock"
+pthread_mutex_t lock;
+
+pthread_t tid[2];
+struct Small *table;
+
+void *doSmall(void *arg) {
+    bool runFlag=true;
+
+    pthread_mutex_lock(&lock);
+    fprintf(stderr,"Started\n");
+
+    while(runFlag) {
+    }
+
+}
+
+#endif
+#endif
 
 /*  MAIN  --  Main program.  */
 
@@ -49,7 +70,6 @@ int main(int argc, char *argv[]) {
     char *include[20];
     int in = 0;
 
-    //    extern dictword *rf;
     int *tst;
 
 #define PR(x) (void) fprintf(stderr, x)
@@ -133,14 +153,23 @@ int main(int argc, char *argv[]) {
     uint8_t lineBuffer[MAX_LINE];
     char t[132];
 #ifdef PUBSUB
-    struct Small *table = newSmall();
+    table = newSmall();
+#ifdef PTHREAD
+#warning Pthreads
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("pthread_mutex_init");
+        exit(1);
+    }
 
+    pthread_mutex_lock(&lock);
+    int err = pthread_create(&(tid[i]), NULL, &doSmall, NULL);
+#endif
 #ifdef LINUX
     sprintf(t,"0x%x constant TABLE",table);
     atl_eval(t);
     memset(t,0x00,sizeof(t));
-#else
 #endif
+
 
 #endif
 
