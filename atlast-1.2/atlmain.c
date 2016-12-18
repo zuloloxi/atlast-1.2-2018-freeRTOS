@@ -58,11 +58,13 @@ pthread_mutex_t lock;
 pthread_t tid[2];
 struct Small *table;
 
+/*
 char *cmdParser(const char *cmd, const char *key, char *value) {
     char *ret=NULL;
 
     
 }
+*/
 
 void *doSmall(void *arg) {
     bool runFlag=true;
@@ -244,7 +246,7 @@ int main(int argc, char *argv[]) {
 #endif /* HIGHC */
 
 //    tst = (int *) atl_body(rf);
-    while (*tst) {
+    while (true) {
 
         if (!fname)
             V printf(atl_comment ? "(  " :  /* Show pending comment */
