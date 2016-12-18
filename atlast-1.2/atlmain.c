@@ -72,7 +72,8 @@ void *doSmall(void *arg) {
     mqd_t mq;
     struct mq_attr attr;
     ssize_t len;
-    uint8_t buffer[sizeof(struct cmdMessage)];
+    struct cmdMessage buffer;
+    char *res;
 
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
@@ -81,13 +82,20 @@ void *doSmall(void *arg) {
 
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
+    printf("size %d\n", sizeof(struct cmdMessage));
     attr.mq_msgsize = sizeof(struct cmdMessage);
     attr.mq_curmsgs = 0;
 
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
+    mq_setattr(mq, &attr,NULL);
 
     while(runFlag) {
-        len = mq_receive(mq, buffer, sizeof(buffer), NULL);
+        len = mq_receive(mq, &buffer, sizeof(buffer), NULL);
+        if( len < 0) {
+            perror("mq_receive");
+        } else {
+            res=cmdParse(table, &buffer,false);
+        }
     }
 
 }

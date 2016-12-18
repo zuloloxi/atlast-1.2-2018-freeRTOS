@@ -34,6 +34,7 @@
 
 #ifdef LINUX
 #include <unistd.h>
+#include <mqueue.h>         // Message queues.
 #endif
 // #define MEMSTAT
 
@@ -834,8 +835,7 @@ prim ANSI_free() {
 
 #endif // ANSI
 
-#ifdef FREERTOS
-
+#ifdef PUBSUB
 prim FR_CmdParse() {
 	Sl(2);
 
@@ -849,7 +849,9 @@ prim FR_CmdParse() {
 	res=cmdParse(db, msg);
 	S0=(stackitem)res;
 }
+#endif
 
+#ifdef FREERTOS
 
 prim FR_getPoolId() {
 	Push=(stackitem)mpool_id;
@@ -888,7 +890,10 @@ prim FR_getQid() {
 
 }
 
+#endif
+#ifdef PUBSUB
 
+#ifdef FREERTOS
 prim FR_getMessage() {
 	extern struct taskData *task[LAST_TASK];
 	osEvent evt;
@@ -925,7 +930,41 @@ prim FR_putMessage() {
 	Push=rc;
 }
 #endif
-#ifdef PUBSUB
+
+#ifdef LINUX
+// Stack: <qname> <timeout> -- <address of message> <osStatus>
+prim FR_getMessage() {
+    uint32_t timeout;
+    char *qname;
+    Sl(2);
+    So(2);
+
+    timeout=(uint32_t)S0;
+    qname=(char *)S1;
+}
+
+prim FR_putMessage() {
+    char *dest;
+	struct cmdMessage *out;
+    mqd_t mq;
+
+    Sl(2);
+
+    dest=(char *)S1;
+    out=(struct CmdMessage *)S0;
+
+    mq = mq_open(dest, O_WRONLY);
+    if ((mqd_t)-1 == mq) {
+        perror("mq_open");
+        exit(1);
+    }
+
+    if (0 < mq_send(mq, out, sizeof(struct cmdMessage), 0)) {
+        perror("mq_send");
+    }
+    mq_close(mq);
+}
+#endif
 
 prim FR_mkdb() {
 	So(1);
@@ -2753,6 +2792,31 @@ prim P_fload()			      /* Load source file:  fd -- evalstat */
     So(1);
     Push = estat;
 }
+
+prim P_include() {
+    Sl(1);
+    char *fname;
+    int estat;
+    
+    fname=(char *)S0;
+    printf("Loading %s ... \n", fname);
+    FILE *fd = fopen(fname,"r");
+
+    if (fd == NULL) {
+        printf("... open failed\n");
+        return;
+    }
+
+    estat = atl_load(fd);
+    if(estat == 0) {
+        printf("... done\n");
+    } else {
+        printf("... failed\n");
+    }
+    Pop;
+    fclose(fd);
+}
+
 #endif /* FILEIO */
 
 #ifdef EVALUATE
@@ -4123,6 +4187,7 @@ static struct primfcn primt[] = {
     {"0FTELL", P_ftell},
     {"0FSEEK", P_fseek},
     {"0FLOAD", P_fload},
+    {"0INCLUDE", P_include},
 #endif /* FILEIO */
 
 #ifdef EVALUATE
@@ -4156,17 +4221,17 @@ static struct primfcn primt[] = {
 #endif
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
-    {(char *)"0MESSAGE@", FR_getMessage},
-    {(char *)"0MESSAGE!", FR_putMessage},
 
     {(char *)"0POOL@", FR_getPoolId } ,
     {(char *)"0POOL-FREE", FR_poolFree } ,
     {(char *)"0POOL-ALLOCATE", FR_poolAllocate } ,
 
-    {(char *)"0CMD-PARSE", FR_CmdParse },
 
 #endif
 #ifdef PUBSUB
+    {(char *)"0MESSAGE@", FR_getMessage},
+    {(char *)"0MESSAGE!", FR_putMessage},
+   	{(char *)"0CMD-PARSE", FR_CmdParse },
 	{(char *)"0MKDB",     FR_mkdb},
 	{(char *)"0ADD-RECORD",  FR_addRecord},
 	{(char *)"0LOOKUP",  FR_lookup},

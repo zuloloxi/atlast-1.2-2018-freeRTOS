@@ -59,7 +59,8 @@ extern pthread_mutex_t lock;
 
 struct cmdMessage {
     char sender[32];    // name of senders message Q
-    char cmd[6];        // Command
+    uint8_t count;
+    char cmd[8];        // Command
     char key[16];       // Key to search on.
     char defn[32];      // Value.
 };
