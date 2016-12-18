@@ -58,11 +58,19 @@ pthread_mutex_t lock;
 pthread_t tid[2];
 struct Small *table;
 
+char *cmdParser(const char *cmd, const char *key, char *value) {
+    char *ret=NULL;
+
+    
+}
+
 void *doSmall(void *arg) {
     bool runFlag=true;
     char *queueName ;
     mqd_t mq;
     struct mq_attr attr;
+    ssize_t len;
+    uint8_t buffer[sizeof(struct cmdMessage)];
 
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
@@ -77,6 +85,7 @@ void *doSmall(void *arg) {
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
 
     while(runFlag) {
+        len = mq_receive(mq, buffer, sizeof(buffer), NULL);
     }
 
 }

@@ -58,9 +58,10 @@ char outBuffer[255];
 extern pthread_mutex_t lock;
 
 struct cmdMessage {
-    char cmd[6];
-    char key[16];
-    char defn[32];
+    char sender[32];    // name of senders message Q
+    char cmd[6];        // Command
+    char key[16];       // Key to search on.
+    char defn[32];      // Value.
 };
 #endif
 #endif
