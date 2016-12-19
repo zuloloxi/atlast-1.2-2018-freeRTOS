@@ -611,6 +611,22 @@ prim ATH_Token() {
     Push = (stackitem) strbuf[cstrbuf];
 }
 
+prim ATH_Linux() {
+#ifdef LINUX
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_Freertos() {
+#ifdef FREERTOS
+    Push=-1;
+#else
+    Push=0;
+#endif
+
+}
 prim ATH_qfileio() {
     So(1);
 
@@ -4209,6 +4225,8 @@ static struct primfcn primt[] = {
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
     {(char *)"0TOKEN", ATH_Token},
+    {(char *)"0?LINUX", ATH_Linux},
+    {(char *)"0?FREERTOS", ATH_Freertos},
 #endif
 
 #ifdef ANSI
