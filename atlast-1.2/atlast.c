@@ -17,8 +17,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "atlcfig.h"
 #ifdef PUBSUB
+#warning "HERE"
 #include "Small.h"
+#include "tasks.h"
 
 #ifdef PTHREAD
 #include <pthread.h>
@@ -28,7 +32,6 @@
 #endif
 #endif
 
-#include "atlcfig.h"
 
 // #include "atldef.h"
 
@@ -963,6 +966,7 @@ prim FR_putMessage() {
     char *dest;
 	struct cmdMessage *out;
     mqd_t mq;
+    int len;
 
     Sl(2);
 
@@ -1044,7 +1048,6 @@ prim FR_displayRecord() {
 
 #ifdef PUBSUB
 #ifdef PTHREAD
-#warning "startComms PTHREAD"
 // extern pthread_mutex_t lock;
 
 prim FR_startComms() {

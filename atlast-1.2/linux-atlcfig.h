@@ -57,6 +57,7 @@ char outBuffer[255];
 #include <pthread.h>
 extern pthread_mutex_t lock;
 
+/*
 struct cmdMessage {
     char sender[32];    // name of senders message Q
     uint8_t count;
@@ -64,6 +65,7 @@ struct cmdMessage {
     char key[16];       // Key to search on.
     char defn[32];      // Value.
 };
+*/
 #endif
 #endif
 

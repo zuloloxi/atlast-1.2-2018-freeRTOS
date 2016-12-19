@@ -20,6 +20,7 @@
 
 #ifdef PUBSUB
 #include "Small.h"
+#include "tasks.h"
 
 #ifdef PTHREAD
 #include <pthread.h>
@@ -100,7 +101,6 @@ void *doSmall(void *arg) {
     }
 
 }
-
 #endif
 #endif
 
