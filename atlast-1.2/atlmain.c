@@ -58,13 +58,10 @@ pthread_mutex_t lock;
 pthread_t tid[2];
 struct Small *table;
 
-/*
-char *cmdParser(const char *cmd, const char *key, char *value) {
-    char *ret=NULL;
+void doSmallCallback(struct nlist *rec, uint8_t idx) {
 
-    
+    printf("doSmallCallback\n");
 }
-*/
 
 void *doSmall(void *arg) {
     bool runFlag=true;
@@ -74,6 +71,8 @@ void *doSmall(void *arg) {
     ssize_t len;
     struct cmdMessage buffer;
     char *res;
+
+    bool ff;
 
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
@@ -88,6 +87,8 @@ void *doSmall(void *arg) {
 
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
     mq_setattr(mq, &attr,NULL);
+
+    ff=setGlobalCallback(table, doSmallCallback);
 
     while(runFlag) {
         len = mq_receive(mq, &buffer, sizeof(buffer), NULL);
