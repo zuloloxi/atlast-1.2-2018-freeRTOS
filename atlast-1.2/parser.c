@@ -13,28 +13,31 @@
 #ifndef LINUX
 #include "cmsis_os.h"
 extern osPoolId mpool_id;
-#else
-#include "tasks.h"
 #endif
 
+#include "tasks.h"
 #include "Small.h"
 
 
 char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
+
 	char *res=NULL;
 	bool failFlag=true;
 	int len=0;
 	bool freeMemory=true;  // if this is set to true return the block via osPoolFree.
 #ifdef LINUX
 	int rc=0;
-    char *from;
-//    char from[SENDER_SIZE];
+    char from[SENDER_SIZE];
 #else
+    // TODO These are volatile for debugging purposes, remove.
 	osStatus rc;
 	QueueHandle_t *from;
 	from = msg->sender;
 #endif
 
+#ifdef LINUX
+    strncpy(from,msg->sender,SENDER_SIZE);
+#endif
 	char *cmd   = msg->message.cmd;
 	char *name  = msg->message.key;
 	char *value = msg->message.value;
@@ -54,30 +57,33 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 			strncpy(msg->message.value,res,sizeof(msg->message.value));
 		}
 		msg->message.fields = 3;
-		strcpy(msg->message.cmd,"SET");
+#ifdef LINUX
+        // Don'y want a reply, so make this message anonymous
+        memset(&(msg->sender),0,SENDER_SIZE);
+#endif
+        strncpy(cmd, "SET", sizeof(cmd));
+        strncpy(value, res, sizeof(value));
+		msg->message.fields = 3;
 
 #ifdef LINUX
         printf("%s=%s\n", name,res);
+
+        mqd_t outMq = mq_open(from,O_WRONLY);
+        if( outMq == (mqd_t)-1) {
+            perror("COMMS mq_open reply");
+        } else {
+            rc = mq_send(outMq,msg,sizeof(struct cmdMessage),NULL);
+            mq_close(outMq);
+        }
 
 #else
 		rc=osMessagePut((QueueHandle_t *) from, (uint32_t )msg, osWaitForever);
 #endif
 	} else if(!strcmp(cmd,"SUB")) {
 #ifdef LINUX
-        struct client *temp;
-        /*
         len=SENDER_SIZE;
 		memcpy( from, msg->sender, len);
-        */
-        temp=(struct client *)malloc(sizeof(struct client));
-        if(!temp) {
-            perror("cmdParse");
-            exit(2);
-        }
-
-        strncpy(temp->name,msg->sender,sizeof(temp->name));
-        temp->pipe=(mqd_t) -1;
-        from=(void *)temp;
+		res=dbLookup(db,name);
 #else
 		from = msg->sender;
 #endif

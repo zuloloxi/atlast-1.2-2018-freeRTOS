@@ -17,27 +17,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
 #include "atlcfig.h"
 #ifdef PUBSUB
-#warning "HERE"
 #include "Small.h"
-#include "tasks.h"
-
-#ifdef PTHREAD
-#include <pthread.h>
-#include <mqueue.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
 #endif
-#endif
-
 
 // #include "atldef.h"
 
 #ifdef LINUX
 #include <unistd.h>
-#include <mqueue.h>         // Message queues.
+#include <mqueue.h>
 #endif
 // #define MEMSTAT
 
@@ -365,18 +354,6 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 //
-#ifdef PTHREAD
-    sprintf(outBuffer,"    PTHREAD\n");
-#else
-    sprintf(outBuffer,"NOT PTHREAD\n");
-#endif
-
-#ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
-#else
-	 printf("%s",outBuffer);
-#endif
-//
 
 #ifdef CONIO
     sprintf(outBuffer,"    CONIO\n");
@@ -614,22 +591,6 @@ prim ATH_Token() {
     Push = (stackitem) strbuf[cstrbuf];
 }
 
-prim ATH_Linux() {
-#ifdef LINUX
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_Freertos() {
-#ifdef FREERTOS
-    Push=-1;
-#else
-    Push=0;
-#endif
-
-}
 prim ATH_qfileio() {
     So(1);
 
@@ -854,7 +815,8 @@ prim ANSI_free() {
 
 #endif // ANSI
 
-#ifdef PUBSUB
+#ifdef FREERTOS
+
 prim FR_CmdParse() {
 	Sl(2);
 
@@ -868,9 +830,7 @@ prim FR_CmdParse() {
 	res=cmdParse(db, msg);
 	S0=(stackitem)res;
 }
-#endif
 
-#ifdef FREERTOS
 
 prim FR_getPoolId() {
 	Push=(stackitem)mpool_id;
@@ -909,11 +869,12 @@ prim FR_getQid() {
 
 }
 
-#endif
-#ifdef PUBSUB
 
-#ifdef FREERTOS
+#endif
+
+#ifdef PUBSUB
 prim FR_getMessage() {
+#ifdef FREERTOS
 	extern struct taskData *task[LAST_TASK];
 	osEvent evt;
 	uint32_t timeout;
@@ -931,14 +892,16 @@ prim FR_getMessage() {
 //	Pop;
 	S1 = (stackitem)evt.value.p;
 	S0 = (stackitem)evt.status;
+#endif
 }
 
 prim FR_putMessage() {
 	struct cmdMessage *out;
+	Sl(2);
+#ifdef FREERTOS
 	volatile QueueHandle_t dest;
 	osStatus rc = osOK;
 
-	Sl(2);
 
 	dest = (QueueHandle_t ) S0;
 	out = (struct CmdMessage *)S1;
@@ -947,43 +910,26 @@ prim FR_putMessage() {
 	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
 
 	Push=rc;
-}
 #endif
+#ifdef LINUX
+	char *dest = (char *)S0;
+	out = (struct cmdMessage *)S1;
+
+	mqd_t mq=mq_open(dest,O_WRONLY);
+	if ((mqd_t) -1 == mq) {
+		perror("MESSAGE! mq_open");
+		exit(2);
+	}
+#endif
+}
 
 #ifdef LINUX
-// Stack: <qname> <timeout> -- <address of message> <osStatus>
-prim FR_getMessage() {
-    uint32_t timeout;
-    char *qname;
-    Sl(2);
-    So(2);
+#ifdef PTHREAD
+prim PS_comms() {
 
-    timeout=(uint32_t)S0;
-    qname=(char *)S1;
+	pthread_mutex_unlock(&lock);
 }
-
-prim FR_putMessage() {
-    char *dest;
-	struct cmdMessage *out;
-    mqd_t mq;
-    int len;
-
-    Sl(2);
-
-    dest=(char *)S1;
-    out=(struct CmdMessage *)S0;
-
-    mq = mq_open(dest, O_WRONLY);
-    if ((mqd_t)-1 == mq) {
-        perror("mq_open");
-        exit(1);
-    }
-
-    if (0 < mq_send(mq, out, sizeof(struct cmdMessage), 0)) {
-        perror("mq_send");
-    }
-    mq_close(mq);
-}
+#endif
 #endif
 
 prim FR_mkdb() {
@@ -1045,16 +991,6 @@ prim FR_displayRecord() {
 #endif
     Pop;
 }
-
-#ifdef PUBSUB
-#ifdef PTHREAD
-// extern pthread_mutex_t lock;
-
-prim FR_startComms() {
-    pthread_mutex_unlock(&lock);
-}
-#endif
-#endif
 
 prim FR_addRecord() {
 	struct Small *db;
@@ -2813,27 +2749,17 @@ prim P_fload()			      /* Load source file:  fd -- evalstat */
 }
 
 prim P_include() {
-    Sl(1);
-    char *fname;
     int estat;
-    
-    fname=(char *)S0;
-    printf("Loading %s ... \n", fname);
-    FILE *fd = fopen(fname,"r");
+    FILE *fd;
 
-    if (fd == NULL) {
-        printf("... open failed\n");
+    Sl(1);
+
+    fd = fopen((char *)S0, "r") ;
+    if(!fd) {
+        perror("INCLUDE fopen");
         return;
     }
-
     estat = atl_load(fd);
-    if(estat == 0) {
-        printf("... done\n");
-    } else {
-        printf("... failed\n");
-    }
-    Pop;
-    fclose(fd);
 }
 
 #endif /* FILEIO */
@@ -4228,8 +4154,6 @@ static struct primfcn primt[] = {
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
     {(char *)"0TOKEN", ATH_Token},
-    {(char *)"0?LINUX", ATH_Linux},
-    {(char *)"0?FREERTOS", ATH_Freertos},
 #endif
 
 #ifdef ANSI
@@ -4247,21 +4171,23 @@ static struct primfcn primt[] = {
     {(char *)"0POOL-FREE", FR_poolFree } ,
     {(char *)"0POOL-ALLOCATE", FR_poolAllocate } ,
 
+    {(char *)"0CMD-PARSE", FR_CmdParse },
 
 #endif
 #ifdef PUBSUB
-    {(char *)"0MESSAGE@", FR_getMessage},
-    {(char *)"0MESSAGE!", FR_putMessage},
-   	{(char *)"0CMD-PARSE", FR_CmdParse },
 	{(char *)"0MKDB",     FR_mkdb},
 	{(char *)"0ADD-RECORD",  FR_addRecord},
 	{(char *)"0LOOKUP",  FR_lookup},
 	{(char *)"0LOOKUP-REC",  FR_lookupRecord},
 	{(char *)"0PUBLISH",  FR_publish},
 	{(char *)"0.RECORD",  FR_displayRecord},
+    {(char *)"0MESSAGE@", FR_getMessage},
+    {(char *)"0MESSAGE!", FR_putMessage},
 #ifdef PTHREAD
-	{(char *)"0START-COMMS",  FR_startComms},
+	// TODO Rename all in this section from FR_ to PS_
+    {(char *)"0COMMS", PS_comms},
 #endif
+
 #endif
     {NULL, (codeptr) 0}
 };

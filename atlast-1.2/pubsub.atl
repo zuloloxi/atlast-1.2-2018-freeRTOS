@@ -48,4 +48,4 @@
 ;
 
 set QNAME /atlast
-
+dump-rec QNAME cr cr
