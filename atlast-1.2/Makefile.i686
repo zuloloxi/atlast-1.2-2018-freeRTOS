@@ -15,7 +15,7 @@ INCLUDE =
 
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 
-CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
+CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX
 
 ATLOBJ = atlast.o atlmain.o
 
@@ -24,7 +24,7 @@ APPS = atlast # atlsmall primdeftest
 all:	$(APPS)
 # all:	atlsmall
 
-atlast: $(ATLOBJ)
+atlast: $(ATLOBJ) parser.o tasks.h
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/C++/include
