@@ -9,7 +9,7 @@ VERSION = 1.2
 COPTIONS = -g -w 
 
 # LIBRARIES = -lm
-LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++
+LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++ -lrt -lpthread
 
 INCLUDE =
 
@@ -19,13 +19,13 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlsmall atlast # primdeftest
+APPS = atlast # atlsmall primdeftest
 
 all:	$(APPS)
 # all:	atlsmall
 
 atlast: $(ATLOBJ)
-	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
+	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/C++/include
 CFLAGS += -I/usr/local/lib/Small
