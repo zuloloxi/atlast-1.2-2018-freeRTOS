@@ -36,9 +36,9 @@ variable out
     then
 ;
 
-: send ( dest message )
+: send 
     init_run if
-       message!
+       out @ "/client" message!
     then
 ;
 \ 

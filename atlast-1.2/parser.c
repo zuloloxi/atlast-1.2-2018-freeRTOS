@@ -27,7 +27,9 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 	bool freeMemory=true;  // if this is set to true return the block via osPoolFree.
 #ifdef LINUX
 	int rc=0;
-    char from[SENDER_SIZE];
+    struct client from;
+    struct client *c;
+//    char from[SENDER_SIZE];
 #else
     // TODO These are volatile for debugging purposes, remove.
 	osStatus rc;
@@ -36,7 +38,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 #endif
 
 #ifdef LINUX
-    strncpy(from,msg->sender,SENDER_SIZE);
+    strncpy(from.name,msg->sender,SENDER_SIZE);
 #endif
 	char *cmd   = msg->message.cmd;
 	char *name  = msg->message.key;
@@ -68,7 +70,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 #ifdef LINUX
         printf("%s=%s\n", name,res);
 
-        mqd_t outMq = mq_open(from,O_WRONLY);
+        mqd_t outMq = mq_open(from.name,O_WRONLY);
         if( outMq == (mqd_t)-1) {
             perror("COMMS mq_open reply");
         } else {
@@ -81,18 +83,32 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 #endif
 	} else if(!strcmp(cmd,"SUB")) {
 #ifdef LINUX
+
+		res=dbLookup(db,name);
+
+        if(res) {
+            c=calloc(1,sizeof(struct client));
+            if(c == NULL) {
+                perror("calloc");
+            } else {
+                strncpy(c->name,from.name,SENDER_SIZE);
+                c->pipe=-1;
+            }
+        }
+        /*
         len=SENDER_SIZE;
 		memcpy( from, msg->sender, len);
-		res=dbLookup(db,name);
+        */
 #else
 		from = msg->sender;
 #endif
 
-		dbSubscribe(db, (void *)from,name);
+		dbSubscribe(db, c,name);
+		// dbSubscribe(db, (void *)from,name);
 	} else if(!strcmp(cmd,"UNSUB")) {
 #ifdef LINUX
         len=SENDER_SIZE;
-		memcpy( from, msg->sender, len);
+//		memcpy( from, msg->sender, len);
 #else
         /*
 		len = sizeof(QueueHandle_t);
@@ -100,7 +116,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 		*/
 		from = msg->sender;
 #endif
-		dbUnsubscribe(db, (void *)from,name);
+		dbUnsubscribe(db, (void *)c,name);
 	}
 
 #ifndef LINUX

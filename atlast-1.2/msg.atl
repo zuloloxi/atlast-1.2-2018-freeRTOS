@@ -37,8 +37,16 @@ variable out
 
 
 : send
-    init_run if
-        out @  tst_rx qid@ message!
+    init_run @ if
+        "send" type cr
+        ?freertos if
+            "FreeRTOS" type cr
+\            out @  tst_rx qid@ message!
+        then
+        ?linux if
+            "Linux" type cr
+\            out @ "/client" message!
+        then
     then
 ;
 

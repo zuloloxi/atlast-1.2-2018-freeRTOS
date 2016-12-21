@@ -20,6 +20,7 @@
 #include "atlcfig.h"
 #ifdef PUBSUB
 #include "Small.h"
+#include "tasks.h"
 #endif
 
 // #include "atldef.h"
@@ -27,6 +28,9 @@
 #ifdef LINUX
 #include <unistd.h>
 #include <mqueue.h>
+#ifdef PTHREAD
+#include <pthread.h>
+#endif
 #endif
 // #define MEMSTAT
 
@@ -44,7 +48,6 @@
 #ifdef FREERTOS
 #include "usart.h"
 #include "ATH_serial.h"
-#include "tasks.h"
 #include "cmsis_os.h"
 
 extern osPoolId mpool_id;
@@ -53,6 +56,7 @@ extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
 #endif
 #endif
+
 static int token( char **);
 
 #ifdef Macintosh
@@ -591,6 +595,22 @@ prim ATH_Token() {
     Push = (stackitem) strbuf[cstrbuf];
 }
 
+prim ATH_qlinux() {
+#ifdef LINUX
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qfreertos() {
+#ifdef FREERTOS
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
 prim ATH_qfileio() {
     So(1);
 
@@ -909,10 +929,11 @@ prim FR_putMessage() {
 
 	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
 
-	Push=rc;
 #endif
 #ifdef LINUX
 	char *dest = (char *)S0;
+    int rc=0;
+
 	out = (struct cmdMessage *)S1;
 
 	mqd_t mq=mq_open(dest,O_WRONLY);
@@ -920,14 +941,18 @@ prim FR_putMessage() {
 		perror("MESSAGE! mq_open");
 		exit(2);
 	}
+    rc = mq_send(mq,out,sizeof(struct cmdMessage),(size_t)NULL);
+    mq_close( mq ) ;
 #endif
+	Push=rc;
 }
 
 #ifdef LINUX
 #ifdef PTHREAD
 prim PS_comms() {
-
 	pthread_mutex_unlock(&lock);
+    pthread_yield();
+    sleep(1);
 }
 #endif
 #endif
@@ -4154,6 +4179,8 @@ static struct primfcn primt[] = {
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
     {(char *)"0TOKEN", ATH_Token},
+    {(char *)"0?LINUX", ATH_qlinux},
+    {(char *)"0?FREERTOS", ATH_qfreertos},
 #endif
 
 #ifdef ANSI

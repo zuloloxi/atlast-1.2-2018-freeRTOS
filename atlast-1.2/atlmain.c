@@ -60,8 +60,31 @@ pthread_t tid[2];
 struct Small *table;
 
 void doSmallCallback(struct nlist *rec, uint8_t idx) {
+    struct client *tmp;
+    void *fred;
 
     printf("doSmallCallback\n");
+
+    tmp=(struct client *)nlistGetSubscriber(rec,idx);
+
+    if(tmp != NULL) {
+        if( tmp->pipe == NULL ) {
+            mqd_t mq = mq_open( tmp->name, O_WRONLY) ;
+            if( mq == (mqd_t)-1) {
+                perror("doSmallCallback");
+            } else {
+                tmp->pipe = mq;
+            }
+        } 
+        struct cmdMessage subMessage;
+
+        memset(&subMessage,0,sizeof(struct cmdMessage));
+        strncpy(subMessage.message.cmd,"SET",MAX_CMD);
+        strncpy(subMessage.message.key,nlistGetName(rec),MAX_KEY);
+        strncpy(subMessage.message.value,nlistGetDef(rec),MAX_VALUE);
+
+        int rc=mq_send(tmp->pipe,&subMessage,sizeof(struct cmdMessage),NULL);
+    }
 }
 
 void *doSmall(void *arg) {
@@ -75,6 +98,7 @@ void *doSmall(void *arg) {
 
     bool ff;
 
+    ff=setGlobalCallback(table, doSmallCallback);
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
 
@@ -89,7 +113,6 @@ void *doSmall(void *arg) {
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
     mq_setattr(mq, &attr,NULL);
 
-    ff=setGlobalCallback(table, doSmallCallback);
 
     while(runFlag) {
         len = mq_receive(mq, &buffer, sizeof(buffer), NULL);
@@ -254,7 +277,7 @@ int main(int argc, char *argv[]) {
     V signal(SIGINT, ctrlc);
 #endif /* HIGHC */
 
-//    tst = (int *) atl_body(rf);
+    //    tst = (int *) atl_body(rf);
     while (true) {
 
         if (!fname)
