@@ -34,6 +34,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
     // TODO These are volatile for debugging purposes, remove.
 	osStatus rc;
 	QueueHandle_t *from;
+	QueueHandle_t *c;
 	from = msg->sender;
 #endif
 
@@ -100,7 +101,8 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 		memcpy( from, msg->sender, len);
         */
 #else
-		from = msg->sender;
+//		from = msg->sender;
+		c = msg->sender;
 #endif
 
 		dbSubscribe(db, c,name);
@@ -114,7 +116,8 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 		len = sizeof(QueueHandle_t);
 		from = (QueueHandle_t *)malloc( len );
 		*/
-		from = msg->sender;
+//		from = msg->sender;
+		c = msg->sender;
 #endif
 		dbUnsubscribe(db, (void *)c,name);
 	}

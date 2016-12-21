@@ -48,6 +48,7 @@
 #ifdef FREERTOS
 #include "usart.h"
 #include "ATH_serial.h"
+#include "tasks.h"
 #include "cmsis_os.h"
 
 extern osPoolId mpool_id;
@@ -905,6 +906,7 @@ prim FR_getMessage() {
 
 	timeout=S0;
 	qh = (QueueHandle_t) S1;
+	// TODO Fix this
 	qh=task[TST_HARNESS]->iam;
 
 	// evt = osMessageGet(qh,timeout);
@@ -913,6 +915,35 @@ prim FR_getMessage() {
 	S1 = (stackitem)evt.value.p;
 	S0 = (stackitem)evt.status;
 #endif
+
+#ifdef LINUX
+	uint32_t timeout;
+	char *from;
+
+	struct cmdMessage *out;
+	Sl(3);
+	So(1);
+
+	out = S0;
+	timeout=S1;
+	from = S2;
+
+	mqd_t mq=mq_open(from, O_RDONLY);
+	if((mqd_t)-1 == mq) {
+		perror("MESSAGE@");
+	}
+
+	int len = mq_receive(mq,out,sizeof(struct cmdMessage),NULL);
+	Npop(3);
+
+	if( len <0)  {
+		Push=-1;
+	} else {
+		Push=0;
+	}
+
+#endif
+
 }
 
 prim FR_putMessage() {
@@ -929,6 +960,7 @@ prim FR_putMessage() {
 
 	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
 
+	Push=rc;
 #endif
 #ifdef LINUX
 	char *dest = (char *)S0;
@@ -950,6 +982,7 @@ prim FR_putMessage() {
 #ifdef LINUX
 #ifdef PTHREAD
 prim PS_comms() {
+
 	pthread_mutex_unlock(&lock);
     pthread_yield();
     sleep(1);

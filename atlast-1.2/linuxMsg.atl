@@ -41,16 +41,16 @@ variable out
        out @ "/client" message!
     then
 ;
-\ 
-\ : mkmsg-sub
-\     init_run @ if
-\         iam qid@ out @ sender !
-\         2 out @ fields !
-\         "SUB"  out @ cmd strcpy
-\         "COUNTER"  out @ key strcpy
-\     then
-\ ;
-\ 
+
+: mkmsg-sub \ name
+    init_run @ if
+        out @ sender strcpy
+        2 out @ fields !
+        "SUB"  out @ cmd strcpy
+        "COUNTER"  out @ key strcpy
+    then
+;
+
 : mkmsg-get
     init_run @ if
         iam out @ sender strcpy
@@ -59,23 +59,23 @@ variable out
         "COUNTER"  out @ key strcpy
     then
 ;
-\ 
-\ : disp
-\     init_run @ if
-\         out @ /msg dump
-\     then
-\ ;
-\ 
-\ : .struct \ addr --
-\     >r
-\ 
-\     r@ sender @ . cr
-\     r@ fields @ . cr
-\     r@ cmd type cr
-\     r> value type cr
-\     cr
-\ 
-\ ;
+
+: disp
+    init_run @ if
+        out @ /msg dump
+    then
+;
+
+: .struct \ addr --
+    >r
+
+    r@ sender type cr
+    r@ fields @ . cr
+    r@ cmd type cr
+    r> value type cr
+    cr
+
+;
 \ 
 \ 
 \ : msg-get

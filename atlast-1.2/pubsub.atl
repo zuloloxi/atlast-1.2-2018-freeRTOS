@@ -47,13 +47,3 @@
     then
 ;
 
-set QNAME /atlast
-dump-rec QNAME cr cr
-
-comms
-
-set COUNT ONE
-pub COUNT
-dump-rec COUNT cr cr
-
-
