@@ -596,6 +596,13 @@ prim ATH_Token() {
     Push = (stackitem) strbuf[cstrbuf];
 }
 
+prim ATH_ms() {
+    Sl(1);
+#ifdef LINUX
+    usleep((useconds_t)S0 * 1000);
+#endif
+    Pop;
+}
 prim ATH_qlinux() {
 #ifdef LINUX
     Push=-1;
@@ -4214,6 +4221,7 @@ static struct primfcn primt[] = {
     {(char *)"0TOKEN", ATH_Token},
     {(char *)"0?LINUX", ATH_qlinux},
     {(char *)"0?FREERTOS", ATH_qfreertos},
+    {(char *)"0MS", ATH_ms},
 #endif
 
 #ifdef ANSI
