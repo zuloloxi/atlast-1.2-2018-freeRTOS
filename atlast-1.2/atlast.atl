@@ -1,9 +1,25 @@
+
+"struct.atl" include
+"linuxMsg.atl" include
+"pubsub.atl" include
+
+"/atlast" iam strcpy
+
 set QNAME /atlast
-dump-rec QNAME cr cr
 
 comms
 
-set COUNT ONE
-pub COUNT
-dump-rec COUNT cr cr
+: tst
+        clear
+    begin
+        table "COUNTER" lookup
+        0= if
+            dup type cr
+            "QUIT" strcmp 0=
+        else
+            0
+        then
 
+        1000 ms
+    until
+;

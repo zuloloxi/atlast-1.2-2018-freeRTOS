@@ -42,9 +42,11 @@ variable out
     then
 ;
 
-: mkmsg-sub \ name
+: mkmsg-sub 
     init_run @ if
-        out @ sender strcpy
+        out @ /msg erase
+        iam out @ sender strcpy
+
         2 out @ fields !
         "SUB"  out @ cmd strcpy
         "COUNTER"  out @ key strcpy
@@ -79,7 +81,7 @@ variable out
 \ 
 \ 
 \ : msg-get
-\     tst_rx qid@ -1 message@
+\     tst_rx qid@ -1 message@ /defn type
 \     0x10 = if
 \         30 dump
 \      else

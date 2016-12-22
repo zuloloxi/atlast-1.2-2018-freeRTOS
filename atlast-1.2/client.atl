@@ -2,3 +2,9 @@
 "struct.atl" include
 "linuxMsg.atl" include
 "pubsub.atl" include
+
+"/client" iam strcpy
+
+set QNAME /client
+
+
