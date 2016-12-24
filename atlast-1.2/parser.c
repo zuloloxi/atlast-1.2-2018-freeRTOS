@@ -61,7 +61,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 		}
 		msg->message.fields = 3;
 #ifdef LINUX
-        // Don'y want a reply, so make this message anonymous
+        // Don't want a reply, so make this message anonymous
         memset(&(msg->sender),0,SENDER_SIZE);
 #endif
         strncpy(cmd, "SET", sizeof(cmd));
@@ -96,12 +96,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
                 c->pipe=-1;
             }
         }
-        /*
-        len=SENDER_SIZE;
-		memcpy( from, msg->sender, len);
-        */
 #else
-//		from = msg->sender;
 		c = msg->sender;
 #endif
 
@@ -110,13 +105,7 @@ char *cmdParse(struct Small *db, struct cmdMessage *msg,bool publish) {
 	} else if(!strcmp(cmd,"UNSUB")) {
 #ifdef LINUX
         len=SENDER_SIZE;
-//		memcpy( from, msg->sender, len);
 #else
-        /*
-		len = sizeof(QueueHandle_t);
-		from = (QueueHandle_t *)malloc( len );
-		*/
-//		from = msg->sender;
 		c = msg->sender;
 #endif
 		dbUnsubscribe(db, (void *)c,name);
