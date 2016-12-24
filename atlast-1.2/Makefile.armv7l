@@ -80,12 +80,12 @@ lint:	lintatlast
 lintatlast:
 	lint atlast.c atlmain.c $(LIBRARIES) $(ATLCONFIG)
 
-install:	atlsmall
-	strip atlsmall
-	strip atlast
-	mv ./atlsmall /usr/local/bin
-	mv ./atlast /usr/local/bin
+install:	
 	mkdir -p /usr/local/lib/Small
+	strip atlast
+	mv ./atlast /usr/local/bin
+	strip atlsmall
+	mv ./atlsmall /usr/local/bin
 	cp tasks.h /usr/local/lib/Small
 
 
