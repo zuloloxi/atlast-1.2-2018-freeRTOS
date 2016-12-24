@@ -9,23 +9,23 @@ VERSION = 1.2
 COPTIONS = -g -w 
 
 # LIBRARIES = -lm
-LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++
+LIBRARIES = -L/usr/local/lib/Small -lsmall -lstdc++ -lrt -lpthread
 
 INCLUDE =
 
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 
-CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
+CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlsmall atlast # primdeftest
+APPS = atlast # atlsmall primdeftest
 
 all:	$(APPS)
 # all:	atlsmall
 
-atlast: $(ATLOBJ)
-	$(CC) $(CFLAGS) $(ATLOBJ) -o atlast $(LIBRARIES)
+atlast: $(ATLOBJ) parser.o tasks.h
+	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) parser.o -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/C++/include
 CFLAGS += -I/usr/local/lib/Small
@@ -85,4 +85,7 @@ install:	atlsmall
 	strip atlast
 	mv ./atlsmall /usr/local/bin
 	mv ./atlast /usr/local/bin
+	mkdir -p /usr/local/lib/Small
+	cp tasks.h /usr/local/lib/Small
+
 
