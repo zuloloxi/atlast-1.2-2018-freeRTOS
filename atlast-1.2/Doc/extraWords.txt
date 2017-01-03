@@ -26,10 +26,11 @@ Description:
     Returns a pointer to the record associated with name, and a failure flag.
 
 Name:   message@
-Stack:  qh timeout -- <address of message> <osStatus>
+Stack:  qh timeout buffer -- <osStatus>
 Description:
-    Read a essage from qh, and wait for 'timeout' milliseconds.  Returns a pointer to the message
-    and the status, which indicates the reason for returning (e.g. osEventMessage, or osEventTimeout).
+    Read a essage from qh, and wait for 'timeout' milliseconds.  If a
+    messsage is received it is copied to buffer.
+    Retuens the status, which indicates the reason for returning (e.g. osEventMessage, or osEventTimeout).
 
 Name:   message!
 Stack:  qh msg -- rc
