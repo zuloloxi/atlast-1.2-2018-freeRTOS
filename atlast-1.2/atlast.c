@@ -21,13 +21,15 @@
 #ifdef PUBSUB
 #include "Small.h"
 #include "tasks.h"
+#ifdef LINUX
+#include <mqueue.h>
+#endif
 #endif
 
 // #include "atldef.h"
 
 #ifdef LINUX
 #include <unistd.h>
-#include <mqueue.h>
 #ifdef PTHREAD
 #include <pthread.h>
 #endif

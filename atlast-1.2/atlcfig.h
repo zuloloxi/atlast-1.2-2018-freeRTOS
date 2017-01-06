@@ -1,1 +1,1 @@
-./linux-atlcfig.h
+./termux-atlcfig.h

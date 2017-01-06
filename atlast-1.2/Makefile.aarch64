@@ -2,6 +2,7 @@
 #	Unix makefile for ATLAST
 
 VERSION = 1.2
+DESTDIR=/data/data/com.termux/files
 
 COPTIONS = -g -Wall
 # CC = gcc
