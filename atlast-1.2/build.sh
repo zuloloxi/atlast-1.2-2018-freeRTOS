@@ -1,18 +1,42 @@
 #!/bin/sh
 
-# set -x
+set -x
 
 CPU=`uname -m`
-OS=`uname -s`
+OS=$(uname -s | tr '[A-Z]' '[a-z]')
+
+KERNEL=$(uname -o)
 
 printf "\nbuilding for $CPU\n"
 echo "       OS is $OS"
 
-if [ "$OS" = "Linux" ]; then
+if [ "$OS" = "linux" ]; then
     ARCH=$CPU
 else
     ARCH="${OS}_${CPU}"
 fi
+
+if [ -f "atlcfig.h" ]; then
+    echo "Config exists."
+
+    if [ -L "atlcfig.h" ]; then
+        echo "Is a symbolic link"
+        rm atlcfig.h
+    else
+        echo "Is not a symbolic link"
+        exit 1
+    fi
+fi
+
+if [ $OS = "linux" ]; then
+    echo "Here"
+    if [ $KERNEL = "Android" ]; then
+        ln -s termux-atlcfig.h atlcfig.h
+    else
+        ln -s linux-atlcfig.h atlcfig.h
+    fi
+fi
+
 
 LIST="NO"
 PROFILE_CHANGED="NO"
@@ -110,10 +134,10 @@ fi
 MAKEFILE=Makefile.${ARCH}${OPT}
 
 if [ $PROFILE_CHANGED = "YES" ]; then
-# 
-# If Makefile exists and is a symbolic link, remove
-# and remake link.
-#
+    # 
+    # If Makefile exists and is a symbolic link, remove
+    # and remake link.
+    #
     if [ -L Makefile ]; then
         rm Makefile
     fi
@@ -129,5 +153,5 @@ if [ -f $MAKEFILE ]; then
     sleep 1
     make -j 4 $MAKE_FLAGS $MAKEFILE $ARGS
 else
-	echo "$MAKEFILE does not exist."
+    echo "$MAKEFILE does not exist."
 fi
