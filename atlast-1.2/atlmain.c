@@ -51,6 +51,7 @@ static void ctrlc(int sig) {
 }
 #endif /* HIGHC */
 
+
 #ifdef PUBSUB
 #ifdef PTHREAD
 #warning "Define lock"
