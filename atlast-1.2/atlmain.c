@@ -20,6 +20,7 @@
 
 #ifdef PUBSUB
 #include "Small.h"
+#include "linuxParser.h"
 #include "tasks.h"
 
 #ifdef PTHREAD
@@ -96,10 +97,17 @@ void *doSmall(void *arg) {
     ssize_t len;
     struct cmdMessage buffer;
     char *res;
+    
+    struct linuxParser *p;
 
     bool ff;
 
     ff=setGlobalCallback(table, doSmallCallback);
+    
+    // This lock is held by this threads parent.
+    // Once the parent has completed its setup it will release the lock, and
+    // then we can continue.
+    //
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
 
@@ -114,13 +122,16 @@ void *doSmall(void *arg) {
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
     mq_setattr(mq, &attr,NULL);
 
+    p=newParser(table);
+    
+    setIam(p,queueName);
 
     while(runFlag) {
         len = mq_receive(mq, &buffer, sizeof(buffer), NULL);
         if( len < 0) {
             perror("mq_receive");
         } else {
-            res=cmdParse(table, &buffer,false);
+            res=cmdParse(p,&buffer);
         }
     }
 
