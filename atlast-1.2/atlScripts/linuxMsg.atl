@@ -26,22 +26,28 @@ variable out
 ;
 
 
-: mkmsg 
+\ : mkmsg 
+\     init_run if
+\         iam out @ sender strcpy
+\         3 out @ fields !
+\         "SET"  out @ cmd strcpy
+\         "RUN"  out @ key strcpy
+\         "TRUE" out @ value strcpy
+\     then
+\ ;
+
+\ name value
+: mkmsg-set 
     init_run if
         iam out @ sender strcpy
         3 out @ fields !
+        out @ value strcpy
+        out @ key strcpy
         "SET"  out @ cmd strcpy
-        "RUN"  out @ key strcpy
-        "TRUE" out @ value strcpy
     then
 ;
 
-: send 
-    init_run if
-       out @ "/client" message!
-    then
-;
-
+\ name
 : mkmsg-sub 
     init_run @ if
         out @ /msg erase
@@ -49,16 +55,22 @@ variable out
 
         2 out @ fields !
         "SUB"  out @ cmd strcpy
-        "COUNTER"  out @ key strcpy
+        out @ key strcpy
     then
 ;
 
 : mkmsg-get
     init_run @ if
+        out @ key strcpy
         iam out @ sender strcpy
         2 out @ fields !
         "GET"  out @ cmd strcpy
-        "COUNTER"  out @ key strcpy
+    then
+;
+
+: send 
+    init_run @ if
+       out @ "/client" message!
     then
 ;
 
@@ -72,7 +84,7 @@ variable out
     >r
 
     r@ sender type cr
-    r@ fields @ . cr
+    r@ fields c@ . cr
     r@ cmd type cr
     r> value type cr
     cr

@@ -81,6 +81,7 @@ void doSmallCallback(struct nlist *rec, uint8_t idx) {
         struct cmdMessage subMessage;
 
         memset(&subMessage,0,sizeof(struct cmdMessage));
+        subMessage.message.fields = 3;
         strncpy(subMessage.message.cmd,"SET",MAX_CMD);
         strncpy(subMessage.message.key,nlistGetName(rec),MAX_KEY);
         strncpy(subMessage.message.value,nlistGetDef(rec),MAX_VALUE);
