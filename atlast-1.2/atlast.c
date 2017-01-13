@@ -598,6 +598,41 @@ prim ATH_Token() {
     Push = (stackitem) strbuf[cstrbuf];
 }
 
+prim ATH_pwd() {
+    char *p;
+    Sl(2); // pointer to a memory area large enough to hold the biggest path
+#ifdef LINUX
+
+    p=getcwd( (char *)S1, (size_t)S0);
+    Pop;
+
+    if(!p) {
+        S0=true;
+    } else {
+        S0=false;
+    }
+#else
+    Pop;
+    S0=true;
+
+#endif
+}
+
+prim ATH_cd() {
+    Sl(1);
+    int rc=0;
+#ifdef LINUX
+    rc=chdir(S0);
+    if(rc < 0) {
+        S0=false;
+    } else {
+        S0=true;
+    }
+#else
+    S0=true;
+#endif
+}
+
 prim ATH_ms() {
     Sl(1);
 #ifdef LINUX
@@ -1007,6 +1042,7 @@ prim FR_mkdb() {
 	Push = (stackitem) db;
 
 }
+
 prim FR_publish() {
 	char *name;
 	struct Small *db;
@@ -1023,6 +1059,7 @@ prim FR_publish() {
 
 	Push=rc;
 }
+
 
 prim FR_displayRecord() {
     struct nlist *rec; 
@@ -4224,6 +4261,8 @@ static struct primfcn primt[] = {
     {(char *)"0?LINUX", ATH_qlinux},
     {(char *)"0?FREERTOS", ATH_qfreertos},
     {(char *)"0MS", ATH_ms},
+    {(char *)"0PWD", ATH_pwd},
+    {(char *)"0CD", ATH_cd},
 #endif
 
 #ifdef ANSI

@@ -3,8 +3,11 @@
 "linuxMsg.atl" include
 "pubsub.atl" include
 
-"/test iam strcpy
+"/test" iam strcpy
 
 set QNAME /test
+
+init
+comms
 
 

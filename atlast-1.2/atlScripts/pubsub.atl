@@ -1,4 +1,6 @@
 
+"pubsub.atl" type cr
+
 32 constant /name
 32 constant /defn
 
@@ -28,7 +30,7 @@
     else
         defn strcpy
     then
-
+    defn
 ;
 
 : pub
