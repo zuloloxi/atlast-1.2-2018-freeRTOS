@@ -624,9 +624,9 @@ prim ATH_cd() {
 #ifdef LINUX
     rc=chdir(S0);
     if(rc < 0) {
-        S0=false;
-    } else {
         S0=true;
+    } else {
+        S0=false;
     }
 #else
     S0=true;

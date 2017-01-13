@@ -28,17 +28,6 @@ variable out
 ;
 
 
-\ : mkmsg 
-\     init_run if
-\         iam out @ sender strcpy
-\         3 out @ fields !
-\         "SET"  out @ cmd strcpy
-\         "RUN"  out @ key strcpy
-\         "TRUE" out @ value strcpy
-\     then
-\ ;
-
-\ name value
 : mkmsg-set 
     init_run if
         iam out @ sender strcpy
@@ -60,6 +49,18 @@ variable out
         out @ key strcpy
     then
 ;
+
+: mkmsg-unsub
+    init_run @ if
+        out @ /msg erase
+        iam out @ sender strcpy
+
+        2 out @ fields !
+        "UNSUB"  out @ cmd strcpy
+        out @ key strcpy
+    then
+;
+
 
 : mkmsg-get
     init_run @ if
