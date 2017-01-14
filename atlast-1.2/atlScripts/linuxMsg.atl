@@ -17,6 +17,8 @@ variable init_run
 variable out
 /msg string cmd-buffer
 
+32 chars string destination
+
 : init
     init_run @ 0= if
         here /msg allot out !
