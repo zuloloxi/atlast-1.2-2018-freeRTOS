@@ -2861,9 +2861,12 @@ prim P_include() {
     fd = fopen((char *)S0, "r") ;
     if(!fd) {
         perror("INCLUDE fopen");
+        Pop;
         return;
     }
     estat = atl_load(fd);
+    fclose(fd);
+    Pop;
 }
 
 #endif /* FILEIO */
