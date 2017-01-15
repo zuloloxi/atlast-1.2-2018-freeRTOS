@@ -29,7 +29,6 @@ if [ -f "atlcfig.h" ]; then
 fi
 
 if [ $OS = "linux" ]; then
-    echo "Here"
     if [ $KERNEL = "Android" ]; then
         ln -s termux-atlcfig.h atlcfig.h
     else
