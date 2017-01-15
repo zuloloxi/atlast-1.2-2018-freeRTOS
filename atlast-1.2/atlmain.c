@@ -113,6 +113,14 @@ void *doSmall(void *arg) {
     fprintf(stderr,"Started\n");
 
     queueName = dbLookup(table,"QNAME");
+    if(!queueName) {
+        ff=addRecord(table,"QNAME","/atlast");
+        if(ff) {
+            fprintf(stderr,"db install faulure, fatal error\n");
+            exit(1);
+        }
+        queueName = dbLookup(table,"QNAME");
+    }
 
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
