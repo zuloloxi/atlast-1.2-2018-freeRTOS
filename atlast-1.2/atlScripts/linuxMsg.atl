@@ -21,6 +21,7 @@ variable out
 
 : init
     init_run @ 0= if
+        "/client" destination strcpy
         here /msg allot out !
         out @ /msg erase
 
@@ -29,13 +30,24 @@ variable out
     then
 ;
 
-
-: mkmsg-set 
-    init_run if
+: mkmsg-get
+    init_run @ if
+        out @ /msg erase
+        out @ key strcpy
         iam out @ sender strcpy
-        3 out @ fields !
+        2 out @ fields c!
+        "GET"  out @ cmd strcpy
+    then
+;
+
+\ name value
+: mkmsg-set
+    init_run @ if
+        out @ /msg erase
         out @ value strcpy
         out @ key strcpy
+        iam out @ sender strcpy
+        3 out @ fields c!
         "SET"  out @ cmd strcpy
     then
 ;
@@ -64,18 +76,10 @@ variable out
 ;
 
 
-: mkmsg-get
-    init_run @ if
-        out @ key strcpy
-        iam out @ sender strcpy
-        2 out @ fields !
-        "GET"  out @ cmd strcpy
-    then
-;
-
 : send 
     init_run @ if
-       out @ "/client" message!
+\       out @ "/client" message!
+       out @ destination message!
     then
 ;
 
