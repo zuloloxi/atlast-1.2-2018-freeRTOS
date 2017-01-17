@@ -99,7 +99,7 @@ void *doSmall(void *arg) {
     struct mq_attr attr;
     ssize_t len;
     struct cmdMessage buffer;
-    char *res;
+//    char *res;
     
     struct linuxParser *p;
 
@@ -142,7 +142,7 @@ void *doSmall(void *arg) {
         if( len < 0) {
             perror("mq_receive");
         } else {
-            res=cmdParse(p,&buffer);
+            ff=cmdParse(p,&buffer);
         }
     }
 
