@@ -90,7 +90,7 @@ void doSmallCallback(struct nlist *rec, uint8_t idx) {
     }
 }
 
-extern struct linuxParser *newParser();
+// extern struct linuxParser *newParser();
 
 void *doSmall(void *arg) {
     bool runFlag=true;
