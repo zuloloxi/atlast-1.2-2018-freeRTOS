@@ -1060,6 +1060,16 @@ prim FR_publish() {
 	Push=rc;
 }
 
+prim FR_subCount() {
+    int32_t cnt;
+
+    Sl(1);
+    So(1);
+    cnt=(int32_t)getSubCount(S0);
+    S0=(int32_t)cnt;
+}
+
+
 
 prim FR_displayRecord() {
     struct nlist *rec; 
@@ -4292,6 +4302,7 @@ static struct primfcn primt[] = {
 	{(char *)"0LOOKUP",  FR_lookup},
 	{(char *)"0LOOKUP-REC",  FR_lookupRecord},
 	{(char *)"0PUBLISH",  FR_publish},
+	{(char *)"0GET-SUBCOUNT",  FR_subCount},
 	{(char *)"0.RECORD",  FR_displayRecord},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},

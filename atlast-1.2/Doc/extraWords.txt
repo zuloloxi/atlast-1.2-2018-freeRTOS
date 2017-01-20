@@ -37,9 +37,10 @@ Stack:  qh msg -- rc
 Description:
     Send the message pointed to by 'msg' to the queue 'qh'.  Rc indicates the result.
 
-Name:
-Stack:
+Name:   get-subcount
+Stack:  dbHandle -- count
 Description:
+    Return the number of subscriptions to the database.
 
 Name:
 Stack:
