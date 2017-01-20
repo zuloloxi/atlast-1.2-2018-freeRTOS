@@ -1019,6 +1019,7 @@ prim FR_putMessage() {
 	}
     rc = mq_send(mq,out,sizeof(struct cmdMessage),(size_t)NULL);
     mq_close( mq ) ;
+    Pop2;
 #endif
 	Push=rc;
 }
