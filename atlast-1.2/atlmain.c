@@ -22,6 +22,7 @@
 #include "Small.h"
 #include "linuxParser.h"
 #include "tasks.h"
+#include <errno.h>
 
 #ifdef PTHREAD
 #include <pthread.h>
@@ -131,6 +132,14 @@ void *doSmall(void *arg) {
     attr.mq_curmsgs = 0;
 
     mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
+    if( (mqd_t)-1 == mq) {
+        perror("mq_open");
+        if(errno == ENOSYS) {
+            fprintf(stderr,"Fatal ERROR\n");
+            exit(1);
+        }
+    }
+
     mq_setattr(mq, &attr,NULL);
 
     p=newParser(table);
