@@ -62,6 +62,7 @@ pthread_mutex_t lock;
 
 pthread_t tid[2];
 struct Small *table;
+char *queueName ;
 
 void doSmallCallback(struct nlist *rec, uint8_t idx) {
     struct client *tmp;
@@ -71,19 +72,13 @@ void doSmallCallback(struct nlist *rec, uint8_t idx) {
 
     tmp=(struct client *)nlistGetSubscriber(rec,idx);
 
-    if(tmp != NULL) {
-        if( tmp->pipe == NULL ) {
-            mqd_t mq = mq_open( tmp->name, O_WRONLY) ;
-            if( mq == (mqd_t)-1) {
-                perror("doSmallCallback");
-            } else {
-                tmp->pipe = mq;
-            }
-        } 
+    if(tmp != 0) {
         struct cmdMessage subMessage;
 
         memset(&subMessage,0,sizeof(struct cmdMessage));
+
         subMessage.message.fields = 3;
+        strncpy(subMessage.sender,queueName,MAX_SUB_NAME);
         strncpy(subMessage.message.cmd,"SET",MAX_CMD);
         strncpy(subMessage.message.key,nlistGetName(rec),MAX_KEY);
         strncpy(subMessage.message.value,nlistGetDef(rec),MAX_VALUE);
@@ -92,11 +87,9 @@ void doSmallCallback(struct nlist *rec, uint8_t idx) {
     }
 }
 
-// extern struct linuxParser *newParser();
-
 void *doSmall(void *arg) {
     bool runFlag=true;
-    char *queueName ;
+//    char *queueName ;
     mqd_t mq;
     struct mq_attr attr;
     ssize_t len;
@@ -106,8 +99,9 @@ void *doSmall(void *arg) {
     struct linuxParser *p;
 
     bool ff;
+    struct Small *myTable=arg;
 
-    ff=setGlobalCallback(table, doSmallCallback);
+    ff=setGlobalCallback(myTable, doSmallCallback);
 
     // This lock is held by this threads parent.
     // Once the parent has completed its setup it will release the lock, and
@@ -116,14 +110,14 @@ void *doSmall(void *arg) {
     pthread_mutex_lock(&lock);
     fprintf(stderr,"Started\n");
 
-    queueName = dbLookup(table,"QNAME");
+    queueName = dbLookup(myTable,"QNAME");
     if(!queueName) {
-        ff=addRecord(table,"QNAME","/atlast");
+        ff=addRecord(myTable,"QNAME","/atlast");
         if(ff) {
             fprintf(stderr,"db install faulure, fatal error\n");
             exit(1);
         }
-        queueName = dbLookup(table,"QNAME");
+        queueName = dbLookup(myTable,"QNAME");
     }
 
     attr.mq_flags = 0;
@@ -143,7 +137,7 @@ void *doSmall(void *arg) {
 
     mq_setattr(mq, &attr,NULL);
 
-    p=newParser(table);
+    p=newParser(myTable);
 
     setIam(p,queueName);
 
@@ -238,14 +232,15 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    pthread_mutex_lock(&lock);
-    int err = pthread_create(&(tid[i]), NULL, &doSmall, NULL);
+
 #endif
 #ifdef LINUX
     sprintf(t,"0x%x constant TABLE",table);
     atl_eval(t);
     memset(t,0x00,sizeof(t));
 #endif
+    pthread_mutex_lock(&lock);
+    int err = pthread_create(&(tid[0]), NULL, &doSmall, (void *)table);
 
 
 #endif
