@@ -15,6 +15,7 @@
 
 #include <signal.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include "atldef.h"
 #include "atlcfig.h"
 
@@ -100,14 +101,14 @@ void *doSmall(void *arg) {
     struct mq_attr attr;
     ssize_t len;
     struct cmdMessage buffer;
-//    char *res;
-    
+    //    char *res;
+
     struct linuxParser *p;
 
     bool ff;
 
     ff=setGlobalCallback(table, doSmallCallback);
-    
+
     // This lock is held by this threads parent.
     // Once the parent has completed its setup it will release the lock, and
     // then we can continue.
@@ -143,7 +144,7 @@ void *doSmall(void *arg) {
     mq_setattr(mq, &attr,NULL);
 
     p=newParser(table);
-    
+
     setIam(p,queueName);
 
     while(runFlag) {
@@ -178,72 +179,50 @@ int main(int argc, char *argv[]) {
 #endif
 
     ifp = stdin;
-    for (i = 1; i < argc; i++) {
-        char *cp, opt;
 
-        cp = argv[i];
-        if (*cp == '-') {
-            opt = *(++cp);
-            if (islower(opt))
-                opt = toupper(opt);
-            switch (opt) {
+    int opt;
 
-                case 'D':
-                    defmode = TRUE;
-                    break;
+    while((opt = getopt(argc,argv, "C:DH:I:R:S:T?U")) != -1) {
+        switch(opt) {
+            case 'C':
+                chdir(optarg);
+                break;
+            case 'D':
+                defmode = TRUE;
+                break;
+            case 'H':
+                atl_heaplen = atol(optarg);
+                break;
+            case 'I':
+                include[in]=(char *)malloc(strlen(optarg)+1);
+                strncpy(include[in++], optarg, strlen(optarg));
+                break;
+            case 'R':
+                atl_rstklen = atol(optarg);
+                break;
 
-                case 'H':
-                    atl_heaplen = atol(cp + 1);
-                    break;
+            case 'S':
+                atl_stklen = atol(optarg);
+                break;
 
-                case 'I':
-                    include[in++] = cp + 1;
-                    break;
-
-                case 'R':
-                    atl_rstklen = atol(cp + 1);
-                    break;
-
-                case 'S':
-                    atl_stklen = atol(cp + 1);
-                    break;
-
-                case 'T':
-                    atl_trace = TRUE;
-                    break;
-
-                case '?':
-                case 'U':
-                    PR("Usage:  ATLAST [options] [inputfile]\n");
-                    PR("        Options:\n");
-                    PR("           -D     Treat file as definitions\n");
-                    PR("           -Hn    Heap length n\n");
-                    PR("           -Ifile Include named definition file\n");
-                    PR("           -Rn    Return stack length n\n");
-                    PR("           -Sn    Stack length n\n");
-                    PR("           -T     Set TRACE mode\n");
-                    PR("           -U     Print this message\n");
-                    return 0;
-            }
-        } else {
-            char fn[132];
-
-            if (fname) {
-                PR("Duplicate file name.\n");
-                return 1;
-            }
-            fname = TRUE;
-            V strcpy(fn, cp);
-            if (strchr(fn, '.') == NULL)
-                V strcat(fn, ".atl");
-            ifp = fopen(fn, "r");
-            if (ifp == NULL) {
-                V fprintf(stderr, "Unable to open file %s\n", fn);
-                return 1;
-            }
+            case 'T':
+                atl_trace = TRUE;
+                break;
+            case '?':
+            case 'U':
+                PR("Usage:  ATLAST [options] [inputfile]\n");
+                PR("        Options:\n");
+                PR("           -C <dir>  Change to this directory\n");
+                PR("           -D        Treat file as definitions\n");
+                PR("           -Hn       Heap length n\n");
+                PR("           -I <file> Include named definition file\n");
+                PR("           -R n      Return stack length n\n");
+                PR("           -S n      Stack length n\n");
+                PR("           -T        Set TRACE mode\n");
+                PR("           -U        Print this message\n");
+                return 0;
         }
     }
-
     // OK, so init the system
     //
     atl_init();
