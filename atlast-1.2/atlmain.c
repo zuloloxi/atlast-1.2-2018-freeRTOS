@@ -101,7 +101,7 @@ void *doSmall(void *arg) {
     bool ff;
     struct Small *myTable=arg;
 
-    ff=setGlobalCallback(myTable, doSmallCallback);
+//    ff=setGlobalCallback(myTable, doSmallCallback);
 
     // This lock is held by this threads parent.
     // Once the parent has completed its setup it will release the lock, and
