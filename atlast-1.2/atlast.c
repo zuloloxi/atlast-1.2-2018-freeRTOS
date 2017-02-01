@@ -938,25 +938,34 @@ prim FR_getQid() {
 #endif
 
 #ifdef PUBSUB
+/*
+ * Name: message@
+ * Stack: <from> <timeout> <message ptr>
+ *
+ * Description:
+ *  Receive a message, waiting for a specified number of milli seconds, and
+ *  place the recieved message at ptr.
+ */
 prim FR_getMessage() {
 #ifdef FREERTOS
-	extern struct taskData *task[LAST_TASK];
+//	extern struct taskData *task[LAST_TASK];
 	osEvent evt;
 	uint32_t timeout;
 	volatile QueueHandle_t qh;
+    struct cmdMessage *out;
 
-	Sl(2);
-	So(2);
+	Sl(3);
+	So(1);
 
-	timeout=S0;
-	qh = (QueueHandle_t) S1;
-	// TODO Fix this
-	qh=task[TST_HARNESS]->iam;
+    out = (struct cmdMessage *)S0;
+	timeout=S1;
+    qh=(QueueHandle_t)S2;
 
-	// evt = osMessageGet(qh,timeout);
 	evt = osMessageGet(qh,timeout);
-//	Pop;
-	S1 = (stackitem)evt.value.p;
+
+    memcpy(out, evt.value.p, sizeof(struct cmdMessage));
+    Pop2;
+
 	S0 = (stackitem)evt.status;
 #endif
 
@@ -1028,6 +1037,7 @@ prim FR_putMessage() {
 #ifdef LINUX
 #ifdef PTHREAD
 prim PS_comms() {
+
 	pthread_mutex_unlock(&lock);
     pthread_yield();
     sleep(1);

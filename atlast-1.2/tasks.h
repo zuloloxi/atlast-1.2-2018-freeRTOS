@@ -4,8 +4,15 @@
  *  Created on: Nov 15, 2016
  *      Author: andrew.holt
  */
+
+/*
+ * @file tasks.h
+ * @brief Test
+ */
 #ifndef TASKS_H_   //1
 #define TASKS_H_
+
+#include <stdint.h>
 
 #ifdef LINUX
 #include <mqueue.h>
@@ -25,7 +32,7 @@
 // void setQid(const enum appTask tid, const QueueHandle_t q) ;
 
 struct taskData {
-	osMutexId lock;
+	osMutexId dbLock;
 	QueueHandle_t iam;
 };
 
@@ -66,6 +73,7 @@ struct client {
 };
 #else
 struct client {
+    char name[32];
     QueueHandle_t pipe;
 };
 #endif
