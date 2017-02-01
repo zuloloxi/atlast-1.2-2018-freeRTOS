@@ -28,13 +28,6 @@
 #define MAX_KEY   16    // Length of longest key.
 
 #ifdef FREERTOS // 2
-// QueueHandle_t getQid(const enum appTask tid) D or the given task
-// void setQid(const enum appTask tid, const QueueHandle_t q) ;
-
-struct taskData {
-	osMutexId dbLock;
-	QueueHandle_t iam;
-};
 
 enum appTask {
 	NO_TASK=0,
@@ -43,7 +36,20 @@ enum appTask {
 	TST_RX,
 	LAST_TASK
 };
-#
+
+// QueueHandle_t getQid(const enum appTask tid) D or the given task
+// void setQid(const enum appTask tid, const QueueHandle_t q) ;
+/*
+ * This structure holds information about a task
+ * iam is the Q that the tsask listens for messages on.
+ */
+struct taskData {
+	osMutexId dbLock;
+	QueueHandle_t iam;
+};
+struct taskData *task[LAST_TASK];
+
+
 #endif // 2
 struct payload {
     uint8_t fields; // <= 3
