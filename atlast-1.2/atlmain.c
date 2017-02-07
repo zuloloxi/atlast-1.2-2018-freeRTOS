@@ -22,7 +22,7 @@
 #ifdef PUBSUB
 #include "Small.h"
 #include "linuxParser.h"
-#include "tasks.h"
+#include "msgs.h"
 #include <errno.h>
 
 #ifdef PTHREAD

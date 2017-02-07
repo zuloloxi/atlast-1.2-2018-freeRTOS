@@ -24,7 +24,7 @@ APPS = atlast # atlsmall primdeftest
 all:	$(APPS)
 # all:	atlsmall
 
-atlast: $(ATLOBJ) tasks.h
+atlast: $(ATLOBJ) 
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/C++/include

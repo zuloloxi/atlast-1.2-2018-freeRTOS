@@ -20,7 +20,7 @@
 #include "atlcfig.h"
 #ifdef PUBSUB
 #include "Small.h"
-#include "tasks.h"
+#include "msgs.h"
 #ifdef LINUX
 #include <mqueue.h>
 #endif
