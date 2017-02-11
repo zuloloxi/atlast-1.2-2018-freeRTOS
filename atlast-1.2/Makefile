@@ -89,6 +89,6 @@ install:	atlast
 #	strip atlsmall
 #	mv ./atlsmall /usr/local/bin
 	mkdir -p /usr/local/lib/Small
-	cp tasks.h /usr/local/lib/Small
+#	cp tasks.h /usr/local/lib/Small
 
 
