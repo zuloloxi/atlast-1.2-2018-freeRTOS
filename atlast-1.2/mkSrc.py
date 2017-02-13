@@ -74,8 +74,8 @@ def main():
             verbose=True
 
     if debug:
-        print "files :",files
-        print "Output:" + outFile
+        print >> sys.stderr, "files :",files
+        print >> sys.stderr, "Output:" + outFile
 
 
 
@@ -91,15 +91,17 @@ def main():
     output=""
     for file in files:
         if verbose:
-            print "Reading " + file
+            print >> sys.stderr, "Reading " + file
         with open(file) as inf:
             for line in inf:
                 if len(line) > 1:
                     if line[0] != '\\' and line[0] != '(':
-                        output += removeComments(line)
+#                        output += removeComments(line)
+                        tmp = removeComments(line)
+                        output += tmp.replace('"','\\"')
                         output = (output.strip() + '\\n')
 
-    output += '"'
+    output += '";'
 
     output +="\n\n#endif\n\n"
 
