@@ -945,6 +945,12 @@ prim FR_getQid() {
 
 }
 
+prim FR_getTaskDb() {
+	Sl(1);
+
+	S0 = (stackitem)task[S0]->db;
+}
+
 
 #endif
 
@@ -4310,6 +4316,7 @@ static struct primfcn primt[] = {
 #endif
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
+    {(char *)"0DB@", FR_getTaskDb},
 
     {(char *)"0POOL@", FR_getPoolId } ,
     {(char *)"0POOL-FREE", FR_poolFree } ,
