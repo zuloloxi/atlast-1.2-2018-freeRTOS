@@ -882,6 +882,17 @@ prim ANSI_free() {
 
 #ifdef FREERTOS
 
+prim FR_getSysTick() {
+    uint32_t tick;
+
+    Sl(0);
+    So(1);
+
+    tick = osKernelSysTick();
+
+    Push=(stackitem)tick;
+}
+
 prim FR_CmdParse() {
 	Sl(2);
 
@@ -4305,6 +4316,7 @@ static struct primfcn primt[] = {
     {(char *)"0POOL-ALLOCATE", FR_poolAllocate } ,
 
     {(char *)"0CMD-PARSE", FR_CmdParse },
+    {(char *)"0TICK@", FR_getSysTick },
 
 #endif
 #ifdef PUBSUB
