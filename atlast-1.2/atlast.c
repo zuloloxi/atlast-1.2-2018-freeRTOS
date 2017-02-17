@@ -1090,10 +1090,17 @@ prim FR_publish() {
 
 prim FR_subCount() {
     int32_t cnt;
+    char *key;
+    struct Small *db;
 
-    Sl(1);
+    Sl(2);
     So(1);
-    cnt=(int32_t)getSubCount(S0);
+
+    key=(char *)S0;
+    db=(struct Small *)S1;
+    Pop;
+
+    cnt=(int32_t)getSubCount(db, key);
     S0=(int32_t)cnt;
 }
 
