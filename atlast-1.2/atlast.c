@@ -349,12 +349,6 @@ void ATH_Features() {
 	 printf("%s",outBuffer);
 #endif
 //
-#ifdef PUBSUB
-    sprintf(outBuffer,"    PUBSUB\n");
-#else
-    sprintf(outBuffer,"NOT PUBSUB\n");
-#endif
-
 #ifdef FREERTOS
 	 txBuffer(console, (uint8_t *)outBuffer) ;
 #else
