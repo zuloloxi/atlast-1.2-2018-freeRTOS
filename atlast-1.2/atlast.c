@@ -587,7 +587,7 @@ void ATH_Features() {
 }
 
 prim ATH_Instream() {
-    Push=instream;
+    Push=(stackitem)instream;
 }
 
 prim ATH_Token() {
@@ -599,9 +599,9 @@ prim ATH_Token() {
 }
 
 prim ATH_pwd() {
-    char *p;
     Sl(2); // pointer to a memory area large enough to hold the biggest path
 #ifdef LINUX
+    char *p;
 
     p=getcwd( (char *)S1, (size_t)S0);
     Pop;
@@ -620,8 +620,8 @@ prim ATH_pwd() {
 
 prim ATH_cd() {
     Sl(1);
-    int rc=0;
 #ifdef LINUX
+    int rc=0;
     rc=chdir(S0);
     if(rc < 0) {
         S0=true;
@@ -966,10 +966,10 @@ prim FR_getTaskDb() {
 prim FR_getMessage() {
 #ifdef FREERTOS
 //	extern struct taskData *task[LAST_TASK];
-	osEvent evt;
-	uint32_t timeout;
+	osEvent evt;	uint32_t timeout;
 	volatile QueueHandle_t qh;
     struct cmdMessage *out;
+	osStatus tmp;
 
 	Sl(3);
 	So(1);
@@ -980,7 +980,15 @@ prim FR_getMessage() {
 
 	evt = osMessageGet(qh,timeout);
 
-    memcpy(out, evt.value.p, sizeof(struct cmdMessage));
+	if( evt.status == osEventMessage) {
+		memcpy(out, evt.value.p, sizeof(struct cmdMessage));
+		//
+		// TODO Memery errors, fatal error handler ?
+		//
+		tmp=osPoolFree( mpool_id, (void *)evt.value.p);
+	} else {
+		memset( out, 0, sizeof(struct cmdMessage) );
+	}
     Pop2;
 
 	S0 = (stackitem)evt.status;
@@ -1023,14 +1031,24 @@ prim FR_putMessage() {
 	volatile QueueHandle_t dest;
 	osStatus rc = osOK;
 
+	Sl(2);
+	So(1);
+
+	struct cmdMessage *tmp;
 
 	dest = (QueueHandle_t ) S0;
-	out = (struct CmdMessage *)S1;
+	out = (struct cmdMessage *)S1;
+
+	tmp = (struct cmdMessage *)osPoolAlloc(	mpool_id );
+
+	if( tmp == NULL) {
+		rc = osErrorNoMemory ;
+	} else {
+		memcpy(tmp,out,sizeof(struct cmdMessage));
+		rc = osMessagePut(dest,(uint32_t)tmp, osWaitForever);
+	}
+
 	Pop2;
-
-	rc = osMessagePut(dest,(uint32_t)out,osWaitForever);
-
-	Push=rc;
 #endif
 #ifdef LINUX
 	char *dest = (char *)S0;
@@ -1098,9 +1116,9 @@ prim FR_subCount() {
 
     key=(char *)S0;
     db=(struct Small *)S1;
-    Pop;
 
     cnt=(int32_t)getSubCount(db, key);
+    Pop;
     S0=(int32_t)cnt;
 }
 
@@ -1393,15 +1411,6 @@ static int token( char **cp) {
             char tc;
             char *tcp;
 
-#ifdef OS2
-            /* Compensate for error in OS/2 sscanf() library function */
-            if ((tokbuf[0] == '-') &&
-                    !(isdigit(tokbuf[1]) ||
-                        (((tokbuf[1] == 'x') || (tokbuf[1] == 'X')) &&
-                         isxdigit(tokbuf[2])))) {
-                return TokWord;
-            }
-#endif /* OS2 */
 #ifdef USE_SSCANF
             if (sscanf(tokbuf, "%li%c", &tokint, &tc) == 1)
                 return TokInt;
@@ -2164,6 +2173,18 @@ prim P_string() 		      /* Create string buffer */
     /* Allocate storage for string */
     hptr += (S0 + 1 + sizeof(stackitem)) / sizeof(stackitem);
     Pop;
+}
+
+// ATH, raw memory move.
+//
+prim P_move() {
+    Sl(3);
+
+    uint32_t len = S0 ;
+    char *dest=(char *)S1;
+    char *src =(char *)S2;
+
+    memcpy( dest, src, len);
 }
 
 prim P_strcpy() 		      /* Copy string to address on stack */
@@ -4132,6 +4153,7 @@ static struct primfcn primt[] = {
     {"0SUBSTR", P_substr},
     {"0COMPARE", P_strcmp},
     {"0STRFORM", P_strform},
+    {"0MOVE", P_move},
 #ifdef REAL
     {"0FSTRFORM", P_fstrform},
     {"0STRREAL", P_strreal},
