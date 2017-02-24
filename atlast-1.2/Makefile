@@ -19,15 +19,13 @@ CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX -DMQ
 
 ATLOBJ = atlast.o atlmain.o
 
-APPS = atlast # atlsmall primdeftest
+APPS = atlast atlsmall # primdeftest
 
 all:	$(APPS)
-# all:	atlsmall
 
 atlast: $(ATLOBJ) 
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
-# CFLAGS += -I/usr/local/lib/C++/include
 CFLAGS += -I/usr/local/lib/Small
 
 atlsmall: $(ATLOBJ) atlMinMain.c
