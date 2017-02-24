@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "atlast.h"
 #include "atlcfig.h"
 #include "atldef.h"
@@ -15,10 +17,11 @@ int main() {
     char t[132];
     int8_t len;
 
+    bool runFlag=true;
+
     uint8_t lineBuffer[MAX_LINE];
     dictword *var;
     int *tst;
-//    extern dictword *rf;
 
     atl_init();
 
@@ -30,16 +33,15 @@ int main() {
 
     var = atl_vardef("TEST",4);
 
+    /*
     if(var == NULL) {
         fprintf(stderr,"Vardef failed\n");
     } else {
         *((int *)atl_body(var))=42;
     }
+    */
 
-    // tst = (int *) atl_body(rf);
-
-
-    while(*tst) {
+    while(runFlag) {
         (void)memset(outBuffer,0,sizeof(outBuffer));
         printf("-> ");
 
