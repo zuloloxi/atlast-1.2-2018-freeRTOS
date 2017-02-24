@@ -297,8 +297,37 @@ STATIC void notcomp(), divzero();
 STATIC void pwalkback();
 #endif
 
+// ATH: List of operating systems
+enum osType {
+    OS_UNKNOWN=0,
+    OS_LINUX,
+    OS_FREERTOS
+};
+
+// ATH: List of CPU Architextures.
+enum cpuType {
+    CPU_UNKNOWN=0,
+    CPU_ARM,
+    CPU_X86,
+    CPU_X86_64,
+};
+
+
 #ifdef ATH
 void ATH_Features() {
+
+#ifdef LINUX
+    sprintf(outBuffer,"\n    LINUX\n");
+#else
+    sprintf(outBuffer,"\nNOT LINUX\n");
+#endif
+
+#ifdef FREERTOS
+	 txBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+// -----------------
 
 #ifdef ARRAY
     sprintf(outBuffer,"\n    ARRAY\n");
@@ -634,6 +663,7 @@ prim ATH_ms() {
 #endif
     Pop;
 }
+
 prim ATH_qlinux() {
 #ifdef LINUX
     Push=-1;
@@ -659,6 +689,112 @@ prim ATH_qfileio() {
     Push=0;
 #endif
 }
+
+prim ATH_qmath() {
+    So(1);
+
+#ifdef MATH
+    Push=-1;
+#else
+    Push=0;
+#endif
+
+}
+
+prim ATH_qreal() {
+    So(1);
+
+#ifdef REAL
+    Push=-1;
+#else
+    Push=0;
+#endif
+
+}
+
+prim ATH_qconio() {
+    So(1);
+
+#ifdef CONIO
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qdouble() {
+    So(1);
+
+#ifdef DOUBLE
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qevaluate() {
+    So(1);
+
+#ifdef EVALUATE
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qstring() {
+    So(1);
+
+#ifdef STRING
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qsystem() {
+    So(1);
+
+#ifdef SYSTEM
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qcustom() {
+    So(1);
+
+#ifdef CUSTOM
+    Push=-1;
+#else
+    Push=0;
+#endif
+}
+
+prim ATH_qos() {
+    So(1);
+
+    enum osType whatami=OS_UNKNOWN;
+
+#ifdef LINUX
+    whatami = OS_LINUX;
+#endif
+
+#ifdef FREERTOS
+    whatami = OS_FREERTOS;;
+#endif
+
+    Push=(stackitem)whatami;
+}
+
+prim ATH_qcpu() {
+    enum cpuType whatami=CPU_UNKNOWN;
+    So(1);
+// TODO: Make this work
+    Push=(stackitem)whatami;
+}
+
 prim ATH_memsafe() {
     Sl(1);
     ath_safe_memory = (S0 == 0) ? Falsity : Truth;
@@ -1067,7 +1203,11 @@ prim FR_putMessage() {
 #ifdef PTHREAD
 prim PS_comms() {
 
+    /* TODO Fix this.
+    extern pthread_mutex_t lock;
 	pthread_mutex_unlock(&lock);
+    */
+
     pthread_yield();
     sleep(1);
 }
@@ -4318,12 +4458,24 @@ static struct primfcn primt[] = {
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DECIMAL",ATH_dec},
 //	{(char *)"0BYE",ATH_bye},
+
 	{(char *)"0?FILEIO",ATH_qfileio},
+    {(char *)"0?LINUX", ATH_qlinux},
+    {(char *)"0?FREERTOS", ATH_qfreertos},
+    {(char *)"0?MATH", ATH_qmath},
+    {(char *)"0?REAL", ATH_qreal},
+    {(char *)"0?CONIO", ATH_qconio},
+    {(char *)"0?DOUBLE", ATH_qdouble},
+    {(char *)"0?EVALUATE", ATH_qevaluate},
+    {(char *)"0?STRING", ATH_qstring},
+    {(char *)"0?SYSTEM", ATH_qsystem},
+    {(char *)"0?CUSTOM", ATH_qcustom},
+    {(char *)"0?OS", ATH_qos},
+    {(char *)"0?CPU", ATH_qcpu},
+
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
     {(char *)"0TOKEN", ATH_Token},
-    {(char *)"0?LINUX", ATH_qlinux},
-    {(char *)"0?FREERTOS", ATH_qfreertos},
     {(char *)"0MS", ATH_ms},
     {(char *)"0PWD", ATH_pwd},
     {(char *)"0CD", ATH_cd},
