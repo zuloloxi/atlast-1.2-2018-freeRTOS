@@ -27,7 +27,7 @@
 #define MEMMESSAGE            /* Print message for stack/heap errors */
 #define MEMSTAT
 #define PROLOGUE              /* Prologue processing and auto-init */
-// TODO Not defining real breaks build
+
 // #define REAL                  /* Floating point numbers */
 #define SHORTCUTA             /* Shortcut integer arithmetic words */
 #define SHORTCUTC             /* Shortcut integer comparison */
@@ -45,10 +45,7 @@
 // #define Keyhit
 // 
 // Stuff added by me
-//
-// #define ATH
 // 
-
 
 char outBuffer[255];
 
@@ -57,15 +54,6 @@ char outBuffer[255];
 #include <pthread.h>
 extern pthread_mutex_t lock;
 
-/*
-struct cmdMessage {
-    char sender[32];    // name of senders message Q
-    uint8_t count;
-    char cmd[8];        // Command
-    char key[16];       // Key to search on.
-    char defn[32];      // Value.
-};
-*/
 #endif
 #endif
 
