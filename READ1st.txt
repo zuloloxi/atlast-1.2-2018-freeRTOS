@@ -10,3 +10,27 @@ git checkout -b PureC
 
 ./build.sh
 
+When this completes you should have two executable files:
+
+atlast
+atlsmall
+
+Enter the following:
+
+./atlast -?
+
+And you will see:
+
+ATLAST 1.2 (2007-10-07) This program is in the public domain.
+Compiled: Mar 10 2017
+Usage:  ATLAST [options] [inputfile]
+        Options:
+           -C <dir>  Change to this directory
+           -D        Treat file as definitions
+           -Hn       Heap length n
+           -I <file> Include named definition file
+           -R n      Return stack length n
+           -S n      Stack length n
+           -T        Set TRACE mode
+           -U        Print this message
+
