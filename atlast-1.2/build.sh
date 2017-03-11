@@ -121,7 +121,8 @@ MAKEFILE=Makefile.${ARCH}${OPT}
 #    make $MAKE_FLAGS $MAKEFILE clean
 # fi
 
-if [ ! -f ./atlcfig ]; then
+
+if [ ! -f ./atlcfig.h ]; then
     echo "Config file missing."
     echo "Linking to default."
 
