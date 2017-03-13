@@ -121,6 +121,15 @@ MAKEFILE=Makefile.${ARCH}${OPT}
 #    make $MAKE_FLAGS $MAKEFILE clean
 # fi
 
+if [ -L atlcfig.h ]; then
+    echo "Default config exists"
+else
+    echo "Default config DOES NOT exist."
+    echo "Creating ..."
+    ln -s ./linux-atlcfig.h ./atlcfig.h
+    echo ".. done."
+fi
+
 if [ -f $MAKEFILE ]; then
     echo "Building with $MAKEFILE"
     PROFILE=$(readlink ./profile.mk)
