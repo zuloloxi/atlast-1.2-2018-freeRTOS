@@ -11,6 +11,12 @@
    This program is in the public domain.
 
 */
+#ifndef LINUX
+#include "dover.h"
+#endif
+#ifdef FREERTOS
+#include "tim.h"
+#endif
 
 #include <stdio.h>
 #include <ctype.h>
@@ -18,9 +24,12 @@
 #include <stdint.h>
 #include <string.h>
 #include "atlcfig.h"
+#include "atlast.h"
 #ifdef PUBSUB
+
 #include "Small.h"
 #include "msgs.h"
+
 #ifdef LINUX
 #include <mqueue.h>
 #endif
@@ -53,7 +62,7 @@
 #include "tasks.h"
 #include "cmsis_os.h"
 
-extern osPoolId mpool_id;
+// extern osPoolId mpool_id;
 
 extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
@@ -61,11 +70,6 @@ extern UART_HandleTypeDef *console;
 #endif
 
 static int token( char **);
-
-#ifdef Macintosh
-/* Macintoshes need 32K segments, else barfage ensues */
-#pragma segment seg2a
-#endif /*Macintosh*/
 
 /*  Custom configuration.  If the tag CUSTOM has been defined (usually on
     the compiler call line), we include the file "atlcfig.h", which may
@@ -297,312 +301,289 @@ STATIC void notcomp(), divzero();
 STATIC void pwalkback();
 #endif
 
-// ATH: List of operating systems
-enum osType {
-    OS_UNKNOWN=0,
-    OS_LINUX,
-    OS_FREERTOS
-};
-
-// ATH: List of CPU Architextures.
-enum cpuType {
-    CPU_UNKNOWN=0,
-    CPU_ARM,
-    CPU_X86,
-    CPU_X86_64,
-};
-
-
 #ifdef ATH
 void ATH_Features() {
 
-#ifdef LINUX
-    sprintf(outBuffer,"\n    LINUX\n");
-#else
-    sprintf(outBuffer,"\nNOT LINUX\n");
-#endif
-
-#ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
-#else
-	 printf("%s",outBuffer);
-#endif
-// -----------------
-
 #ifdef ARRAY
-    sprintf(outBuffer,"\n    ARRAY\n");
+    sprintf(outBuffer,"\n    ARRAY\r\n");
 #else
-    sprintf(outBuffer,"\nNOT ARRAY\n");
+    sprintf(outBuffer,"\nNOT ARRAY\r\n");
 #endif
 
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer);
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef EMBEDDED
-    sprintf(outBuffer,"    EMBEDDED\n");
+    sprintf(outBuffer,"    EMBEDDED\r\n");
 #else
-    sprintf(outBuffer,"NOT EMBEDDED\n");
+    sprintf(outBuffer,"NOT EMBEDDED\r\n");
 #endif
 
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 
 #ifdef BREAK
-    sprintf(outBuffer,"    BREAK\n");
+    sprintf(outBuffer,"    BREAK\r\n");
 #else
-    sprintf(outBuffer,"NOT BREAK\n");
+    sprintf(outBuffer,"NOT BREAK\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 //
 #ifdef COMPILERW
-    sprintf(outBuffer,"    COMPILERW\n");
+    sprintf(outBuffer,"    COMPILERW\r\n");
 #else
-    sprintf(outBuffer,"NOT COMPILERW\n");
+    sprintf(outBuffer,"NOT COMPILERW\r\n");
 #endif
 
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 //
+#ifdef PUBSUB
+    sprintf(outBuffer,"    PUBSUB\r\n");
+#else
+    sprintf(outBuffer,"NOT PUBSUB\r\n");
+#endif
+
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 //
 
 #ifdef CONIO
-    sprintf(outBuffer,"    CONIO\n");
+    sprintf(outBuffer,"    CONIO\r\n");
 #else
-    sprintf(outBuffer,"NOT CONIO\n");
+    sprintf(outBuffer,"NOT CONIO\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef DEFFIELDS
-    sprintf(outBuffer,"    DEFFIELDS\n");
+    sprintf(outBuffer,"    DEFFIELDS\r\n");
 #else
-    sprintf(outBuffer,"NOT DEFFIELDS\n");
+    sprintf(outBuffer,"NOT DEFFIELDS\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef DOUBLE
-    sprintf(outBuffer,"    DOUBLE\n");
+    sprintf(outBuffer,"    DOUBLE\r\n");
 #else
-    sprintf(outBuffer,"NOT DOUBLE\n");
+    sprintf(outBuffer,"NOT DOUBLE\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef EVALUATE
-    sprintf(outBuffer,"    EVALUATE\n");
+    sprintf(outBuffer,"    EVALUATE\r\n");
 #else
-    sprintf(outBuffer,"NOT EVALUATE\n");
+    sprintf(outBuffer,"NOT EVALUATE\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef FILEIO
-    sprintf(outBuffer,"    FILEIO\n");
+    sprintf(outBuffer,"    FILEIO\r\n");
 #else
-    sprintf(outBuffer,"NOT FILEIO\n");
+    sprintf(outBuffer,"NOT FILEIO\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef MATH
-    sprintf(outBuffer,"    MATH\n");
+    sprintf(outBuffer,"    MATH\r\n");
 #else
-    sprintf(outBuffer,"NOT MATH\n");
+    sprintf(outBuffer,"NOT MATH\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef MEMMESSAGE
-    sprintf(outBuffer,"    MEMMESSAGE\n");
+    sprintf(outBuffer,"    MEMMESSAGE\r\n");
 #else
-    sprintf(outBuffer,"NOT MEMMESSAGE\n");
+    sprintf(outBuffer,"NOT MEMMESSAGE\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef PROLOGUE
-    sprintf(outBuffer,"    PROLOGUE\n");
+    sprintf(outBuffer,"    PROLOGUE\r\n");
 #else
-    sprintf(outBuffer,"NOT PROLOGUE\n");
+    sprintf(outBuffer,"NOT PROLOGUE\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef REAL
-    sprintf(outBuffer,"    REAL\n");
+    sprintf(outBuffer,"    REAL\r\n");
 #else
-    sprintf(outBuffer,"NOT REAL\n");
+    sprintf(outBuffer,"NOT REAL\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef SHORTCUTA
-    sprintf(outBuffer,"    SHORTCUTA\n");
+    sprintf(outBuffer,"    SHORTCUTA\r\n");
 #else
-    sprintf(outBuffer,"NOT SHORTCUTA\n");
+    sprintf(outBuffer,"NOT SHORTCUTA\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef SHORTCUTC
-    sprintf(outBuffer,"    SHORTCUTC\n");
+    sprintf(outBuffer,"    SHORTCUTC\r\n");
 #else
-    sprintf(outBuffer,"NOT SHORTCUTC\n");
+    sprintf(outBuffer,"NOT SHORTCUTC\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef STRING
-    sprintf(outBuffer,"    STRING\n");
+    sprintf(outBuffer,"    STRING\r\n");
 #else
-    sprintf(outBuffer,"NOT STRING\n");
+    sprintf(outBuffer,"NOT STRING\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef SYSTEM
-    sprintf(outBuffer,"    SYSTEM\n");
+    sprintf(outBuffer,"    SYSTEM\r\n");
 #else
-    sprintf(outBuffer,"NOT SYSTEM\n");
+    sprintf(outBuffer,"NOT SYSTEM\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef TRACE
-    sprintf(outBuffer,"    TRACE\n");
+    sprintf(outBuffer,"    TRACE\r\n");
 #else
-    sprintf(outBuffer,"NOT TRACE\n");
+    sprintf(outBuffer,"NOT TRACE\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef WALKBACK
-    sprintf(outBuffer,"    WALKBACK\n");
+    sprintf(outBuffer,"    WALKBACK\r\n");
 #else
-    sprintf(outBuffer,"NOT WALKBACK\n");
+    sprintf(outBuffer,"NOT WALKBACK\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef WORDSUSED
-    sprintf(outBuffer,"    WORDSUSED\n");
+    sprintf(outBuffer,"    WORDSUSED\r\n");
 #else
-    sprintf(outBuffer,"NOT WORDSUSED\n");
+    sprintf(outBuffer,"NOT WORDSUSED\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 // ------------------
 #ifdef ATH
-    sprintf(outBuffer,"\n    ATH CUSTOM\n");
+    sprintf(outBuffer,"\r\n    ATH CUSTOM\r\n");
 #else
-    sprintf(outBuffer,"\nNOT ATH CUSTOM\n");
+    sprintf(outBuffer,"\r\nNOT ATH CUSTOM\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 // ------------------
 #ifdef PUBSUB
-    sprintf(outBuffer,"    PUBSUB\n");
+    sprintf(outBuffer,"    PUBSUB\r\n");
 #else
-    sprintf(outBuffer,"NOT PUBSUB\n");
+    sprintf(outBuffer,"NOT PUBSUB\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 // ------------------
 
 #ifdef FREERTOS
-    sprintf(outBuffer,"    FREERTOS\n");
+    sprintf(outBuffer,"    FREERTOS\r\n");
 #else
-    sprintf(outBuffer,"NOT FREERTOS\n");
+    sprintf(outBuffer,"NOT FREERTOS\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
 
 #ifdef ANSI
-    sprintf(outBuffer,"    ANSI\n");
+    sprintf(outBuffer,"    ANSI\r\n");
 #else
-    sprintf(outBuffer,"NOT ANSI\n");
+    sprintf(outBuffer,"NOT ANSI\r\n");
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
 	 printf("%s",outBuffer);
 #endif
@@ -661,9 +642,13 @@ prim ATH_ms() {
 #ifdef LINUX
     usleep((useconds_t)S0 * 1000);
 #endif
+
+#ifdef FREERTOS
+    vTaskDelay(pdMS_TO_TICKS((uint32_t)S0));
+
+#endif
     Pop;
 }
-
 prim ATH_qlinux() {
 #ifdef LINUX
     Push=-1;
@@ -689,112 +674,6 @@ prim ATH_qfileio() {
     Push=0;
 #endif
 }
-
-prim ATH_qmath() {
-    So(1);
-
-#ifdef MATH
-    Push=-1;
-#else
-    Push=0;
-#endif
-
-}
-
-prim ATH_qreal() {
-    So(1);
-
-#ifdef REAL
-    Push=-1;
-#else
-    Push=0;
-#endif
-
-}
-
-prim ATH_qconio() {
-    So(1);
-
-#ifdef CONIO
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qdouble() {
-    So(1);
-
-#ifdef DOUBLE
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qevaluate() {
-    So(1);
-
-#ifdef EVALUATE
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qstring() {
-    So(1);
-
-#ifdef STRING
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qsystem() {
-    So(1);
-
-#ifdef SYSTEM
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qcustom() {
-    So(1);
-
-#ifdef CUSTOM
-    Push=-1;
-#else
-    Push=0;
-#endif
-}
-
-prim ATH_qos() {
-    So(1);
-
-    enum osType whatami=OS_UNKNOWN;
-
-#ifdef LINUX
-    whatami = OS_LINUX;
-#endif
-
-#ifdef FREERTOS
-    whatami = OS_FREERTOS;;
-#endif
-
-    Push=(stackitem)whatami;
-}
-
-prim ATH_qcpu() {
-    enum cpuType whatami=CPU_UNKNOWN;
-    So(1);
-// TODO: Make this work
-    Push=(stackitem)whatami;
-}
-
 prim ATH_memsafe() {
     Sl(1);
     ath_safe_memory = (S0 == 0) ? Falsity : Truth;
@@ -817,7 +696,7 @@ void displayLineHex(uint8_t *a) {
 #endif
 
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -832,7 +711,7 @@ void displayLineAscii(uint8_t *a) {
 #endif
 
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -844,7 +723,7 @@ void displayLineAscii(uint8_t *a) {
             a++;
 #endif
 #ifdef FREERTOS
-            txBuffer(console, (uint8_t *)outBuffer) ;
+            atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
             printf("%s",outBuffer);
 #endif
@@ -853,17 +732,17 @@ void displayLineAscii(uint8_t *a) {
             sprintf(outBuffer,"%c",*(a++));
 #endif
 #ifdef FREERTOS
-            txBuffer(console, (uint8_t *)outBuffer) ;
+            atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
             printf("%s",outBuffer);
 #endif
         }
     }
 #ifdef EMBEDDED
-    sprintf(outBuffer,"\n");
+    sprintf(outBuffer,"\r\n");
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -887,7 +766,7 @@ prim ATH_dump() {
         sprintf(outBuffer,"%08x:", address);
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s", outBuffer);
 #endif
@@ -930,11 +809,17 @@ prim ATH_hex() {
 prim ATH_dec() {
     base = 10;
 }
-/*
+
 prim ATH_bye() {
-    *((int *) atl_body(rf)) = 0;
+//    *((int *) atl_body(rf)) = 0;
+#ifdef FREETOS
+	usbPassThrough=false;
+#endif
+
+#ifdef LINUX
+	exit(0);
+#endif
 }
-*/
 
 int8_t readLineFromArray(uint8_t *src, uint8_t *dest) {
     uint8_t ch;
@@ -1012,6 +897,83 @@ prim ANSI_free() {
 
 #ifdef FREERTOS
 
+prim FR_uartRxReady() {
+
+	Sl(1);
+	So(1);
+
+	bool failFlag = rxReady(S0);
+
+	S0=failFlag;
+}
+
+prim FR_uartTxBuffer() {
+	Sl(2);
+
+	uint8_t *buffer=(uint8_t *)S0;
+	UART_HandleTypeDef *uart=(UART_HandleTypeDef *)S1;
+
+	txBuffer(uart, buffer);
+
+	Pop2;
+}
+
+prim FR_uartRxByte() {
+
+	Sl(1);
+	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)S0;
+	uint8_t data;
+
+	data = rxByteWait(huart,-1) ;
+	S0=data;
+}
+
+/*
+ * uart buffer len -- count
+ */
+prim FR_uartReadLine() {
+
+	Sl(3);
+	So(1);
+	uint8_t byteCount=0;
+
+	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)S2;
+	void *buffer;
+	buffer = S1 ;
+	uint8_t len = (uint8_t)S0;
+
+	byteCount = simpleRxLine(huart, buffer, len) ;
+	Pop2;
+	S0=byteCount;
+}
+
+prim FR_uartEmit() {
+
+	Sl(2);
+	UART_HandleTypeDef *huart;
+	uint8_t data;
+
+	huart=S1;
+	data=(uint8_t)S0;
+
+//	txByteWait(UART_HandleTypeDef *huart,uint8_t data, int timeout)
+	txByteWait(huart,data, -1) ;
+	Pop2;
+}
+
+prim FR_lcdReset() {
+	HAL_GPIO_WritePin(GPIOA,nLCD_RESET_Pin,GPIO_PIN_RESET); // Set LCD reset low.
+	vTaskDelay( pdMS_TO_TICKS(500));
+	HAL_GPIO_WritePin(GPIOA,nLCD_RESET_Pin,GPIO_PIN_SET); // Set LCD reset high.
+	vTaskDelay( pdMS_TO_TICKS(500));
+}
+
+prim FR_lcdRegSet() {
+	HAL_GPIO_WritePin(GPIOA,nLCD_RESET_Pin,GPIO_PIN_RESET);
+	vTaskDelay( pdMS_TO_TICKS(10));
+	HAL_GPIO_WritePin(GPIOA,nLCD_RESET_Pin,GPIO_PIN_SET);
+	vTaskDelay( pdMS_TO_TICKS(200));
+}
 prim FR_getSysTick() {
     uint32_t tick;
 
@@ -1039,7 +1001,8 @@ prim FR_CmdParse() {
 
 
 prim FR_getPoolId() {
-	Push=(stackitem)mpool_id;
+//	Push=(stackitem)mpool_id;
+	Push=0;
 }
 
 prim FR_poolAllocate() {
@@ -1052,6 +1015,7 @@ prim FR_poolAllocate() {
 	S0=(stackitem) msg;
 	Push=sizeof(struct cmdMessage);
 }
+
 prim FR_poolFree() {
 
 	osStatus rc=osOK;;
@@ -1081,6 +1045,47 @@ prim FR_getTaskDb() {
 	S0 = (stackitem)task[S0]->db;
 }
 
+prim FR_writePin() {
+	Sl(3);
+
+	uint8_t pinState=(uint8_t)S0;
+	uint16_t portPin = (uint16_t)S1;
+	uint32_t portAddr = (uint32_t)S2;
+
+	HAL_GPIO_WritePin(portAddr,portPin,pinState);
+	Pop2;
+	Pop;
+}
+/*
+	HAL_GPIO_WritePin(R_LED_GPIO_Port,R_LED_Pin,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB,G_LED_Pin,GPIO_PIN_SET);
+	*/
+
+prim FR_readPin() {
+	Sl(2);
+	So(1);
+
+//	uint8_t pinState=(uint8_t)S0;
+	uint16_t portPin = (uint16_t)S0;
+	uint32_t portAddr = (uint32_t)S1;
+
+	Pop;
+	S0=(stackitem)HAL_GPIO_ReadPin(portAddr,portPin);
+}
+
+prim FR_setBacklight() {
+	TIM_OC_InitTypeDef sConfigOC;
+
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+
+	sConfigOC.Pulse = (uint32_t)S0;
+
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_4);
+
+	S0=HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_4);
+}
 
 #endif
 
@@ -1115,7 +1120,8 @@ prim FR_getMessage() {
 		//
 		// TODO Memery errors, fatal error handler ?
 		//
-		tmp=osPoolFree( mpool_id, (void *)evt.value.p);
+//		tmp=osPoolFree( mpool_id, (void *)evt.value.p);
+		free(evt.value.p);
 	} else {
 		memset( out, 0, sizeof(struct cmdMessage) );
 	}
@@ -1169,7 +1175,8 @@ prim FR_putMessage() {
 	dest = (QueueHandle_t ) S0;
 	out = (struct cmdMessage *)S1;
 
-	tmp = (struct cmdMessage *)osPoolAlloc(	mpool_id );
+//	tmp = (struct cmdMessage *)osPoolAlloc(	mpool_id );
+	tmp = (struct cmdMessage *)calloc(1,sizeof(struct cmdMessage));
 
 	if( tmp == NULL) {
 		rc = osErrorNoMemory ;
@@ -1203,11 +1210,7 @@ prim FR_putMessage() {
 #ifdef PTHREAD
 prim PS_comms() {
 
-    /* TODO Fix this.
-    extern pthread_mutex_t lock;
 	pthread_mutex_unlock(&lock);
-    */
-
     pthread_yield();
     sleep(1);
 }
@@ -1268,13 +1271,13 @@ prim FR_displayRecord() {
 #ifdef LINUX
     printf("%s",localBuffer);
 #else
-	txBuffer(console, (uint8_t *)localBuffer) ;
+	atlastTxBuffer(console, (uint8_t *)localBuffer) ;
 #endif
     sprintf(localBuffer,"Value     : %s\n", (char *)nlistGetDef(rec));
 #ifdef LINUX
     printf("%s",localBuffer);
 #else
-	txBuffer(console, (uint8_t *)localBuffer) ;
+	atlastTxBuffer(console, (uint8_t *)localBuffer) ;
 #endif
 
 
@@ -1288,7 +1291,7 @@ prim FR_displayRecord() {
 #ifdef LINUX
     printf("%s",localBuffer);
 #else
-	txBuffer(console, (uint8_t *)localBuffer) ;
+	atlastTxBuffer(console, (uint8_t *)localBuffer) ;
 #endif
     Pop;
 }
@@ -1376,7 +1379,7 @@ static char *alloc(unsigned int size) {
         sprintf(outBuffer, "\n\nOut of memory!  %u bytes requested.\n", size); // EMBEDDED
 #endif
 #ifdef FREERTOS
-    	 txBuffer(console, (uint8_t *)outBuffer) ;
+    	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
          printf("%s",outBuffer);
 #endif
@@ -1497,7 +1500,7 @@ static int token( char **cp) {
                 sprintf(outBuffer,"\nRunaway string: %s\n", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -1654,7 +1657,7 @@ void atl_memstat() {
 #ifdef EMBEDDED
      sprintf(outBuffer,"  Memory Area     usage     used    allocated   in use \n");
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -1665,7 +1668,7 @@ void atl_memstat() {
             (100L * (stk - stack)) / atl_stklen);
 
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -1675,7 +1678,7 @@ void atl_memstat() {
             atl_rstklen,
             (100L * (rstk - rstack)) / atl_rstklen);
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -1685,7 +1688,7 @@ void atl_memstat() {
             atl_heaplen,
             (100L * (hptr - heap)) / atl_heaplen);
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -1740,11 +1743,12 @@ static void enter(tkname)
 static Boolean kbquit() {
 
 	Boolean rc=False;
-
+/*
 	if(rxReady(console)) {
 		(void) rxByte(console );
 		rc=True;
 	}
+	*/
 
 	return rc;
 	/*
@@ -2290,7 +2294,7 @@ prim P_strlit() 		      /* Push address of string literal */
         sprintf(outBuffer,"\"%s\" ", (((char *) ip) + 1)); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -2743,7 +2747,7 @@ prim P_dot() {
     }
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -2761,7 +2765,7 @@ prim P_question()		      /* Print value at address */
     sprintf(outBuffer,"Hello\n");
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s",outBuffer);
 #endif
@@ -2774,7 +2778,7 @@ prim P_cr() {
         sprintf(outBuffer,"\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s",outBuffer);
 #endif
@@ -2788,7 +2792,7 @@ prim P_dots() {
     sprintf(outBuffer,"Stack: ");  // EMBEDDED
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
    	outBuffer[0]=0;
 #else
         V printf("Stack: ");    // NOT EMBEDDED
@@ -2800,7 +2804,7 @@ prim P_dots() {
 #endif
 
 #ifdef FREERTOS
-        txBuffer(console, (uint8_t *)outBuffer) ;
+        atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
         V printf("Empty."); // NOT EMBEDDED
 #endif
@@ -2811,7 +2815,7 @@ prim P_dots() {
         	// TODO If you change the stack size change this
             sprintf(outBuffer,(base == 16 ? "%lX " : "%ld "), *tsp); //  EMBEDDED
 #ifdef FREERTOS
-            txBuffer(console, (uint8_t *)outBuffer) ;
+            atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
              printf("%s",outBuffer);
 #endif
@@ -2837,7 +2841,7 @@ prim P_dotparen()		      /* Print literal string that follows */
     	memset(outBuffer,0,sizeof(outBuffer));
         sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
 #ifdef FREERTOS
-        txBuffer(console, (uint8_t *)outBuffer) ;
+        atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 #else
         V printf("%s", ((char *) ip) + 1);  // NOT EMBEDDED
@@ -2846,7 +2850,18 @@ prim P_dotparen()		      /* Print literal string that follows */
     }
 }
 
+
+// send the byte at TOS.
+prim P_emit() {
+	Sl(1);
+
+#ifdef FREERTOS
+	usbTxByte(S0);
+#endif
+	Pop;
+}
 /* Print string pointed to by stack */
+
 prim P_type() {
     Sl(1);
     
@@ -2858,7 +2873,7 @@ prim P_type() {
     sprintf(outBuffer,"%s", (char *) S0); // EMBEDDED
 #endif
 #ifdef FREERTOS
-    txBuffer(console, (uint8_t *)outBuffer) ;
+    atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s",outBuffer);
 #endif
@@ -2876,10 +2891,13 @@ prim P_words()			      /* List words */
     while (dw != NULL) {
 
 #ifdef EMBEDDED
-        sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+//    	strcpy(outBuffer,"\n");
+//    	strcat(outBuffer,dw->wname+1);
+
+        sprintf(outBuffer,"\r\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-        txBuffer(console, (uint8_t *)outBuffer) ;
+        atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s",outBuffer);
 #endif
@@ -2900,7 +2918,7 @@ prim P_words()			      /* List words */
     sprintf(outBuffer,"\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3353,7 +3371,7 @@ prim P_dolit()			      /* Push instruction stream literal */
         sprintf(outBuffer,"%ld ", (long) *ip); // NOT EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3668,7 +3686,7 @@ prim P_abortq() 		      /* Abort, printing message */
         sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3816,7 +3834,7 @@ prim P_tick()			      /* Take address of next word */
                 sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3826,7 +3844,7 @@ prim P_tick()			      /* Take address of next word */
             sprintf(outBuffer,"\nWord not specified when expected.\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3844,7 +3862,7 @@ prim P_tick()			      /* Take address of next word */
             sprintf(outBuffer,"\nWord requested by ` not on same input line.\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3921,7 +3939,7 @@ prim P_tolink() 		      /* Find link field from compile addr */
         sprintf(outBuffer,"\n>LINK Foulup--wnext is not at zero!\n");  // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -3949,7 +3967,7 @@ prim P_fromlink()		      /* Get compile address from link */
         sprintf(outBuffer,"\nLINK> Foulup--wnext is not at zero!\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4030,10 +4048,11 @@ prim P_system()
 }
 
 // Time to leave.
+/*
 prim ATH_bye() {
     exit(0);
 }
-
+*/
 #endif /* SYSTEM */
 
 #ifdef TRACE
@@ -4066,7 +4085,7 @@ prim P_wordsused()		      /* List words used by program */
             sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4082,7 +4101,7 @@ prim P_wordsused()		      /* List words used by program */
     sprintf(outBuffer,"\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4098,7 +4117,7 @@ prim P_wordsunused()		      /* List words not used by program */
             sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4114,7 +4133,7 @@ prim P_wordsunused()		      /* List words not used by program */
     sprintf(outBuffer,"\n");  // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4424,6 +4443,7 @@ static struct primfcn primt[] = {
     {"1.(", P_dotparen},
     {"0TYPE", P_type},
     {"0WORDS", P_words},
+	{"0EMIT", P_emit},
 #endif /* CONIO */
 
 #ifdef FILEIO
@@ -4457,25 +4477,13 @@ static struct primfcn primt[] = {
 	{(char *)"0W!",ATH_wbang},
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DECIMAL",ATH_dec},
-//	{(char *)"0BYE",ATH_bye},
-
+	{(char *)"0BYE",ATH_bye},
 	{(char *)"0?FILEIO",ATH_qfileio},
-    {(char *)"0?LINUX", ATH_qlinux},
-    {(char *)"0?FREERTOS", ATH_qfreertos},
-    {(char *)"0?MATH", ATH_qmath},
-    {(char *)"0?REAL", ATH_qreal},
-    {(char *)"0?CONIO", ATH_qconio},
-    {(char *)"0?DOUBLE", ATH_qdouble},
-    {(char *)"0?EVALUATE", ATH_qevaluate},
-    {(char *)"0?STRING", ATH_qstring},
-    {(char *)"0?SYSTEM", ATH_qsystem},
-    {(char *)"0?CUSTOM", ATH_qcustom},
-    {(char *)"0?OS", ATH_qos},
-    {(char *)"0?CPU", ATH_qcpu},
-
     {(char *)"0.FEATURES", ATH_Features},
     {(char *)"0TIB", ATH_Instream},
     {(char *)"0TOKEN", ATH_Token},
+    {(char *)"0?LINUX", ATH_qlinux},
+    {(char *)"0?FREERTOS", ATH_qfreertos},
     {(char *)"0MS", ATH_ms},
     {(char *)"0PWD", ATH_pwd},
     {(char *)"0CD", ATH_cd},
@@ -4492,6 +4500,9 @@ static struct primfcn primt[] = {
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
     {(char *)"0DB@", FR_getTaskDb},
+	{(char *)"0WRITE-PIN", FR_writePin},
+	{(char *)"0READ-PIN", FR_readPin},
+	{(char *)"0SET-BACKLIGHT", FR_setBacklight},
 
     {(char *)"0POOL@", FR_getPoolId } ,
     {(char *)"0POOL-FREE", FR_poolFree } ,
@@ -4499,6 +4510,14 @@ static struct primfcn primt[] = {
 
     {(char *)"0CMD-PARSE", FR_CmdParse },
     {(char *)"0TICK@", FR_getSysTick },
+	{(char *)"0LCD-RESET", FR_lcdReset },
+	{(char *)"0LCD-REG-SET",FR_lcdRegSet},
+
+	{(char *)"0?UART-RX", FR_uartRxReady},
+	{(char *)"0UART-TYPE", FR_uartTxBuffer},
+	{(char *)"0UART-KEY", FR_uartRxByte},
+	{(char *)"0UART-READLINE",FR_uartReadLine},
+	{(char *)"0UART-EMIT",  FR_uartEmit},
 
 #endif
 #ifdef PUBSUB
@@ -4592,7 +4611,7 @@ static void pwalkback()
         sprintf(outBuffer,"Walkback:\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4602,7 +4621,7 @@ static void pwalkback()
             sprintf(outBuffer,"   %s\n", curword->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4613,7 +4632,7 @@ static void pwalkback()
             sprintf(outBuffer,"   %s\n", wb->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4632,7 +4651,7 @@ static void trouble(kind)
     sprintf(outBuffer,"\n%s.\n", kind); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4735,7 +4754,7 @@ static void exword(wp)
         sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); //  EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4760,7 +4779,7 @@ static void exword(wp)
             sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5093,7 +5112,7 @@ int atl_load(fp)
         sprintf(outBuffer,"\nRunaway `(' comment.\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5140,7 +5159,7 @@ int atl_prologue(sp)
                     sprintf(outBuffer,"Prologue set %sto %ld\n", proname[i].pname, *proname[i].pparam); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5201,7 +5220,7 @@ int atl_eval(char *sp) {
                                 sprintf(outBuffer,"\nForget protected.\n"); //  EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5242,7 +5261,7 @@ int atl_eval(char *sp) {
                                 sprintf(outBuffer," Forgetting DOES> word. "); //  EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5256,7 +5275,7 @@ int atl_eval(char *sp) {
                         sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5275,7 +5294,7 @@ int atl_eval(char *sp) {
                         sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5293,7 +5312,7 @@ int atl_eval(char *sp) {
                         sprintf(outBuffer,"\n%s isn't unique.", tokbuf); // NOT EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5332,10 +5351,10 @@ int atl_eval(char *sp) {
                         sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #endif
 #ifdef FREERTOS
-                        txBuffer(console, (uint8_t *)outBuffer) ;
+                        atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
                         printf("%s",outBuffer);
 #endif
@@ -5404,7 +5423,7 @@ int atl_eval(char *sp) {
                         sprintf(outBuffer,"%s", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -5434,7 +5453,7 @@ int atl_eval(char *sp) {
                 sprintf(outBuffer,"\nUnknown token type %d\n", i); // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 txBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
      printf("%s",outBuffer);
 #endif
