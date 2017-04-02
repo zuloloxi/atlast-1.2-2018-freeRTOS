@@ -82,7 +82,6 @@ lintatlast:
 install:	atlast
 	strip atlast
 #	strip atlsmall
-	strip atlast
 #	mv ./atlsmall /usr/local/bin
 	mv ./atlast /usr/local/bin
 #	strip atlsmall
