@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef BANNER
     PR("ATLAST 1.2 (2007-10-07) This program is in the public domain.\n");
-    printf("Compiled: %s\n",__DATE__);
+    printf("Compiled: %s %s\n",__DATE__, __TIME__);
 #endif
 
     ifp = stdin;
