@@ -130,6 +130,12 @@ else
     echo ".. done."
 fi
 
+if [ $DRY_RUN="YES" ] ; then
+    echo
+    echo "DRY RUN"
+    echo
+fi
+
 if [ -f $MAKEFILE ]; then
     echo "Building with $MAKEFILE"
     PROFILE=$(readlink ./profile.mk)
