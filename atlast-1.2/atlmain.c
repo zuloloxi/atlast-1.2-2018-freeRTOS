@@ -192,11 +192,9 @@ int main(int argc, char *argv[]) {
             case 'R':
                 atl_rstklen = atol(optarg);
                 break;
-
             case 'S':
                 atl_stklen = atol(optarg);
                 break;
-
             case 'T':
                 atl_trace = TRUE;
                 break;
@@ -230,7 +228,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-
 #endif
 #ifdef LINUX
     sprintf(t,"0x%x constant TABLE",table);
@@ -240,9 +237,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_lock(&lock);
     int err = pthread_create(&(tid[0]), NULL, &doSmall, (void *)table);
 
-
 #endif
-
 
     /* If any include files were named, load each in turn before
        we execute the program. */
@@ -276,10 +271,6 @@ int main(int argc, char *argv[]) {
 
     /* Now that all the preliminaries are out of the way, fall into
        the main ATLAST execution loop. */
-
-#ifndef HIGHC
-    V signal(SIGINT, ctrlc);
-#endif /* HIGHC */
 
     //    tst = (int *) atl_body(rf);
     while (true) {
