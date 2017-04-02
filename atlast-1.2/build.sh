@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # set -x
 
@@ -130,7 +130,7 @@ else
     echo ".. done."
 fi
 
-if [ $DRY_RUN="YES" ] ; then
+if [ "$DRY_RUN" == "YES" ]; then
     echo
     echo "DRY RUN"
     echo
