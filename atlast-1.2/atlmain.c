@@ -40,21 +40,6 @@
 
 /*  Globals imported  */
 
-#ifndef HIGHC
-
-/*  CTRLC  --  Catch a user console break signal.  If your C library
-    does not provide this Unix-compatibile facility
-    (registered with the call on signal() in main()),
-    just turn this code off or, better still, replace it
-    with the equivalent on your system.  */
-
-static void ctrlc(int sig) {
-    if (sig == SIGINT)
-        atl_break();
-}
-#endif /* HIGHC */
-
-
 #ifdef PUBSUB
 #ifdef PTHREAD
 #warning "Define lock"
@@ -276,11 +261,6 @@ int main(int argc, char *argv[]) {
 
     /* Now that all the preliminaries are out of the way, fall into
        the main ATLAST execution loop. */
-
-#ifndef HIGHC
-    V signal(SIGINT, ctrlc);
-#endif /* HIGHC */
-
     //    tst = (int *) atl_body(rf);
     while (true) {
 
