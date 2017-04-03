@@ -61,10 +61,11 @@
 #include "ATH_serial.h"
 #include "tasks.h"
 #include "cmsis_os.h"
+#include "elco.h"
 
 // extern osPoolId mpool_id;
 
-extern UART_HandleTypeDef *console;
+// extern UART_HandleTypeDef *console;
 // extern char *outBuffer;
 #endif
 #endif
@@ -763,7 +764,7 @@ prim ATH_dump() {
     int i=0;
     for( i = 0; i<length;i+=16) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"%08x:", address);
+        sprintf(outBuffer,"%08x:", (uintptr_t)address);
 #endif
 #ifdef FREERTOS
     atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -896,13 +897,68 @@ prim ANSI_free() {
 #endif // ANSI
 
 #ifdef FREERTOS
+extern struct ringBuffer *uart4RxBuffer;
+
+// Given a UART structure return the  ring buffer data pointer.
+// Of the data.
+//
+prim FR_ringBufferPtr() {
+    struct ringBuffer *ptr=NULL;
+    UART_HandleTypeDef *uart;
+
+    Sl(1);
+    So(1);
+
+    uart = (UART_HandleTypeDef *)S0;
+
+    if(uart->Instance == UART4) {
+        ptr = uart4RxBuffer;
+    } else {
+        ptr=NULL;
+    }
+
+    S0=(stackitem)ptr->buffer;
+}
+
+prim FR_ringBufferErase() {
+    struct ringBuffer *ptr=NULL;
+    UART_HandleTypeDef *uart;
+
+    Sl(1);
+
+    uart = (UART_HandleTypeDef *)S0;
+
+    if(uart->Instance == UART4) {
+        ptr = uart4RxBuffer;
+    } else {
+        ptr=NULL;
+    }
+    if( ptr != NULL) {
+        ringBufferReset(ptr);
+    }
+    Pop;
+
+}
 
 prim FR_uartRxReady() {
 
 	Sl(1);
 	So(1);
 
-	bool failFlag = rxReady(S0);
+	UART_HandleTypeDef *uart;
+	bool failFlag = true;
+
+	// If RX is interrupt driven then use
+	// The ringBuffer struct.
+	// NAMING CONVENTION: uartRxBuffer, e.g.
+	// uart4RxBuffer
+
+	uart = (UART_HandleTypeDef *)S0;
+	if (uart->Instance == UART4) {
+		failFlag = (uart4RxBuffer->inIdx != uart4RxBuffer->outIdx);
+	} else {
+		failFlag = rxReady(S0);
+	}
 
 	S0=failFlag;
 }
@@ -923,16 +979,19 @@ prim FR_uartRxByte() {
 	Sl(1);
 	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)S0;
 	uint8_t data;
+	if (huart->Instance == UART4) {
+	    data=ringBufferRxByte( uart4RxBuffer );
+	} else {
+	    data = rxByteWait(huart,-1) ;
+	}
 
-	data = rxByteWait(huart,-1) ;
-	S0=data;
+	S0=(stackitem)data;
 }
 
 /*
  * uart buffer len -- count
  */
 prim FR_uartReadLine() {
-
 	Sl(3);
 	So(1);
 	uint8_t byteCount=0;
@@ -942,7 +1001,13 @@ prim FR_uartReadLine() {
 	buffer = S1 ;
 	uint8_t len = (uint8_t)S0;
 
-	byteCount = simpleRxLine(huart, buffer, len) ;
+	memset(buffer,0,len);
+
+	if( huart->Instance == UART4) {
+	    byteCount = ringBufferSimpleRxLine(uart4RxBuffer, buffer, len, '\r');
+	} else {
+	    byteCount = simpleRxLine(huart, buffer, len,'\r') ;
+	}
 	Pop2;
 	S0=byteCount;
 }
@@ -985,7 +1050,7 @@ prim FR_getSysTick() {
     Push=(stackitem)tick;
 }
 
-prim FR_CmdParse() {
+prim FR_cmdParse() {
 	Sl(2);
 
 	char *res=NULL;
@@ -1042,7 +1107,18 @@ prim FR_getQid() {
 prim FR_getTaskDb() {
 	Sl(1);
 
+    xSemaphoreTake(task[S0]->lock, portMAX_DELAY );
 	S0 = (stackitem)task[S0]->db;
+    xSemaphoreGive(task[USB_TASK]->lock);
+}
+
+prim FR_setTaskDb() {
+	Sl(1);
+
+    xSemaphoreTake(task[S0]->lock, portMAX_DELAY );
+	task[S0]->db = S0;
+    xSemaphoreGive(task[USB_TASK]->lock);
+    Pop;
 }
 
 prim FR_writePin() {
@@ -1076,6 +1152,8 @@ prim FR_readPin() {
 prim FR_setBacklight() {
 	TIM_OC_InitTypeDef sConfigOC;
 
+	Sl(1);
+
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
 
 	sConfigOC.Pulse = (uint32_t)S0;
@@ -1085,6 +1163,7 @@ prim FR_setBacklight() {
 	HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_4);
 
 	S0=HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_4);
+	Pop;
 }
 
 #endif
@@ -2323,6 +2402,23 @@ prim P_move() {
     char *src =(char *)S2;
 
     memcpy( dest, src, len);
+}
+// ATH find token
+//
+prim P_strsep() {
+    uint8_t *buffer;
+    uint8_t *res=NULL;
+    uint8_t delim;
+
+    Sl(2);
+    So(1);
+
+    delim=(uint8_t) S0;
+    buffer=(uint8_t *)S1;
+
+    res=strsep(&buffer, &delim);
+    Pop;
+    S0=(stackitem)res;
 }
 
 prim P_strcpy() 		      /* Copy string to address on stack */
@@ -4082,7 +4178,7 @@ prim P_wordsused()		      /* List words used by program */
     while (dw != NULL) {
         if (*(dw->wname) & WORDUSED) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sprintf(outBuffer,"\r\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4114,7 +4210,7 @@ prim P_wordsunused()		      /* List words not used by program */
     while (dw != NULL) {
         if (!(*(dw->wname) & WORDUSED)) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"\n%s", dw->wname + 1); // EMBEDDED
+            sprintf(outBuffer,"\r\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4307,6 +4403,7 @@ static struct primfcn primt[] = {
     {"0COMPARE", P_strcmp},
     {"0STRFORM", P_strform},
     {"0MOVE", P_move},
+    {"0STRSEP", P_strsep},
 #ifdef REAL
     {"0FSTRFORM", P_fstrform},
     {"0STRREAL", P_strreal},
@@ -4500,6 +4597,8 @@ static struct primfcn primt[] = {
 #ifdef FREERTOS
     {(char *)"0QID@", FR_getQid},
     {(char *)"0DB@", FR_getTaskDb},
+    {(char *)"0DB!", FR_setTaskDb},
+
 	{(char *)"0WRITE-PIN", FR_writePin},
 	{(char *)"0READ-PIN", FR_readPin},
 	{(char *)"0SET-BACKLIGHT", FR_setBacklight},
@@ -4508,7 +4607,7 @@ static struct primfcn primt[] = {
     {(char *)"0POOL-FREE", FR_poolFree } ,
     {(char *)"0POOL-ALLOCATE", FR_poolAllocate } ,
 
-    {(char *)"0CMD-PARSE", FR_CmdParse },
+    {(char *)"0CMD-PARSE", FR_cmdParse },
     {(char *)"0TICK@", FR_getSysTick },
 	{(char *)"0LCD-RESET", FR_lcdReset },
 	{(char *)"0LCD-REG-SET",FR_lcdRegSet},
@@ -4518,6 +4617,8 @@ static struct primfcn primt[] = {
 	{(char *)"0UART-KEY", FR_uartRxByte},
 	{(char *)"0UART-READLINE",FR_uartReadLine},
 	{(char *)"0UART-EMIT",  FR_uartEmit},
+	{(char *)"0RING-BUFFER@", FR_ringBufferPtr },
+	{(char *)"0RING-BUFFER-ERASE", FR_ringBufferErase },
 
 #endif
 #ifdef PUBSUB
@@ -4604,11 +4705,10 @@ void atl_primdef(pt)
 
 /*  PWALKBACK  --  Print walkback trace.  */
 
-static void pwalkback()
-{
+static void pwalkback() {
     if (atl_walkback && ((curword != NULL) || (wbptr > wback))) {
 #ifdef EMBEDDED
-        sprintf(outBuffer,"Walkback:\n"); // EMBEDDED
+        sprintf(outBuffer,"Walkback:\r\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4618,7 +4718,7 @@ static void pwalkback()
         
         if (curword != NULL) {
 #ifdef EMBEDDED
-            sprintf(outBuffer,"   %s\n", curword->wname + 1); // EMBEDDED
+            sprintf(outBuffer,"   %s\r\n", curword->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4629,7 +4729,7 @@ static void pwalkback()
         while (wbptr > wback) {
             dictword *wb = *(--wbptr);
 #ifdef EMBEDDED
-            sprintf(outBuffer,"   %s\n", wb->wname + 1); // EMBEDDED
+            sprintf(outBuffer,"   %s\r\n", wb->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4643,12 +4743,10 @@ static void pwalkback()
 
 /*  TROUBLE  --  Common handler for serious errors.  */
 
-static void trouble(kind)
-    char *kind;
-{
+static void trouble(char *kind) {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-    sprintf(outBuffer,"\n%s.\n", kind); // EMBEDDED
+    sprintf(outBuffer,"\n%s.\r\n", kind); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -5348,7 +5446,7 @@ int atl_eval(char *sp) {
                     } else {
 #ifdef MEMMESSAGE
 #ifdef EMBEDDED
-                        sprintf(outBuffer," '%s' undefined ", tokbuf); // EMBEDDED
+                        sprintf(outBuffer," '%s' undefined\r\n", tokbuf); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
