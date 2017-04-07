@@ -1095,21 +1095,107 @@ prim FR_poolFree() {
 	Push=rc;
 }
 
+bool validTask(uint8_t n) {
+    return (bool) ( (n > NO_TASK) && (n < LAST_TASK));
+}
+
+prim FR_semGet() {
+    SemaphoreHandle_t sema;
+    sema=task[S0]->lock;
+    S0 = (stackitem)sema;
+}
+
+prim FR_semGetCount() {
+    BaseType_t counter;
+    Sl(1);
+    So(1);
+
+    counter=uxQueueMessagesWaiting( (SemaphoreHandle_t )S0 );
+
+    S0=counter;
+}
+prim FR_semGive() {
+    SemaphoreHandle_t sema;
+    BaseType_t rc;
+    BaseType_t counter;
+    bool failFlag=true;
+
+    Sl(1);
+    So(1);
+
+    sema=(SemaphoreHandle_t)S0;
+
+    counter=uxQueueMessagesWaiting( sema );
+
+    if ( counter >= 0 ) {
+        rc = xSemaphoreGive( sema);
+        failFlag=(rc != pdPASS ) ? true : false ;
+    } else {
+        failFlag=true;
+    }
+
+    S0=failFlag ;
+}
+
+prim FR_semTake() {
+    SemaphoreHandle_t sema;
+    BaseType_t rc;
+    bool failFlag=true;
+    TickType_t delay;
+
+    Sl(2);
+    So(1);
+
+    sema=(SemaphoreHandle_t)S1;
+    delay=(TickType_t)S0;
+
+    rc=xSemaphoreTake( sema, pdMS_TO_TICKS(delay)) ;
+    Pop;
+
+    failFlag=(rc != pdPASS ) ? true : false ;
+    S0=(stackitem)failFlag;
+}
+
 prim FR_getQid() {
-	extern struct taskData *task[LAST_TASK];
+    extern struct taskData *task[LAST_TASK];
 
-	Sl(1);
+    bool failFlag=true;
 
-	S0 = (stackitem)task[S0]->iam;
+    struct taskData *t;
+
+    Sl(1);
+
+    if (validTask( S0 )) {
+        // We have a valid task id ...
+        t=task[S0];
+        Pop;
+
+        if( t != NULL) {
+            Push=t->iam;
+            failFlag=false;
+        } else {
+            failFlag = true;
+        }
+    } else {
+        Pop;
+        failFlag=true;
+    }
+    Push=failFlag;
 
 }
 
 prim FR_getTaskDb() {
-	Sl(1);
+    Sl(1);
 
-    xSemaphoreTake(task[S0]->lock, portMAX_DELAY );
-	S0 = (stackitem)task[S0]->db;
-    xSemaphoreGive(task[USB_TASK]->lock);
+    bool failFlag=true;
+
+    if (validTask( S0 )) {
+        xSemaphoreTake(task[S0]->lock, portMAX_DELAY );
+        S0 = (stackitem)task[S0]->db;
+        xSemaphoreGive(task[USB_TASK]->lock);
+        failFlag=false;
+    }
+    Push= failFlag ;
 }
 
 prim FR_setTaskDb() {
@@ -1180,10 +1266,11 @@ prim FR_setBacklight() {
 prim FR_getMessage() {
 #ifdef FREERTOS
 //	extern struct taskData *task[LAST_TASK];
-	osEvent evt;	uint32_t timeout;
+	BaseType_t rc;
+	uint32_t timeout;
 	volatile QueueHandle_t qh;
     struct cmdMessage *out;
-	osStatus tmp;
+    bool failFlag=true;
 
 	Sl(3);
 	So(1);
@@ -1192,21 +1279,17 @@ prim FR_getMessage() {
 	timeout=S1;
     qh=(QueueHandle_t)S2;
 
-	evt = osMessageGet(qh,timeout);
+    rc = xQueueReceive( qh, out, pdMS_TO_TICKS(timeout));
 
-	if( evt.status == osEventMessage) {
-		memcpy(out, evt.value.p, sizeof(struct cmdMessage));
-		//
-		// TODO Memery errors, fatal error handler ?
-		//
-//		tmp=osPoolFree( mpool_id, (void *)evt.value.p);
-		free(evt.value.p);
-	} else {
+	if( rc != pdPASS ) {
 		memset( out, 0, sizeof(struct cmdMessage) );
+	    failFlag=true;
+	} else {
+	    failFlag=false;
 	}
     Pop2;
 
-	S0 = (stackitem)evt.status;
+	S0 = (stackitem)failFlag;
 #endif
 
 #ifdef LINUX
@@ -1261,7 +1344,8 @@ prim FR_putMessage() {
 		rc = osErrorNoMemory ;
 	} else {
 		memcpy(tmp,out,sizeof(struct cmdMessage));
-		rc = osMessagePut(dest,(uint32_t)tmp, osWaitForever);
+//		rc = osMessagePut(dest,(uint32_t)tmp, osWaitForever);
+		rc = xQueueSendToBack(dest,out, osWaitForever);
 	}
 
 	Pop2;
@@ -1396,7 +1480,7 @@ prim FR_addRecord() {
 
 }
 //    char *dbLookup(struct Small *db, const char *n);
-
+// Stack: db <key> -- <nlist>
 prim FR_lookupRecord() {
 	struct Small *db;
 	char *key;
@@ -1732,9 +1816,9 @@ Exported char *atl_fgetsp(s, n, stream)
 // outBuffer
 // #warning MEMSTAT
 void atl_memstat() {
-    static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld\n";
+    static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld\r\n";
 #ifdef EMBEDDED
-     sprintf(outBuffer,"  Memory Area     usage     used    allocated   in use \n");
+     sprintf(outBuffer,"  Memory Area     usage     used    allocated   in use\r\n");
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
@@ -2874,6 +2958,7 @@ prim P_cr() {
         sprintf(outBuffer,"\n"); // EMBEDDED
 #endif
 #ifdef FREERTOS
+        strcat(outBuffer,"\r");
     atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
     printf("%s",outBuffer);
@@ -2987,10 +3072,11 @@ prim P_words()			      /* List words */
     while (dw != NULL) {
 
 #ifdef EMBEDDED
-//    	strcpy(outBuffer,"\n");
-//    	strcat(outBuffer,dw->wname+1);
+    	strcpy(outBuffer,"\r\n");
+    	strcat(outBuffer,dw->wname+1);
+//    	strcat(outBuffer,"\r\n");
 
-        sprintf(outBuffer,"\r\n%s", dw->wname + 1); // EMBEDDED
+//        sprintf(outBuffer,"\r\n%s", dw->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
         atlastTxBuffer(console, (uint8_t *)outBuffer) ;
@@ -4620,6 +4706,11 @@ static struct primfcn primt[] = {
 	{(char *)"0RING-BUFFER@", FR_ringBufferPtr },
 	{(char *)"0RING-BUFFER-ERASE", FR_ringBufferErase },
 
+	{(char *)"0SEM@", FR_semGet },
+	{(char *)"0SEM-COUNT@", FR_semGetCount },
+	{(char *)"0SEM-GIVE", FR_semGive },
+	{(char *)"0SEM-TAKE", FR_semTake },
+
 #endif
 #ifdef PUBSUB
 	{(char *)"0MKDB",     FR_mkdb},
@@ -4848,11 +4939,20 @@ static void exword(wp)
     curword = wp;
 #ifdef TRACE
     if (atl_trace) {
+
+	 P_dots();
+#ifdef FREERTOS
+	 atlastTxBuffer(console, (uint8_t *)"\t\t") ;
+#else
+     printf("\t\t");
+#endif
 #ifdef EMBEDDED
         sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); //  EMBEDDED
 #endif
 #ifdef FREERTOS
+
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)"\r\n") ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4873,11 +4973,18 @@ static void exword(wp)
         curword = *ip++;
 #ifdef TRACE
         if (atl_trace) {
+	 P_dots();
+#ifdef FREERTOS
+	 atlastTxBuffer(console, (uint8_t *)"\t\t") ;
+#else
+     printf("\t\t");
+#endif
 #ifdef EMBEDDED
             sprintf(outBuffer,"\nTrace: %s ", curword->wname + 1); // EMBEDDED
 #endif
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, (uint8_t *)"\r\n") ;
 #else
      printf("%s",outBuffer);
 #endif
@@ -4964,11 +5071,14 @@ void atl_init()
                stackitems. */
             atl_ltempstr += sizeof(stackitem) -
                 (atl_ltempstr % sizeof(stackitem));
-            cp = alloc((((unsigned int) atl_heaplen) * sizeof(stackitem)) +
-                    ((unsigned int) (atl_ntempstr * atl_ltempstr)));
+
+//            cp = alloc((((unsigned int) atl_heaplen) * sizeof(stackitem)) + ((unsigned int) (atl_ntempstr * atl_ltempstr)));
+            int heapSize=((((unsigned int) atl_heaplen) * sizeof(stackitem)) + ((unsigned int) (atl_ntempstr * atl_ltempstr)));
+            cp = alloc( heapSize );
+
             heapbot = (stackitem *) cp;
-            strbuf = (char **) alloc(((unsigned int) atl_ntempstr) *
-                    sizeof(char *));
+            strbuf = (char **) alloc(((unsigned int) atl_ntempstr) * sizeof(char *));
+
             for (i = 0; i < atl_ntempstr; i++) {
                 strbuf[i] = cp;
                 cp += ((unsigned int) atl_ltempstr);
