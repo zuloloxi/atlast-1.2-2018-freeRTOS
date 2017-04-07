@@ -1,0 +1,56 @@
+"struct.atl" include
+
+struct
+    64 chars field topic
+    32 chars field payload
+endstruct /msg
+
+here /msg allot constant msg
+msg /msg erase
+
+variable init-run
+variable client
+
+0 init-run !
+
+: init
+    init-run @ 0= if
+        -1 init-run !
+        mqtt-init
+        "TEST" msg mqtt-new 0= if
+            client !
+            client @ "192.168.0.65" 1883 mqtt-client
+            0= if
+                "Init success"
+            else
+                "Init failed"
+            then
+            type cr
+        else
+            "mqtt-new failed" type cr
+            abort
+        then
+    then
+;
+
+: stuff
+    begin
+        500 ms
+        " Around and ..." type cr
+        clear client @ -1 mqtt-loop .s 0<>
+    until
+;
+
+: test
+    init
+
+    client @ "/home/office/ups/STATUS" mqtt-sub if
+        "mqtt-sub failed" type cr
+        abort
+    then
+
+    client @ -1 mqtt-loop if
+        "mqtt-loop failed" type cr
+        abort
+    then
+;
