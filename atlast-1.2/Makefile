@@ -15,8 +15,9 @@ LIBRARIES = -lrt -lpthread
 INCLUDE =
 
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
+LDFLAGS +=-Wl,--no-as-needed
 
-CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX -DMQ
+CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX # -DMQ
 
 ATLOBJ = atlast.o atlmain.o
 
@@ -24,13 +25,24 @@ APPS = atlast atlsmall # primdeftest
 
 all:	$(APPS)
 
+ifdef EXTRAS
+
+extras.o:	extras.c
+	$(CC) $(CFLAGS) -c extras.c -o extras.o 
+
+atlast: $(ATLOBJ) extras.o
+	$(CC) $(CFLAGS) -Wl,--no-as-needed extras.o $(ATLOBJ) -o atlast $(LIBRARIES)
+else
 atlast: $(ATLOBJ) 
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
+endif
+
+#	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/Small
 
 atlsmall: $(ATLOBJ) atlMinMain.c
-	$(CC) $(CFLAGS) atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
+	$(CC) $(CFLAGS) $(LDFLAGS) atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
 
 atlast.o:   atlast.c atldef.h atlcfig.h 
 	$(CC) $(CFLAGS) -c atlast.c -o atlast.o 

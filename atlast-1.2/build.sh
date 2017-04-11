@@ -109,7 +109,7 @@ fi
 
 MAKEFILE=Makefile.${ARCH}${OPT}
 
-# if [ $PROFILE_CHANGED = "YES" ]; then
+if [ $PROFILE_CHANGED = "YES" ]; then
 # 
 # If Makefile exists and is a symbolic link, remove
 # and remake link.
@@ -118,8 +118,8 @@ MAKEFILE=Makefile.${ARCH}${OPT}
 #        rm Makefile
 #    fi
 #    ln -s $MAKEFILE Makefile
-#    make $MAKE_FLAGS $MAKEFILE clean
-# fi
+    make $MAKE_FLAGS $MAKEFILE clean
+fi
 
 if [ -L atlcfig.h ]; then
     echo "Default config exists"

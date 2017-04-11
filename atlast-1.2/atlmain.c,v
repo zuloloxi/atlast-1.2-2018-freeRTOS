@@ -1,4 +1,27 @@
-/*			      ATLMAIN.C
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2017.04.11.13.14.01;	author andrewh;	state Exp;
+branches;
+next	;
+
+
+desc
+@bye
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*			      ATLMAIN.C
 
                   Main driver program for interactive ATLAST
 
@@ -288,3 +311,4 @@ int main(int argc, char *argv[]) {
         V printf("\n");
     return 0;
 }
+@

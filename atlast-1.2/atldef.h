@@ -18,6 +18,8 @@
 
 */
 
+#ifndef __ATLDEF
+#define ATLDEF
 #include <stdint.h>
 #include "atlast.h"                   /* Define user linkage structures */
 
@@ -295,3 +297,6 @@ typedef enum {False = 0, True = 1} Boolean;
 // ATH Additions
 #define MAX_LINE 80
 int8_t readLineFromArray(uint8_t *, uint8_t *) ;
+
+#endif
+

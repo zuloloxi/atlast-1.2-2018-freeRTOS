@@ -1,0 +1,4 @@
+CC=gcc
+EXTRAS=""
+ATLCONFIG=-DEXTRAS
+
