@@ -9,7 +9,7 @@ VERSION = 1.2
 COPTIONS = -g -w 
 
 # LIBRARIES = -lm
-LIBRARIES = -lrt -lpthread
+LIBRARIES += -lrt -lpthread
 # LIBRARIES = -L/usr/local/lib -lsmall -lstdc++ -lrt -lpthread
 
 INCLUDE =

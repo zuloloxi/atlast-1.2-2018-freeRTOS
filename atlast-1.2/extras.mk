@@ -1,4 +1,5 @@
 CC=gcc
 EXTRAS=""
 ATLCONFIG=-DEXTRAS
+# LIBRARIES=-lmosquitto
 
