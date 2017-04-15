@@ -1,0 +1,39 @@
+
+variable init-run
+variable client
+
+0 init-run !
+
+: init
+    init-run @ 0= if
+        -1 init-run !
+        mqtt-init
+        "TEST" mqtt-new 0= if
+            client !
+            client @ "192.168.0.65" 1883 mqtt-client
+            0= if
+                "Init success"
+            else
+                "Init failed"
+            then
+            type cr
+        else
+            "mqtt-new failed" type cr
+            abort
+        then
+    then
+;
+
+: test
+    init
+
+    client @ "/test/atlast" mqtt-sub if
+        "mqtt-sub failed" type cr
+        abort
+    then
+
+    client @ -1 mqtt-loop if
+        "mqtt-loop failed" type cr
+        abort
+    then
+;

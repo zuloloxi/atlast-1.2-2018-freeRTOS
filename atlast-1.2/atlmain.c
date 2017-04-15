@@ -205,8 +205,12 @@ int main(int argc, char *argv[]) {
     atl_init();
 #ifdef EXTRAS
     extern void extrasLoad();
-
     extrasLoad();
+#endif
+
+#ifdef MQTT
+    extern void mqttLoad();
+    mqttLoad();
 #endif
 
     int8_t len=0;
