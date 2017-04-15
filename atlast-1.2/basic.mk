@@ -1,1 +1,4 @@
 CC=gcc
+BASIC=""
+# ATLCONFIG=-DMQTT
+

@@ -40,6 +40,11 @@ mqtt.o:	mqtt.c
 atlast: $(ATLOBJ) mqtt.o
 	$(CC) $(CFLAGS) -Wl,--no-as-needed mqtt.o $(ATLOBJ) -o atlast $(LIBRARIES)
 endif
+
+ifdef BASIC
+atlast: $(ATLOBJ)
+	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
+endif
 #	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/Small
