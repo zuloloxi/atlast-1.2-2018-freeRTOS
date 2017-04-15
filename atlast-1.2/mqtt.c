@@ -4,9 +4,24 @@
 #include "atldef.h"
 
 void messageCallback(struct mosquitto *mosq, void *obj,const struct mosquitto_message *message) {
-    printf ("Rx message: %s\n", (char *)message->payload);
+    static char *buffer;
+    static bool firstTime=true;
 
-    atl_eval(".s cr");
+    if(firstTime) {
+        firstTime=false;
+
+        atl_eval("here 128 allot");
+        buffer=S0;
+        Pop;
+    }
+
+
+    printf ("Rx message: %s\n", (char *)message->payload);
+    strcpy(buffer,(char *)message->payload);
+
+    Pop;
+    Push=(char *)buffer;
+    Push=-1;
 }
 
 prim mqttInit() {
@@ -122,6 +137,7 @@ prim mqttLoop() {
     mosq=S1;
 
     Pop2;
+
     rc = mosquitto_loop(mosq,timeout,1);
 
     if( rc == MOSQ_ERR_SUCCESS) {
