@@ -3,24 +3,27 @@
 
 #include "atldef.h"
 
+struct cbMqttMessage {
+    char topic[64];
+    char payload[32];
+} ;
+
+struct cbMqttMessage mqttMessage;
+
 void messageCallback(struct mosquitto *mosq, void *obj,const struct mosquitto_message *message) {
     static char *buffer;
     static bool firstTime=true;
 
-    if(firstTime) {
-        firstTime=false;
-
-        atl_eval("here 128 allot");
-        buffer=S0;
-        Pop;
-    }
 
 
-    printf ("Rx message: %s\n", (char *)message->payload);
-    strcpy(buffer,(char *)message->payload);
+    atl_eval(".s cr");
+    printf ("Rx topic  : %s\n", (char *)message->topic);
+    printf ("Rx payload: %s\n", (char *)message->payload);
+    strcpy( ((struct cbMqttMessage *)obj)->topic,(char *)message->topic);
+    strcpy( ((struct cbMqttMessage *)obj)->payload,(char *)message->payload);
 
-    Pop;
-    Push=(char *)buffer;
+//    Pop;
+    Push=(void *)obj ;
     Push=-1;
 }
 
@@ -36,14 +39,17 @@ prim mqttInit() {
     }
 
 }
-
+// 
+// <client name> <message buffer address> -- <id> false | true
+// 
 prim mqttNew() {
-    Sl(1);
+    Sl(2);
     So(2);
 
     struct mosquitto *mosq = NULL;
+    void *obj=NULL;
 
-    mosq=mosquitto_new(S0, true, NULL);
+    mosq=mosquitto_new(S1, true, (void *)S0);
 
     if(!mosq) {
         S0=true;
