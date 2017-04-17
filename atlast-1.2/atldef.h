@@ -19,7 +19,7 @@
 */
 
 #ifndef __ATLDEF
-#define ATLDEF
+#define __ATLDEF
 #include <stdint.h>
 #include "atlast.h"                   /* Define user linkage structures */
 
