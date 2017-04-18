@@ -1252,6 +1252,27 @@ prim FR_setBacklight() {
 	Pop;
 }
 
+prim FR_stackHighWaterMark() {
+    UBaseType_t s;
+    TaskHandle_t h;
+
+    Sl(1);
+    So(1);
+
+    h=S0;
+
+    S0 = uxTaskGetStackHighWaterMark( h );
+
+}
+
+prim FR_getTaskHandle() {
+
+    uint8_t idx;
+
+    idx=S0;
+//    task[S0]->handle = xTaskGetCurrentTaskHandle();
+    S0=task[idx]->handle ;
+}
 #endif
 
 #ifdef PUBSUB
@@ -3039,6 +3060,9 @@ prim P_emit() {
 #ifdef FREERTOS
 	usbTxByte(S0);
 #endif
+#ifdef LINUX
+    putchar(S0);
+#endif
 	Pop;
 }
 /* Print string pointed to by stack */
@@ -3993,8 +4017,19 @@ prim P_semicolon()		      /* End compilation */
     createword = NULL;		      /* Flag no word being created */
 }
 
-prim P_tick()			      /* Take address of next word */
-{
+prim ATH_char() {
+    int i;
+    char c;
+
+    i=token(&instream);
+
+    if( i != TokNull) {
+        c=tokbuf[0];
+        Push=c;
+    }
+}
+/* Take address of next word */
+prim P_tick() {
     int i;
 
     /* Try to get next symbol from the input stream.  If
@@ -4593,6 +4628,7 @@ static struct primfcn primt[] = {
     {"0EXECUTE", P_execute},
     {"0>BODY", P_body},
     {"0STATE", P_state},
+    {"0CHAR", ATH_char},
 
 #ifdef DEFFIELDS
     {"0FIND", P_find},
@@ -4710,6 +4746,8 @@ static struct primfcn primt[] = {
 	{(char *)"0SEM-COUNT@", FR_semGetCount },
 	{(char *)"0SEM-GIVE", FR_semGive },
 	{(char *)"0SEM-TAKE", FR_semTake },
+	{(char *)"0STACK-HWM", FR_stackHighWaterMark },
+	{(char *)"0GET-TASK-HANDLE", FR_getTaskHandle },
 
 #endif
 #ifdef PUBSUB
