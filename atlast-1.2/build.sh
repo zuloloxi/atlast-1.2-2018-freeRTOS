@@ -109,7 +109,7 @@ fi
 
 MAKEFILE=Makefile.${ARCH}${OPT}
 
-if [ $PROFILE_CHANGED = "YES" ]; then
+if [ "$PROFILE_CHANGED" = "YES" ]; then
 # 
 # If Makefile exists and is a symbolic link, remove
 # and remake link.
@@ -118,7 +118,8 @@ if [ $PROFILE_CHANGED = "YES" ]; then
 #        rm Makefile
 #    fi
 #    ln -s $MAKEFILE Makefile
-    make $MAKE_FLAGS $MAKEFILE clean
+#    make $MAKE_FLAGS $MAKEFILE clean
+    make clean
 fi
 
 if [ -L atlcfig.h ]; then
@@ -130,7 +131,7 @@ else
     echo ".. done."
 fi
 
-if [ "$DRY_RUN" == "YES" ]; then
+if [ "$DRY_RUN" = "YES" ]; then
     echo
     echo "DRY RUN"
     echo
