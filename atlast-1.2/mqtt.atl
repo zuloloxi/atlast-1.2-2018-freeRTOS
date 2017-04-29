@@ -40,7 +40,7 @@ variable client
 : test
     init
 
-    client @ "/home/office/+/power" mqtt-sub if
+    client @ "/home/office/ups/+" mqtt-sub if
         "mqtt-sub failed" type cr
         abort
     then
