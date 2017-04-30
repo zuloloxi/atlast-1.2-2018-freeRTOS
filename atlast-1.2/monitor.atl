@@ -1,6 +1,7 @@
 "struct.atl" include
 
 struct
+    1 chars field flag
     64 chars field topic
     32 chars field payload
 endstruct /msg
@@ -35,10 +36,24 @@ variable client
 
 : stuff
     begin
-        500 ms
+\        500 ms
         " Around and ..." type cr
-        clear client @ -1 mqtt-loop .s 0<>
+        clear client @ 500 mqtt-loop 
+        msg flag c@  dup . cr 0>
     until
+
+    msg /msg dump
+
+    msg flag c@ 1- msg flag c!
+
+    msg payload "ONLINE" strcmp 0= if
+        "OK" 
+    else
+        "FAILED"
+    then
+
+    type cr
+
 ;
 
 : test

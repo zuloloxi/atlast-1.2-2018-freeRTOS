@@ -4,6 +4,7 @@
 #include "atldef.h"
 
 struct cbMqttMessage {
+    uint8_t msgFlag;
     char topic[64];
     char payload[32];
 } ;
@@ -15,16 +16,15 @@ void messageCallback(struct mosquitto *mosq, void *obj,const struct mosquitto_me
     static bool firstTime=true;
 
 
-
-    atl_eval(".s cr");
+//    atl_eval(".s cr");
     printf ("Rx topic  : %s\n", (char *)message->topic);
     printf ("Rx payload: %s\n", (char *)message->payload);
     strcpy( ((struct cbMqttMessage *)obj)->topic,(char *)message->topic);
     strcpy( ((struct cbMqttMessage *)obj)->payload,(char *)message->payload);
 
 //    Pop;
-    Push=(void *)obj ;
-    Push=-1;
+    firstTime=false;
+    ((struct cbMqttMessage *)obj)->msgFlag++ ;
 }
 
 prim mqttInit() {
@@ -35,9 +35,10 @@ prim mqttInit() {
 
     if (doneFlag=false) {
         mosquitto_lib_init();
+        memset(&mqttMessage, 0, (size_t)sizeof(struct cbMqttMessage));
         doneFlag=true;
     }
-
+//    Push=(void *)&mqttMessage ;
 }
 // 
 // <client name> <message buffer address> -- <id> false | true
@@ -50,6 +51,7 @@ prim mqttNew() {
     void *obj=NULL;
 
     mosq=mosquitto_new(S1, true, (void *)S0);
+    Pop;
 
     if(!mosq) {
         S0=true;
