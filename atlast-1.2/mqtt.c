@@ -156,8 +156,21 @@ prim mqttLoop() {
 
 }
 
+prim ATH_strtok() {
+    char *ptr;
+    // Note not re-entrent
+
+    Sl(2);
+    So(1);
+
+    ptr=strtok( (char *)S1, (char *)S0);
+    Pop;
+    S0=ptr;
+}
+
 
 static struct primfcn mqtt[] = {
+    {"0STRTOK", ATH_strtok},
     {"0MQTT-INIT", mqttInit},
     {"0MQTT-NEW", mqttNew},
     {"0MQTT-CLIENT", mqttClient},
