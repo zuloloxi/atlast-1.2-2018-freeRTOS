@@ -19,32 +19,21 @@ LDFLAGS +=-Wl,--no-as-needed
 
 CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX # -DMQ
 
-ATLOBJ = atlast.o atlmain.o
+ATLOBJ += atlast.o atlmain.o
 
 APPS = atlast atlsmall # primdeftest
 
 all:	$(APPS)
 
-ifdef EXTRAS
 extras.o:	extras.c
 	$(CC) $(CFLAGS) -c extras.c -o extras.o 
 
-atlast: $(ATLOBJ) extras.o
-	$(CC) $(CFLAGS) -Wl,--no-as-needed extras.o $(ATLOBJ) -o atlast $(LIBRARIES)
-endif
-
-ifdef MQTT
 mqtt.o:	mqtt.c
 	$(CC) $(CFLAGS) -c mqtt.c -o mqtt.o 
 
 atlast: $(ATLOBJ) mqtt.o
-	$(CC) $(CFLAGS) -Wl,--no-as-needed mqtt.o $(ATLOBJ) -o atlast $(LIBRARIES)
-endif
-
-ifdef BASIC
-atlast: $(ATLOBJ)
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
-endif
+
 #	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/Small
