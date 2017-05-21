@@ -14,6 +14,15 @@ variable client
 
 0 init-run !
 
+: ONLINE
+    cr "ONLINE" type cr
+;
+
+: ONBATT
+    cr "ONBATT" type cr
+;
+
+
 : init
     init-run @ 0= if
         -1 init-run !
@@ -36,7 +45,6 @@ variable client
 
 : stuff
     begin
-\        500 ms
         " Around and ..." type cr
         clear client @ 500 mqtt-loop 
         msg flag c@  dup . cr 0>
@@ -45,6 +53,8 @@ variable client
     msg /msg dump
 
     msg flag c@ 1- msg flag c!
+
+    msg payload evaluate
 
     msg payload "ONLINE" strcmp 0= if
         "OK" 
