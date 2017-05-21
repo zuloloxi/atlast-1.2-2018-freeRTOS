@@ -3,13 +3,13 @@
 "linuxMsg.atl" include
 "pubsub.atl" include
 
-"/client" iam strcpy
+"/metrology" iam strcpy
 
-set QNAME /client
+set QNAME /metrology
 
-set COUNTER NODATA
+set COUNT "1"
 
-pub COUNTER
+pub COUNT
 
 comms
 
