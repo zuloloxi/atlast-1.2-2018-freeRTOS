@@ -20,6 +20,7 @@
 #include "atlcfig.h"
 
 #ifdef PUBSUB
+#warning "PubSub defined"
 #include "Small.h"
 #include "linuxParser.h"
 #include "msgs.h"

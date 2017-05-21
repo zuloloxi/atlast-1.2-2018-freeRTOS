@@ -1392,8 +1392,10 @@ prim FR_putMessage() {
 
 #ifdef LINUX
 #ifdef PTHREAD
+extern pthread_mutex_t lock;
 prim PS_comms() {
 
+    extern pthread_mutex_t lock;
 	pthread_mutex_unlock(&lock);
     pthread_yield();
     sleep(1);
