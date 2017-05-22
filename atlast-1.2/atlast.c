@@ -16,6 +16,8 @@
 #endif
 #ifdef FREERTOS
 #include "tim.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #endif
 
 #include <stdio.h>
@@ -161,7 +163,8 @@ static int token( char **);
 
 atl_int atl_stklen = 100;	      /* Evaluation stack length */
 atl_int atl_rstklen = 100;	      /* Return stack length */
-atl_int atl_heaplen = 1000;	      /* Heap length */
+// atl_int atl_heaplen = 1000;	      /* Heap length */
+atl_int atl_heaplen = 2000;	      /* Heap length */
 atl_int atl_ltempstr = 256;	      /* Temporary string buffer length */
 atl_int atl_ntempstr = 4;	      /* Number of temporary string buffers */
 
@@ -760,6 +763,9 @@ prim ATH_dump() {
     if(lines ==0 ) {
         lines=1;
     }
+#ifdef FREERTOS
+    atlastTxBuffer(console, (uint8_t *)"\r\n") ;
+#endif
 
     int i=0;
     for( i = 0; i<length;i+=16) {
@@ -1395,7 +1401,6 @@ prim FR_putMessage() {
 extern pthread_mutex_t lock;
 prim PS_comms() {
 
-    extern pthread_mutex_t lock;
 	pthread_mutex_unlock(&lock);
     pthread_yield();
     sleep(1);

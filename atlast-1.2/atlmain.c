@@ -130,7 +130,7 @@ void *doSmall(void *arg) {
         if( len < 0) {
             perror("mq_receive");
         } else {
-            ff=cmdParse(p,&buffer);
+            ff=cmdParse(p,&buffer,NULL);
         }
     }
 
