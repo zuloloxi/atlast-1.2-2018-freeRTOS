@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
     // OK, so init the system
     //
     atl_init();
-#ifdef EXTRAS
+#ifdef LINUX
     extern void extrasLoad();
     extrasLoad();
 #endif

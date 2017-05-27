@@ -1,6 +1,6 @@
 CC=gcc
 EXTRAS=""
-ATLCONFIG=-DEXTRAS
-ATLOBJ=extras.o
+ATLCONFIG=-DLINUX
+ATLOBJ=linux.o
 # LIBRARIES=-lmosquitto
 
