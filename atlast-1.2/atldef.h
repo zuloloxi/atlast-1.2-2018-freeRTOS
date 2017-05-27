@@ -262,7 +262,8 @@ extern char *atl_fgetsp();
 #define Hstore *hptr++		      /* Store item on heap */
 #define state  (*heap)		      /* Execution state is first heap word */
 
-#define prim static void	      /* Attributes of primitive functions */
+// #define prim static void	      /* Attributes of primitive functions */
+#define prim  void	      /* Attributes of primitive functions */
 
 /*  Real number definitions (used only if REAL is configured).	*/
 
