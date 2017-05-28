@@ -31,7 +31,7 @@ linux.o:	linux.c
 mqtt.o:	mqtt.c
 	$(CC) $(CFLAGS) -c mqtt.c -o mqtt.o 
 
-atlast: $(ATLOBJ) mqtt.o
+atlast: $(ATLOBJ) # mqtt.o
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 #	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
