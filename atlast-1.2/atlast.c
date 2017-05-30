@@ -1279,6 +1279,19 @@ prim FR_getTaskHandle() {
 //    task[S0]->handle = xTaskGetCurrentTaskHandle();
     S0=task[idx]->handle ;
 }
+
+prim FR_getTaskState() {
+    UBaseType_t s;
+    TaskHandle_t h;
+
+    Sl(1);
+    So(1);
+
+    h=S0;
+
+    S0 = eTaskGetState( h );
+
+}
 #endif
 
 #ifdef PUBSUB
@@ -4755,6 +4768,7 @@ static struct primfcn primt[] = {
 	{(char *)"0SEM-TAKE", FR_semTake },
 	{(char *)"0STACK-HWM", FR_stackHighWaterMark },
 	{(char *)"0GET-TASK-HANDLE", FR_getTaskHandle },
+	{(char *)"0GET-TASK-STATE", FR_getTaskState },
 
 #endif
 #ifdef PUBSUB
