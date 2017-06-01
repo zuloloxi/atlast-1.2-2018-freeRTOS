@@ -26,7 +26,7 @@ APPS = atlast # atlsmall # primdeftest
 all:	$(APPS)
 
 linux.o:	linux.c
-	$(CC) $(CFLAGS) -c linux.c -o linux.o 
+	$(CC) $(CFLAGS) -c linux.c -o linux.o $(INCLUDE)
 
 mqtt.o:	mqtt.c
 	$(CC) $(CFLAGS) -c mqtt.c -o mqtt.o 

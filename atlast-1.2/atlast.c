@@ -272,6 +272,7 @@ static Boolean stringlit = False;     /* String literal anticipated */
 #ifdef BREAK
 static Boolean broken = False;	      /* Asynchronous break received */
 #endif
+prim P_con();
 
 #ifdef COPYRIGHT
 #ifndef HIGHC
@@ -644,7 +645,7 @@ prim ATH_cd() {
 prim ATH_ms() {
     Sl(1);
 #ifdef LINUX
-    usleep(S0 * 1000);
+    usleep((useconds_t)S0 * 1000);
 #endif
 
 #ifdef FREERTOS
@@ -1360,6 +1361,64 @@ prim FR_getMessage() {
 
 #endif
 
+}
+//
+// populate a GET message
+// Stack <msg pointer> <sender> <key> --
+//
+prim FR_mkmsgGet() {
+    struct cmdMessage *msg;
+    char *key;
+
+#ifdef FREERTOS
+    QueueHandle_t sender;
+#endif
+
+#ifdef LINUX
+    char *sender;
+#endif
+
+    key=(char *)S0;
+    msg=(struct cmdMessage *)S2;
+
+#ifdef FREERTOS
+    sender=(QueueHandle_t) S1;
+#endif
+
+    mkMsg(sender, msg, "GET", key, NULL);
+    Pop;
+    Pop2;
+}
+
+//
+// populate a SUB message
+// Stack <msg pointer> <sender> <key> --
+//
+prim FR_mkmsgSub() {
+    struct cmdMessage *msg;
+    char *key;
+
+#ifdef FREERTOS
+    QueueHandle_t sender;
+#endif
+
+#ifdef LINUX
+    char *sender;
+#endif
+
+    key=(char *)S0;
+#ifdef LINUX
+    strncpy(msg->sender,(char *)S1, SENDER_SIZE);
+#endif
+
+#ifdef FREERTOS
+    sender=(QueueHandle_t) S1;
+#endif
+    msg=(struct cmdMessage *)S2;
+
+    mkMsg(sender, msg, "SUB", key, NULL);
+    Pop;
+    Pop2;
 }
 
 prim FR_putMessage() {
@@ -2293,6 +2352,35 @@ prim P_cbang()			      /* Store byte value into address */
     Pop2;
 }
 #ifdef ATH
+
+prim ATH_mkBuffer() {
+    /* Declare constant */
+    void *hp = hptr;
+    int size;
+    void *t;
+
+    Sl(1);
+
+    size=S0;
+    Pop;
+
+    P_create(); 		      /* Create dictionary item */
+
+    createword->wcode = P_con;	      /* Set code to constant push */
+
+    Ho(1)
+
+    size = ((size + (sizeof(stackitem) - 1 )) / sizeof(stackitem));  // no of items in units of stacksize
+    size = size * sizeof(stackitem);        // Size in bytes
+
+    t = hp+(4*sizeof(stackitem));		      /* Store constant value in body */
+
+    Hstore = t;
+    hptr+=size;
+
+    memset(t,0,size);
+}
+
 prim ATH_wbang() {
     Sl(2);
 
@@ -2365,7 +2453,7 @@ prim P_var()			      /* Push body address of current word */
     Push = (stackitem) (((stackitem *) curword) + Dictwordl);
 }
 
-Exported void P_create()	      /* Create new word */
+prim P_create()	      /* Create new word */
 {
     defpend = True;		      /* Set definition pending */
     Ho(Dictwordl);
@@ -4707,6 +4795,7 @@ static struct primfcn primt[] = {
 #endif /* EVALUATE */
 
 #ifdef ATH
+	{(char *)"0MKBUFFER",ATH_mkBuffer},
 	{(char *)"0MEMSAFE",ATH_memsafe},
 	{(char *)"0?MEMSAFE",ATH_qmemsafe},
 	{(char *)"0DUMP",ATH_dump},
@@ -4781,6 +4870,11 @@ static struct primfcn primt[] = {
 	{(char *)"0.RECORD",  FR_displayRecord},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
+#ifdef FREERTOS
+    // This code is compiled if PUBSUB AND FREERTOS are defined
+    {(char *)"0MKMSG-GET", FR_mkmsgGet},
+    {(char *)"0MKMSG-SUB", FR_mkmsgSub},
+#endif
 #ifdef PTHREAD
 	// TODO Rename all in this section from FR_ to PS_
     {(char *)"0COMMS", PS_comms},
