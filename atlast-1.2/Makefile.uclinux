@@ -1,15 +1,16 @@
 
 #	Unix makefile for ATLAST
 
-CC = gcc
+CC=arm-uclinuxeabi-gcc 
+
 include profile.mk
 VERSION = 1.2
 
 # COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
-COPTIONS = -g -w 
+COPTIONS = -g -w -mcpu=cortex-m4 -mthumb
 
 # LIBRARIES = -lm
-LIBRARIES += -lrt -lpthread
+LIBRARIES += -lrt # -lpthread
 # LIBRARIES = -L/usr/local/lib -lsmall -lstdc++ -lrt -lpthread
 
 # INCLUDE +=

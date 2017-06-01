@@ -644,7 +644,7 @@ prim ATH_cd() {
 prim ATH_ms() {
     Sl(1);
 #ifdef LINUX
-    usleep((useconds_t)S0 * 1000);
+    usleep(S0 * 1000);
 #endif
 
 #ifdef FREERTOS

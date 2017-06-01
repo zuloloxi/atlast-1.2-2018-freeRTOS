@@ -12,7 +12,7 @@
 //
 // LINUX should apply to any UNIX like system, such as
 // MacOS X, Solaris, QNX, Cygwin ....
-#define LINUX
+// #define LINUX
 #define INDIVIDUALLY
 
 #define ARRAY                 /* Array subscripting words */
