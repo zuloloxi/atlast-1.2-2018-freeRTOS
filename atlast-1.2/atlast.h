@@ -65,3 +65,7 @@ extern void atl_init(), atl_mark(), atl_unwind(), atl_break();
 extern int atl_eval();
 // extern int atl_load();
 extern void atl_memstat();
+
+#ifdef EMBEDDED
+#define OUTBUFF_SIZE 255
+#endif

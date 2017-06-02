@@ -1005,7 +1005,7 @@ prim FR_uartReadLine() {
 
 	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)S2;
 	void *buffer;
-	buffer = S1 ;
+	buffer =(void *) S1 ;
 	uint8_t len = (uint8_t)S0;
 
 	memset(buffer,0,len);
@@ -1025,7 +1025,7 @@ prim FR_uartEmit() {
 	UART_HandleTypeDef *huart;
 	uint8_t data;
 
-	huart=S1;
+	huart=(UART_HandleTypeDef *)S1;
 	data=(uint8_t)S0;
 
 //	txByteWait(UART_HandleTypeDef *huart,uint8_t data, int timeout)
@@ -1178,7 +1178,7 @@ prim FR_getQid() {
         Pop;
 
         if( t != NULL) {
-            Push=t->iam;
+            Push=(stackitem)t->iam;
             failFlag=false;
         } else {
             failFlag = true;
@@ -1209,7 +1209,7 @@ prim FR_setTaskDb() {
 	Sl(1);
 
     xSemaphoreTake(task[S0]->lock, portMAX_DELAY );
-	task[S0]->db = S0;
+	task[S0]->db = (struct Small *)S0;
     xSemaphoreGive(task[USB_TASK]->lock);
     Pop;
 }
@@ -1260,13 +1260,12 @@ prim FR_setBacklight() {
 }
 
 prim FR_stackHighWaterMark() {
-    UBaseType_t s;
     TaskHandle_t h;
 
     Sl(1);
     So(1);
 
-    h=S0;
+    h=(TaskHandle_t)S0;
 
     S0 = uxTaskGetStackHighWaterMark( h );
 
@@ -1278,17 +1277,16 @@ prim FR_getTaskHandle() {
 
     idx=S0;
 //    task[S0]->handle = xTaskGetCurrentTaskHandle();
-    S0=task[idx]->handle ;
+    S0=(stackitem)task[idx]->handle ;
 }
 
 prim FR_getTaskState() {
-    UBaseType_t s;
     TaskHandle_t h;
 
     Sl(1);
     So(1);
 
-    h=S0;
+    h=(TaskHandle_t)S0;
 
     S0 = eTaskGetState( h );
 
@@ -1391,10 +1389,9 @@ prim FR_setSender() {
 // <address> -- <sender>
 prim FR_getSender() {
     struct cmdMessage *msg;
-    void *sender;
 
     msg = (struct cmdMessage *)S0;
-    S0 = msg->sender;
+    S0 = (stackitem)msg->sender;
 
 }
 // <struct address> <string> -- <struct address>
@@ -1516,8 +1513,6 @@ prim FR_putMessage() {
 	Sl(2);
 	So(1);
 
-	struct cmdMessage *tmp;
-
 	dest = (QueueHandle_t ) S0;
 	out = (struct cmdMessage *)S1;
 
@@ -1526,19 +1521,6 @@ prim FR_putMessage() {
 	}
 	Pop;
 	S0=rc;
-
-	/*
-//	tmp = (struct cmdMessage *)osPoolAlloc(	mpool_id );
-	tmp = (struct cmdMessage *)calloc(1,sizeof(struct cmdMessage));
-
-	if( tmp == NULL) {
-		rc = osErrorNoMemory ;
-	} else {
-		memcpy(tmp,out,sizeof(struct cmdMessage));
-//		rc = osMessagePut(dest,(uint32_t)tmp, osWaitForever);
-		rc = xQueueSendToBack(dest,out, osWaitForever);
-	}
-	*/
 
 #endif
 #ifdef LINUX
@@ -1687,7 +1669,7 @@ prim FR_lookupRecord() {
 
 	rec = dbLookupRec(db,key);
 
-    Push = rec;
+    Push = (stackitem)rec;
 
     if( rec == NULL ) {
         Push = true;
@@ -1711,7 +1693,7 @@ prim FR_lookup() {
 	value = dbLookup(db,key);
 	Pop2;
 
-	Push = value;
+	Push = (stackitem)value;
 
 	if( value == NULL) {
 		Push = true;
@@ -2420,7 +2402,6 @@ prim P_allot()			      /* Allocate heap bytes */
 prim P_comma()			      /* Store one item on heap */
 {
     Sl(1);
-    stackitem t1;
 
 //    if ( ath_safe_memory == Truth ) {
 //        Hpc(S0);
@@ -2468,7 +2449,7 @@ prim ATH_mkBuffer() {
 
     t = hp+(4*sizeof(stackitem));		      /* Store constant value in body */
 
-    Hstore = t;
+    Hstore = (stackitem)t;
     hptr+=size;
 
     memset(t,0,size);
@@ -3241,10 +3222,10 @@ prim P_dotparen()		      /* Print literal string that follows */
     } else {			      /* Otherwise, */
         /* print string literal in in-line code. */
 #ifdef EMBEDDED
-    	memset(outBuffer,0,sizeof(outBuffer));
+    	memset(outBuffer,0,OUTBUFF_SIZE);
         sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
 #ifdef FREERTOS
-        atlastTxBuffer(console, (uint8_t *)outBuffer) ;
+        atlastTxBuffer(console, OUTBUFF_SIZE) ;
 #endif
 #else
         V printf("%s", ((char *) ip) + 1);  // NOT EMBEDDED
@@ -4088,12 +4069,12 @@ prim P_abortq() 		      /* Abort, printing message */
         /* Otherwise, print string literal in in-line code. */
 #ifdef EMBEDDED
         //sprintf(outBuffer,"%s", (char *) ip);  // EMBEDDED
-        (void) memset(outBuffer,0,sizeof(outBuffer));
+        (void) memset(outBuffer,0,OUTBUFF_SIZE) ;
 
         sprintf(outBuffer,"%s", ((char *) ip) + 1);  // EMBEDDED
 #endif
 #ifdef FREERTOS
-	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
+	 atlastTxBuffer(console, OUTBUFF_SIZE) ;
 #else
      printf("%s",outBuffer);
 #endif
