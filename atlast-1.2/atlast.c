@@ -1187,7 +1187,7 @@ prim FR_getQid() {
         Pop;
         failFlag=true;
     }
-    Push=failFlag;
+//    Push=failFlag;
 
 }
 
@@ -1362,6 +1362,91 @@ prim FR_getMessage() {
 #endif
 
 }
+// Set fields in a message.
+//
+// <address> <value> -- <address>
+prim FR_setSender() {
+    Sl(2);
+    struct cmdMessage *msg;
+
+#ifdef FREERTOS
+    QueueHandle_t value;
+    value=(QueueHandle_t)S0;
+
+    msg = (struct cmdMessage *)S1;
+    msg->sender = value;
+#endif
+
+#ifdef LINUX
+    char *value;
+    value = (char *)S0;
+    strncpy(msg->sender, value,SENDER_SIZE );
+
+#endif
+
+
+    Pop;
+}
+// Get sender
+// <address> -- <sender>
+prim FR_getSender() {
+    struct cmdMessage *msg;
+    void *sender;
+
+    msg = (struct cmdMessage *)S0;
+    S0 = msg->sender;
+
+}
+// <struct address> <string> -- <struct address>
+//
+prim FR_setCmd() {
+    struct cmdMessage *msg;
+    char *cmd;
+
+    cmd = (char *)S0;
+    msg = (struct cmdMessage *)S1;
+
+    Pop;
+
+    strncpy(msg->message.cmd, cmd, MAX_CMD);
+}
+
+prim FR_setKey() {
+    struct cmdMessage *msg;
+    char *key;
+
+    key = (char *)S0;
+    msg = (struct cmdMessage *)S1;
+
+    Pop;
+
+    strncpy(msg->message.key, key, MAX_KEY);
+}
+
+prim FR_setValue() {
+    struct cmdMessage *msg;
+    char *value;
+
+    value = (char *)S0;
+    msg = (struct cmdMessage *)S1;
+
+    Pop;
+
+    strncpy(msg->message.value, value, MAX_VALUE);
+}
+
+prim FR_setFieldCnt() {
+    struct cmdMessage *msg;
+     uint8_t fields;
+
+    fields = (uint8_t)S0;
+    msg = (struct cmdMessage *)S1;
+
+    msg->message.fields = fields;
+
+    Pop;
+
+}
 //
 // populate a GET message
 // Stack <msg pointer> <sender> <key> --
@@ -1436,6 +1521,13 @@ prim FR_putMessage() {
 	dest = (QueueHandle_t ) S0;
 	out = (struct cmdMessage *)S1;
 
+	if ( (dest != NULL) && (out != NULL)) {
+		rc = xQueueSendToBack(dest,out, osWaitForever);
+	}
+	Pop;
+	S0=rc;
+
+	/*
 //	tmp = (struct cmdMessage *)osPoolAlloc(	mpool_id );
 	tmp = (struct cmdMessage *)calloc(1,sizeof(struct cmdMessage));
 
@@ -1446,8 +1538,8 @@ prim FR_putMessage() {
 //		rc = osMessagePut(dest,(uint32_t)tmp, osWaitForever);
 		rc = xQueueSendToBack(dest,out, osWaitForever);
 	}
+	*/
 
-	Pop2;
 #endif
 #ifdef LINUX
 	char *dest = (char *)S0;
@@ -1916,7 +2008,7 @@ Exported char *atl_fgetsp(s, n, stream)
 // outBuffer
 // #warning MEMSTAT
 void atl_memstat() {
-    static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld\r\n";
+    static char fmt[] = "   %-12s %6ld    %6ld    %6ld       %3ld %%\r\n";
 #ifdef EMBEDDED
      sprintf(outBuffer,"  Memory Area     usage     used    allocated   in use\r\n");
 #ifdef FREERTOS
@@ -1926,6 +2018,7 @@ void atl_memstat() {
 #endif
 
      sprintf(outBuffer, fmt, "Stack",
+            ((long) (stk - stack)),
             ((long) (stackmax - stack)),
             atl_stklen,
             (100L * (stk - stack)) / atl_stklen);
@@ -4874,6 +4967,14 @@ static struct primfcn primt[] = {
     // This code is compiled if PUBSUB AND FREERTOS are defined
     {(char *)"0MKMSG-GET", FR_mkmsgGet},
     {(char *)"0MKMSG-SUB", FR_mkmsgSub},
+
+    {(char *)"0SET-CMD", FR_setCmd},
+    {(char *)"0SET-KEY", FR_setKey},
+    {(char *)"0SET-VALUE", FR_setValue},
+    {(char *)"0SET-FIELD-CNT", FR_setFieldCnt},
+
+    {(char *)"0SET-SENDER", FR_setSender},
+    {(char *)"0GET-SENDER", FR_getSender},
 #endif
 #ifdef PTHREAD
 	// TODO Rename all in this section from FR_ to PS_
