@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include "atldef.h"
 #include "atlcfig.h"
+#include <inttypes.h>
 
 #ifdef PUBSUB
 #warning "PubSub defined"
@@ -230,6 +231,8 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef LINUX
     sprintf(t,"0x%x constant TABLE",table);
+    sprintf(t,"0x%" PRIx64 " constant TABLE",table);
+
     atl_eval(t);
     memset(t,0x00,sizeof(t));
 #endif
