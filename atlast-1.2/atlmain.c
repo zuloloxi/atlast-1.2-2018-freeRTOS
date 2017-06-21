@@ -63,11 +63,11 @@ void doSmallCallback(struct nlist *rec, uint8_t idx) {
 
         memset(&subMessage,0,sizeof(struct cmdMessage));
 
-        subMessage.message.fields = 3;
+        subMessage.payload.message.fields = 3;
         strncpy(subMessage.sender,queueName,MAX_SUB_NAME);
-        strncpy(subMessage.message.cmd,"SET",MAX_CMD);
-        strncpy(subMessage.message.key,nlistGetName(rec),MAX_KEY);
-        strncpy(subMessage.message.value,nlistGetDef(rec),MAX_VALUE);
+        strncpy(subMessage.payload.message.cmd,"SET",MAX_CMD);
+        strncpy(subMessage.payload.message.key,nlistGetName(rec),MAX_KEY);
+        strncpy(subMessage.payload.message.value,nlistGetDef(rec),MAX_VALUE);
 
         int rc=mq_send(tmp->pipe,&subMessage,sizeof(struct cmdMessage),NULL);
     }

@@ -1405,7 +1405,7 @@ prim FR_setCmd() {
 
     Pop;
 
-    strncpy(msg->message.cmd, cmd, MAX_CMD);
+    strncpy(msg->payload.message.cmd, cmd, MAX_CMD);
 }
 
 prim FR_setKey() {
@@ -1417,7 +1417,7 @@ prim FR_setKey() {
 
     Pop;
 
-    strncpy(msg->message.key, key, MAX_KEY);
+    strncpy(msg->payload.message.key, key, MAX_KEY);
 }
 
 prim FR_setValue() {
@@ -1429,7 +1429,7 @@ prim FR_setValue() {
 
     Pop;
 
-    strncpy(msg->message.value, value, MAX_VALUE);
+    strncpy(msg->payload.message.value, value, MAX_VALUE);
 }
 
 prim FR_setFieldCnt() {
@@ -1439,7 +1439,7 @@ prim FR_setFieldCnt() {
     fields = (uint8_t)S0;
     msg = (struct cmdMessage *)S1;
 
-    msg->message.fields = fields;
+    msg->payload.message.fields = fields;
 
     Pop;
 

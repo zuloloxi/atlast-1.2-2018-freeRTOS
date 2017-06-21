@@ -16,23 +16,23 @@ extern P_allot();
 void mkMsg(void *from, struct cmdMessage *msg, char *cmd, char *key, char *value) {
 
     memset(msg, 0, sizeof(struct cmdMessage));
-    msg->message.fields=3;
+    msg->payload.message.fields=3;
 
     strncpy(msg->sender,(char *)S1, SENDER_SIZE);
 
-    strncpy(msg->message.cmd,cmd,sizeof(msg->message.cmd));
+    strncpy(msg->payload.message.cmd,cmd,sizeof(msg->payload.message.cmd));
     if( value == NULL) {
-        msg->message.fields=2;
-        msg->message.value[0]='\0';
+        msg->payload.message.fields=2;
+        msg->payload.message.value[0]='\0';
     } else {
-        strncpy(msg->message.value, value, sizeof(msg->message.value));
+        strncpy(msg->payload.message.value, value, sizeof(msg->payload.message.value));
     }
     if( key == NULL) {
-        msg->message.fields=1;
-        msg->message.key[0]='\0';
-        msg->message.value[0]='\0';
+        msg->payload.message.fields=1;
+        msg->payload.message.key[0]='\0';
+        msg->payload.message.value[0]='\0';
     } else {
-        strncpy(msg->message.key, key, sizeof(msg->message.key));
+        strncpy(msg->payload.message.key, key, sizeof(msg->payload.message.key));
     }
 
 }
