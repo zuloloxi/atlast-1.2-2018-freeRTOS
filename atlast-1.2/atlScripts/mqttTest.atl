@@ -48,6 +48,8 @@ variable subscribed
     mosq @ 1000 mqtt-loop 0= if
         buffer c@ 0> if
             buffer 128 dump cr
+            "Topic   :" type buffer mqtt-topic@ type cr
+            "Payload :" type buffer mqtt-payload@ type cr
         else
             "No data" type cr
         then
