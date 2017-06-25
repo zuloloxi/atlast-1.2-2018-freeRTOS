@@ -58,11 +58,17 @@ prim crap() {
     printf("Hello\n");
 }
 
+// <ptr> name -- ptr
 prim ATH_getenv() {
-    Sl(1); // On entry will use this many.
+    Sl(2); // On entry will use this many.
     So(1); // on exit will leave this many.
 
-    S0 = getenv(S0);
+    char *ptr=S1;
+    char *tmp;
+
+    tmp = getenv(S0);
+    strcpy(ptr, tmp);
+    Pop;
 }
 
 
