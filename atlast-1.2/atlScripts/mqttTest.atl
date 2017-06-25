@@ -5,6 +5,11 @@ variable mosq
 variable init_run
 variable subscribed
 
+32 string hostname
+
+\ change this as appropriate
+"localhost" hostname strcpy
+
 0 init_run !
 
 : init
@@ -15,7 +20,7 @@ variable subscribed
         "atlast" buffer mqtt-new 0= if
             mosq !
             "New" type cr
-            mosq @ "localhost" 1883 mqtt-client 0= if
+            mosq @ hostname 1883 mqtt-client 0= if
                 "Client" type cr
             else
                 "Client failed" type cr
