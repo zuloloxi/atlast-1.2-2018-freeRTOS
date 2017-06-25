@@ -58,4 +58,16 @@ variable subscribed
     then
 ;
 
+\ <state> --
+: fans
+    mosq @ swap
+    "/home/office/Fans/power" swap
+    mqtt-pub 0= if
+        "Done" type cr
+    else
+        "Fail" type cr
+    then
+;
+
+
 
