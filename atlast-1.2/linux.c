@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <errno.h>
+
+
 #include "atldef.h"
 #ifdef PUBSUB
 #include "msgs.h"
@@ -65,10 +72,63 @@ prim ATH_getenv() {
     S0 = getenv(S0);
 }
 
+// name -- fd
+prim ATH_shmOpen() {
+    int shmFd;
+    Sl(1);
+    So(2);
+    
+    shmFd=shm_open( S0, O_CREAT | O_RDWR, 0600 );  // only the owners processes can access
+    
+    if(shmFd < 0) {
+        S0 = true;
+    } else {
+        S0 = shmFd;
+        Push=false ;
+    }
+}
 
+// file_descriptor size ---
+prim ATH_shmSize() {
+    off_t length;
+    int shmFd;
+    
+    Sl(2);
+    
+    length = (off_t) S0;
+    shmFd = (int)S1;
+    
+    /* configure the size of the shared memory segment */
+	ftruncate(shmFd,length);
+    Pop2;
+}
+// fd size -- ptr
+
+prim ATH_mmap() {
+    void *ptr;
+    Sl(2);
+    So(1);
+    
+    
+	ptr = mmap(0,S0, PROT_READ | PROT_WRITE, MAP_SHARED, S1, 0);
+    Pop;
+    S0=ptr;
+}
+
+// msg -- 
+prim ATH_perror() {
+    
+    perror(S0);
+    Pop;
+}
+    
 static struct primfcn extras[] = {
     {"0INIT-RAM", ATH_initRamBlocks},
     {"0GETENV", ATH_getenv},
+    {"0MMAP", ATH_mmap},
+    {"0SHM-SIZE", ATH_shmSize},
+    {"0SHM-OPEN", ATH_shmOpen},
+    {"0PERROR", ATH_perror},
     {"0TESTING", crap},
     {NULL, (codeptr) 0}
 };

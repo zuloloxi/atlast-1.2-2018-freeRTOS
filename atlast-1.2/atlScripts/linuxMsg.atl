@@ -1,3 +1,4 @@
+\  "struct.atl" include
 
 "linuxMsg.atl" type cr
 
@@ -13,79 +14,127 @@ struct
     32 chars field value
 endstruct /msg
 
+struct
+    32 chars field sender
+     1 chars field fields
+     8 chars field cmd
+     7 chars field padding
+     8 chars field buffer
+     2 chars field bufferLength
+     2 chars field fileIndex
+endstruct /msgFs
+
 variable init_run
-variable out
-/msg string cmd-buffer
+variable shm-fd
+variable shared-buffer
+
+/msg /msgFs max dup string cmd-buffer
+constant msgSize
+
+1024 mkbuffer tst_rx
+msgSize mkbuffer tst_tx
 
 32 chars string destination
 
 : init
     init_run @ 0= if
-        "/client" destination strcpy
-        here /msg allot out !
-        out @ /msg erase
-
+        -1 shm-fd !
+        "/client" iam strcpy
+        
+        "/server" destination strcpy
+\        here /msg allot out !
+        tst_tx msgSize erase
+        
+        "/buffer" shm-open if
+            cr "shm-open failed" cr
+            "shm-open" perror
+        else
+            shm-fd !
+            shm-fd @ msgSize mmap \ create an error as large as the largest message
+            
+        then
 
         -1 init_run !
     then
+    
+    hex clear
+;
+
+\  filename permission  --
+: mkmsg-open
+    init_run @ if
+        tst_tx /msgFs erase
+        iam tst_tx sender strcpy
+        3 tst_tx fields c!
+        "OPEN"  tst_tx cmd strcpy
+        tst_tx value strcpy
+        tst_tx key strcpy
+    else
+        cr
+        "Run Init" type cr
+    then
+;
+
+\ fd pointer len
+: mksmg-read
 ;
 
 : mkmsg-get
     init_run @ if
-        out @ /msg erase
-        out @ key strcpy
-        iam out @ sender strcpy
-        2 out @ fields c!
-        "GET"  out @ cmd strcpy
+        tst_tx /msg erase
+        tst_tx key strcpy
+        iam tst_tx sender strcpy
+        2 tst_tx fields c!
+        "GET"  tst_tx cmd strcpy
     then
 ;
 
 \ name value
 : mkmsg-set
     init_run @ if
-        out @ /msg erase
-        out @ value strcpy
-        out @ key strcpy
-        iam out @ sender strcpy
-        3 out @ fields c!
-        "SET"  out @ cmd strcpy
+        tst_tx /msg erase
+        tst_tx value strcpy
+        tst_tx key strcpy
+        iam tst_tx sender strcpy
+        3 tst_tx fields c!
+        "SET"  tst_tx cmd strcpy
     then
 ;
 
 \ name
 : mkmsg-sub 
     init_run @ if
-        out @ /msg erase
-        iam out @ sender strcpy
+        tst_tx /msg erase
+        iam tst_tx sender strcpy
 
-        2 out @ fields !
-        "SUB"  out @ cmd strcpy
-        out @ key strcpy
+        2 tst_tx fields !
+        "SUB"  tst_tx cmd strcpy
+        tst_tx key strcpy
     then
 ;
 
 : mkmsg-unsub
     init_run @ if
-        out @ /msg erase
-        iam out @ sender strcpy
+        tst_tx /msg erase
+        iam tst_tx sender strcpy
 
-        2 out @ fields !
-        "UNSUB"  out @ cmd strcpy
-        out @ key strcpy
+        2 tst_tx fields !
+        "UNSUB"  tst_tx cmd strcpy
+        tst_tx key strcpy
     then
 ;
 
 
 : send 
     init_run @ if
-\       out @ "/client" message!
-       out @ destination message!
+\       tst_tx "/client" message!
+       tst_tx destination message!
     then
 ;
 
 : disp
     init_run @ if
-        out @ /msg dump
+        tst_tx /msg dump
     then
 ;
 
@@ -99,6 +148,20 @@ variable out
     cr
 
 ;
+
+\ timeout --
+: msg-get
+    iam swap tst_rx message@
+;
+
+: open? 
+    tst_rx fileIndex w@ w>cell dup 0< if
+        drop -1
+    else
+        0
+    then
+;
+
 \ 
 \ 
 \ : msg-get

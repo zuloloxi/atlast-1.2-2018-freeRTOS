@@ -3,7 +3,7 @@
 "linuxMsg.atl" include
 "pubsub.atl" include
 
-"/metrology" iam strcpy
+\ "/metrology" iam strcpy
 
 set QNAME /metrology
 

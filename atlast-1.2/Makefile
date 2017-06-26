@@ -91,10 +91,11 @@ lintatlast:
 	lint atlast.c atlmain.c $(LIBRARIES) $(ATLCONFIG)
 
 install:	atlast
-	strip atlast
+#	strip atlast
 #	strip atlsmall
 #	mv ./atlsmall /usr/local/bin
-	mv ./atlast /usr/local/bin
+	cp ./atlast /usr/local/bin
+	strip /usr/local/bin/atlast
 #	strip atlsmall
 #	mv ./atlsmall /usr/local/bin
 	mkdir -p /usr/local/lib/Small

@@ -947,6 +947,10 @@ prim FR_ringBufferErase() {
 
 }
 
+prim_FR_devReset() {
+	HAL_NVIC_SystemReset();
+}
+
 prim FR_uartRxReady() {
 
 	Sl(1);
@@ -1334,6 +1338,8 @@ prim FR_getMessage() {
 #ifdef LINUX
 	uint32_t timeout;
 	char *from;
+	struct mq_attr attr;
+	int rc=0;
 
 	struct cmdMessage *out;
 	Sl(3);
@@ -1347,8 +1353,11 @@ prim FR_getMessage() {
 	if((mqd_t)-1 == mq) {
 		perror("MESSAGE@");
 	}
+	rc = mq_getattr(mq,&attr);
 
-	int len = mq_receive(mq,out,sizeof(struct cmdMessage),NULL);
+
+//	int len = mq_receive(mq,out,sizeof(struct cmdMessage),NULL);
+	int len = mq_receive(mq,out,attr.mq_msgsize, NULL);
 	Npop(3);
 
 	if( len <0)  {
@@ -1439,6 +1448,7 @@ prim FR_setFieldCnt() {
     fields = (uint8_t)S0;
     msg = (struct cmdMessage *)S1;
 
+
     msg->payload.message.fields = fields;
 
     Pop;
@@ -1452,6 +1462,7 @@ prim FR_mkmsgGet() {
     struct cmdMessage *msg;
     char *key;
 
+    Sl(3);
 #ifdef FREERTOS
     QueueHandle_t sender;
 #endif
@@ -1471,6 +1482,38 @@ prim FR_mkmsgGet() {
     Pop;
     Pop2;
 }
+//
+// populate a SET message
+// Stack <msg pointer> <key> <value> --
+//
+prim FR_mkmsgSet() {
+    struct cmdMessage *msg;
+    char *key;
+    char *value;
+
+    Sl(3);
+
+#ifdef FREERTOS
+    QueueHandle_t sender;
+#endif
+
+#ifdef LINUX
+    char *sender;
+#endif
+
+    value=(char *)S0;
+    key=(char *)S1;
+    msg=(struct cmdMessage *)S2;
+
+#ifdef FREERTOS
+    sender=NULL;
+#endif
+
+    mkMsg(sender, msg, "SET", key, value);
+    Pop;
+    Pop2;
+}
+
 
 //
 // populate a SUB message
@@ -1519,8 +1562,8 @@ prim FR_putMessage() {
 	if ( (dest != NULL) && (out != NULL)) {
 		rc = xQueueSendToBack(dest,out, osWaitForever);
 	}
-	Pop;
-	S0=rc;
+	Pop2;
+//	S0=rc;
 
 #endif
 #ifdef LINUX
@@ -2478,6 +2521,15 @@ prim ATH_wat() {
         Hpc(S0);
     }
     S0 = *((uint16_t *) S0);
+}
+
+prim ATH_16toCell() {
+	stackitem v;
+
+	v=(stackitem)(int16_t)S0 ;
+	S0=v;
+
+
 }
 #endif
 
@@ -4877,6 +4929,8 @@ static struct primfcn primt[] = {
 	{(char *)"0ERASE",ATH_erase},
 	{(char *)"0W@",ATH_wat},
 	{(char *)"0W!",ATH_wbang},
+	{(char *)"0W>CELL",ATH_16toCell},
+
 	{(char *)"0HEX",ATH_hex},
 	{(char *)"0DECIMAL",ATH_dec},
 	{(char *)"0BYE",ATH_bye},
@@ -4917,6 +4971,7 @@ static struct primfcn primt[] = {
 	{(char *)"0LCD-RESET", FR_lcdReset },
 	{(char *)"0LCD-REG-SET",FR_lcdRegSet},
 
+	{(char *)"0DEV-RESET", prim_FR_devReset},
 	{(char *)"0?UART-RX", FR_uartRxReady},
 	{(char *)"0UART-TYPE", FR_uartTxBuffer},
 	{(char *)"0UART-KEY", FR_uartRxByte},
@@ -4947,6 +5002,7 @@ static struct primfcn primt[] = {
 #ifdef FREERTOS
     // This code is compiled if PUBSUB AND FREERTOS are defined
     {(char *)"0MKMSG-GET", FR_mkmsgGet},
+    {(char *)"0MKMSG-SET", FR_mkmsgSet},
     {(char *)"0MKMSG-SUB", FR_mkmsgSub},
 
     {(char *)"0SET-CMD", FR_setCmd},
