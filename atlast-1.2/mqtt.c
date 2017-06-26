@@ -16,7 +16,9 @@ void messageCallback(struct mosquitto *mosq, void *obj,const struct mosquitto_me
     static bool firstTime=true;
 
 
+//    printf("================\n");
 //    atl_eval(".s cr");
+//    Push=obj;
     printf ("Rx topic  : %s\n", (char *)message->topic);
     printf ("Rx payload: %s\n", (char *)message->payload);
     strcpy( ((struct cbMqttMessage *)obj)->topic,(char *)message->topic);
@@ -25,6 +27,28 @@ void messageCallback(struct mosquitto *mosq, void *obj,const struct mosquitto_me
 //    Pop;
     firstTime=false;
     ((struct cbMqttMessage *)obj)->msgFlag++ ;
+}
+
+prim mqttGetPayload() {
+    Sl(1);
+    So(1);
+
+    struct cbMqttMessage *msg;
+
+    msg=(struct cbMqttMessage *)S0;
+    S0=&(msg->payload);
+
+}
+
+prim mqttGetTopic() {
+    Sl(1);
+    So(1);
+
+    struct cbMqttMessage *msg;
+
+    msg=(struct cbMqttMessage *)S0;
+    S0=&(msg->topic);
+
 }
 
 prim mqttInit() {
@@ -177,6 +201,8 @@ static struct primfcn mqtt[] = {
     {"0MQTT-PUB", mqttPublish},
     {"0MQTT-SUB", mqttSubscribe},
     {"0MQTT-LOOP", mqttLoop},
+    {"0MQTT-TOPIC@", mqttGetTopic},
+    {"0MQTT-PAYLOAD@", mqttGetPayload},
     {NULL, (codeptr) 0}
 };
 
