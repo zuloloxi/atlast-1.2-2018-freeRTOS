@@ -357,19 +357,7 @@ void ATH_Features() {
 #else
 	 printf("%s",outBuffer);
 #endif
-//
-#ifdef PUBSUB
-    sprintf(outBuffer,"    PUBSUB\r\n");
-#else
-    sprintf(outBuffer,"NOT PUBSUB\r\n");
-#endif
 
-#ifdef FREERTOS
-	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
-#else
-	 printf("%s",outBuffer);
-#endif
-//
 
 #ifdef CONIO
     sprintf(outBuffer,"    CONIO\r\n");
@@ -564,6 +552,18 @@ void ATH_Features() {
 #else
     sprintf(outBuffer,"NOT PUBSUB\r\n");
 #endif
+#ifdef FREERTOS
+	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
+#else
+	 printf("%s",outBuffer);
+#endif
+//
+#ifdef MQTT
+    sprintf(outBuffer,"    MQTT\r\n");
+#else
+    sprintf(outBuffer,"NOT MQTT\r\n");
+#endif
+//
 #ifdef FREERTOS
 	 atlastTxBuffer(console, (uint8_t *)outBuffer) ;
 #else
