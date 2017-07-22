@@ -3375,8 +3375,8 @@ prim P_file()			      /* Declare file */
     Hstore = 0; 		      /* Mark file not open */
 }
 
-prim P_fopen()			      /* Open file: fname fmodes fd -- flag */
-{
+    /* Open file: fname fmodes fd -- flag */
+prim P_fopen() {
     FILE *fd;
     stackitem stat;
 
@@ -3386,10 +3386,10 @@ prim P_fopen()			      /* Open file: fname fmodes fd -- flag */
     Isfile(S0);
     fd = fopen((char *) S2, fopenmodes[S1]);
     if (fd == NULL) {
-        stat = Falsity;
+        stat = Truth;
     } else {
         *(((stackitem *) S0) + 1) = (stackitem) fd;
-        stat = Truth;
+        stat = Falsity;
     }
     Pop2;
     S0 = stat;
