@@ -13,6 +13,7 @@
 */
 #ifndef LINUX
 #include "dover.h"
+#include <errno.h>
 #endif
 #ifdef FREERTOS
 #include "tim.h"
@@ -3446,22 +3447,22 @@ prim P_fread()			      {
     /* ATH Now --- File read: buf len fd -- length */
     Sl(3);
     Hpc(S0);
-    Isfile(S2);
-    Isopen(S2);
+    Isfile(S0);
+    Isopen(S0);
     // TODO This is stupid, it is inconsisitent with write.
     // The stack order should follow the C convention.
     // S2 = fread((char *) S0, 1, ((int) S1), FileD(S2));
-    S2 = fread((char *) S1, 1, ((int) S2), FileD(S0));
+    S2 = fread((char *) S2, 1, ((int) S1), FileD(S0));
     Pop2;
 }
 
 prim P_fwrite() 		      /* File write: len buf fd -- length */
 {
     Sl(3);
-    Hpc(S1);
+    Hpc(S2);
     Isfile(S0);
     Isopen(S0);
-    S2 = fwrite((char *) S1, 1, ((int) S2), FileD(S0));
+    S2 = fwrite((char *) S2, 1, ((int) S1), FileD(S0));
     Pop2;
 }
 
