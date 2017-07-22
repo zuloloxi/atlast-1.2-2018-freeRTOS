@@ -136,7 +136,11 @@ prim ATH_mmap() {
 // msg -- 
 prim ATH_perror() {
     
-    perror(S0);
+    Sl(1);
+    So(0);
+
+    perror((char *)S0);
+    errno=0;
     Pop;
 }
     
