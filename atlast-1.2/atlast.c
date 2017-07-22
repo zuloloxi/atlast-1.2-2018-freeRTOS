@@ -3441,13 +3441,17 @@ prim P_fputline()		      /* Put line: string fd -- flag */
     Pop;
 }
 
-prim P_fread()			      /* File read: fd len buf -- length */
-{
+prim P_fread()			      {
+    /* Was ------- File read: fd len buf -- length */
+    /* ATH Now --- File read: buf len fd -- length */
     Sl(3);
     Hpc(S0);
     Isfile(S2);
     Isopen(S2);
-    S2 = fread((char *) S0, 1, ((int) S1), FileD(S2));
+    // TODO This is stupid, it is inconsisitent with write.
+    // The stack order should follow the C convention.
+    // S2 = fread((char *) S0, 1, ((int) S1), FileD(S2));
+    S2 = fread((char *) S1, 1, ((int) S2), FileD(S0));
     Pop2;
 }
 
