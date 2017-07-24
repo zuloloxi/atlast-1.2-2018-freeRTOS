@@ -3385,7 +3385,11 @@ prim P_fopen() {
     Hpc(S2);
     Hpc(S0);
     Isfile(S0);
-    fd = fopen((char *) S2, fopenmodes[S1]);
+//    fd = fopen((char *) S2, fopenmodes[S1]);
+//    D|eviating, again, from atlast as delivered.
+//    The filemodes are paltform specific, get over it.
+//    On linux fopen expects a string.
+    fd = fopen((char *) S2, S1);
     if (fd == NULL) {
         stat = Truth;
     } else {
