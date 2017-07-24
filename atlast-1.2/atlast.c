@@ -5784,7 +5784,7 @@ int atl_eval(char *sp) {
      printf("%s",outBuffer);
 #endif
 #endif
-                        evalstat = ATL_UNDEFINED;
+//                        evalstat = ATL_UNDEFINED;
                     }
                 } else if (tickpend) {
                     tickpend = False;
