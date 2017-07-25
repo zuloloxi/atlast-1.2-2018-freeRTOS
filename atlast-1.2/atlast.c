@@ -11,14 +11,18 @@
    This program is in the public domain.
 
 */
+#include <errno.h>
 #ifndef LINUX
 #include "dover.h"
-#include <errno.h>
 #endif
 #ifdef FREERTOS
 #include "tim.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "NANDFlash.h"
+#include "stm32f4xx_hal_qspi.h"
+#include "yaffs_utils.h"
+#include "usb_printf.h"
 #endif
 
 #include <stdio.h>
@@ -46,6 +50,15 @@
 #include <pthread.h>
 #endif
 #endif
+
+#ifdef FILEIO
+#ifdef FREERTOS
+#ifdef YAFFS
+#include "yportenv.h"
+#endif
+#endif
+#endif
+
 // #define MEMSTAT
 
 /*
@@ -601,9 +614,8 @@ prim ATH_Instream() {
 }
 
 prim ATH_Token() {
-    int r;
+    V token(&instream);
 
-    r=token(&instream);
     V strcpy(strbuf[cstrbuf], tokbuf);
     Push = (stackitem) strbuf[cstrbuf];
 }
@@ -640,6 +652,127 @@ prim ATH_cd() {
     }
 #else
     S0=true;
+#endif
+}
+ prim ATH_errno() {
+	 Sl(0);
+	 So(1);
+	 Push=errno;
+
+	 errno=0;
+}
+
+#ifdef FREERTOS
+prim ATH_perror() {
+	char *msg;
+
+	Sl(1);
+	So(0);
+
+	atlastTxBuffer(console, (uint8_t *)S0) ;
+	atlastTxBuffer(console, (uint8_t *)":") ;
+	msg = strerror(errno);
+	atlastTxBuffer(console, (uint8_t *)msg) ;
+	P_cr();
+}
+#endif
+
+prim RT_dir() {
+    Sl(1);
+    So(0);
+#ifdef YAFFS
+    char *name = S0;							// we expect 1 item on the stack (full file name)
+
+    directory(name);
+
+    S0 = false;
+#else
+    S0=true;
+#endif
+}
+
+prim RT_touch() {
+    Sl(1);										// we expect 1 item on the stack (full file name)
+    So(0);										// we aren't adding anything to the stack (we are replacing name with success/fail
+#ifdef YAFFS
+    char *name = S0;
+    int rc;
+
+    rc = create_random_file(name, 0, 0, 0);		// create returns -1 for fail, 0 for success
+
+    if (rc < 0)
+    {
+    	S0 = true;								// fail
+    }
+    else
+    {
+    	S0 = false;								// success
+    }
+#else
+    S0 = true;									// fail
+#endif
+}
+
+prim RT_mkfile() {
+    Sl(2);										// we expect 2 item on the stack (full file name and length)
+    So(0);										// we aren't adding anything to the stack (we are replacing 2 items with just 1 - success/fail)
+#ifdef YAFFS
+    char *name = S1;
+    int length = S0;
+    int rc;
+
+    Pop;										// trash 1 item
+
+    rc = create_random_file(name, length, 0, 0);	// create returns -1 for fail, 0 for success
+
+	if (rc < 0)
+    {
+    	S0 = true;								// fail
+    }
+    else
+    {
+    	S0 = false;								// success
+    }
+#else
+    S0 = true;									// fail
+#endif
+}
+
+prim RT_crcfile() {
+    Sl(1);										// we expect 1 item on the stack (full file name)
+    So(1);										// we are possibly adding 1 item to the stack (we are replacing 1 item with 1 or 2)
+#ifdef YAFFS
+    char *name = S0;
+    int crc;
+    int rc;
+
+    Pop;										// trash the name
+
+    rc = crc_file(name, (uint32_t *)&crc);		// crc returns -1 for fail, 0 for success
+
+    if (rc < 0)									// failed
+    {
+    	Push = true;							// return fail
+    }
+    else
+    {
+    	Push = crc;								// return crc ...
+    	Push = false;							// ... and success
+    }
+#else
+    S0 = true;									// fail
+#endif
+}
+
+prim RT_test() {
+    Sl(0);										// we expect 0 items on the stack
+    So(1);										// we are responding with a result
+#ifdef YAFFS
+    yaffs_test();
+
+   	Push = false;								// success
+#else
+    S0 = true;									// fail
 #endif
 }
 
@@ -822,7 +955,7 @@ prim ATH_dec() {
 prim ATH_bye() {
 //    *((int *) atl_body(rf)) = 0;
 #ifdef FREETOS
-	usbPassThrough=false;
+	atl_eval("0 DBG_RUN !");
 #endif
 
 #ifdef LINUX
@@ -907,6 +1040,16 @@ prim ANSI_free() {
 #ifdef FREERTOS
 extern struct ringBuffer *uart4RxBuffer;
 
+prim FR_getEvent() {
+	Sl(1);
+	So(1);
+
+	EventBits_t mask = xEventGroupGetBits( (EventGroupHandle_t) S0);
+
+	S0=(stackitem) mask ;
+
+
+}
 // Given a UART structure return the  ring buffer data pointer.
 // Of the data.
 //
@@ -948,7 +1091,7 @@ prim FR_ringBufferErase() {
 
 }
 
-prim_FR_devReset() {
+prim FR_devReset() {
 	HAL_NVIC_SystemReset();
 }
 
@@ -992,7 +1135,7 @@ prim FR_uartRxByte() {
 	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)S0;
 	uint8_t data;
 	if (huart->Instance == UART4) {
-	    data=ringBufferRxByte( uart4RxBuffer );
+	    data=ringBufferRxByte( uart4RxBuffer, portMAX_DELAY );
 	} else {
 	    data = rxByteWait(huart,-1) ;
 	}
@@ -1035,6 +1178,41 @@ prim FR_uartEmit() {
 
 //	txByteWait(UART_HandleTypeDef *huart,uint8_t data, int timeout)
 	txByteWait(huart,data, -1) ;
+	Pop2;
+}
+
+prim FR_qconsoleKey() {
+    extern struct ringBuffer *dataIn;
+    Push=ringBufferRxReady(dataIn);
+}
+
+prim FR_consoleKey() {
+    extern struct ringBuffer *dataIn;
+	Push = ringBufferRxByte( dataIn, portMAX_DELAY);
+}
+
+prim FR_consoleExpect() {
+	Sl(2);
+	So(0);
+
+    extern struct ringBuffer *dataIn;
+
+	int idx = 0;
+	int ch=0;
+
+	int len = S0;
+	char *buffer = S1;
+
+	for(idx=0;idx<len;idx++) {
+		ch = ringBufferRxByte( dataIn, portMAX_DELAY);
+		if( ch == '\r' || ch == '\n') {
+			buffer[idx++]=ch;
+			buffer[idx]='\0';;
+			break;
+		}
+		buffer[idx]= (uint8_t)ch &0xff;
+
+	}
 	Pop2;
 }
 
@@ -1182,12 +1360,14 @@ prim FR_getQid() {
         t=task[S0];
         Pop;
 
+        xSemaphoreTake(task[USB_TASK]->lock, portMAX_DELAY );
         if( t != NULL) {
             Push=(stackitem)t->iam;
             failFlag=false;
         } else {
             failFlag = true;
         }
+        xSemaphoreGive(task[USB_TASK]->lock);
     } else {
         Pop;
         failFlag=true;
@@ -1222,24 +1402,19 @@ prim FR_setTaskDb() {
 prim FR_writePin() {
 	Sl(3);
 
-	uint8_t pinState=(uint8_t)S0;
+	GPIO_PinState pinState=((uint8_t)S0 & 0x01);
 	uint16_t portPin = (uint16_t)S1;
-	uint32_t portAddr = (uint32_t)S2;
+	GPIO_TypeDef *portAddr = (GPIO_TypeDef*)S2;
 
 	HAL_GPIO_WritePin(portAddr,portPin,pinState);
 	Pop2;
 	Pop;
 }
-/*
-	HAL_GPIO_WritePin(R_LED_GPIO_Port,R_LED_Pin,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOB,G_LED_Pin,GPIO_PIN_SET);
-	*/
 
 prim FR_readPin() {
 	Sl(2);
 	So(1);
 
-//	uint8_t pinState=(uint8_t)S0;
 	uint16_t portPin = (uint16_t)S0;
 	uint32_t portAddr = (uint32_t)S1;
 
@@ -1276,12 +1451,91 @@ prim FR_stackHighWaterMark() {
 
 }
 
+prim FR_nice() {
+	Sl(2);
+	So(1);
+
+	uint8_t taskId = (uint8_t)S1;
+	int8_t priorityInc = (int8_t)S0;
+
+	if (taskId < LAST_TASK) {
+
+		int8_t cPriority= task[taskId]->priority;
+
+		cPriority += priorityInc;
+
+		if( cPriority < 1) {
+			cPriority = 1;
+		} else if (cPriority >= (configMAX_PRIORITIES -1)) {
+			cPriority = configMAX_PRIORITIES -1;
+		}
+
+		vTaskPrioritySet(task[taskId]->handle, cPriority);
+		task[taskId]->priority = cPriority;
+		Pop;
+		S0=cPriority;
+	} else {
+		Pop;
+		S0=-1;
+	}
+
+}
+
+prim FR_ps() {
+	char taskList[512];
+	int taskCount=0;
+
+	taskCount = uxTaskGetNumberOfTasks();
+
+	sprintf(taskList,"Number of Task:%6d\r\n",taskCount);
+    atlastTxBuffer(console, (uint8_t *)taskList) ;
+    sprintf(taskList,"Free Heap     :%6d\r\n",xPortGetFreeHeapSize() );
+    atlastTxBuffer(console, (uint8_t *)taskList) ;
+
+    atlastTxBuffer(console, (uint8_t *) "+--------------+-------+-------+-------|----+\r\n");
+    atlastTxBuffer(console, (uint8_t *) "|Name          |State  |Pri    |HWM    |ID  |\r\n");
+    atlastTxBuffer(console, (uint8_t *) "+--------------+-------+-------+-------|----+\r\n");
+	vTaskList(taskList);
+
+    atlastTxBuffer(console, (uint8_t *)taskList) ;
+
+
+}
+
+prim FR_suspend() {
+	Sl(1);
+	So(0);
+
+	uint8_t taskId = S0;
+	TaskHandle_t t;
+	if (taskId < LAST_TASK) {
+		t=task[taskId]->handle;
+		if(t != 0) {
+			vTaskSuspend(t);
+		}
+	}
+}
+
+prim FR_resume() {
+	Sl(1);
+	So(0);
+
+	uint8_t taskId = S0;
+	TaskHandle_t t;
+	if (taskId < LAST_TASK) {
+		t=task[taskId]->handle;
+		if(t != 0) {
+			vTaskResume(t);
+		}
+	}
+}
+
 prim FR_getTaskHandle() {
 
     uint8_t idx;
 
     idx=S0;
-//    task[S0]->handle = xTaskGetCurrentTaskHandle();
+
     S0=(stackitem)task[idx]->handle ;
 }
 
@@ -1296,7 +1550,11 @@ prim FR_getTaskState() {
     S0 = eTaskGetState( h );
 
 }
-#endif
+
+prim FR_rxXmodem() {
+    xmodemReceive(BKPSRAM_BASE,2048);
+}
+#endif // FREERTOS
 
 #ifdef PUBSUB
 /*
@@ -1356,8 +1614,6 @@ prim FR_getMessage() {
 	}
 	rc = mq_getattr(mq,&attr);
 
-
-//	int len = mq_receive(mq,out,sizeof(struct cmdMessage),NULL);
 	int len = mq_receive(mq,out,attr.mq_msgsize, NULL);
 	Npop(3);
 
@@ -1418,6 +1674,15 @@ prim FR_setCmd() {
     strncpy(msg->payload.message.cmd, cmd, MAX_CMD);
 }
 
+prim FR_getCmd() {
+    struct cmdMessage *msg;
+    char *cmd;
+
+    msg = (struct cmdMessage *)S0;
+
+    S0 = msg->payload.message.cmd;
+}
+
 prim FR_setKey() {
     struct cmdMessage *msg;
     char *key;
@@ -1428,6 +1693,14 @@ prim FR_setKey() {
     Pop;
 
     strncpy(msg->payload.message.key, key, MAX_KEY);
+}
+
+prim FR_getKey() {
+    struct cmdMessage *msg;
+
+    msg = (struct cmdMessage *)S0;
+
+    S0=msg->payload.message.key;
 }
 
 prim FR_setValue() {
@@ -1442,19 +1715,36 @@ prim FR_setValue() {
     strncpy(msg->payload.message.value, value, MAX_VALUE);
 }
 
-prim FR_setFieldCnt() {
+prim FR_getValue() {
     struct cmdMessage *msg;
-     uint8_t fields;
 
-    fields = (uint8_t)S0;
-    msg = (struct cmdMessage *)S1;
+    msg = (struct cmdMessage *)S0;
+    S0=msg->payload.message.value;
+}
 
 
-    msg->payload.message.fields = fields;
+prim FR_setFieldCnt() {
+	struct cmdMessage *msg;
+	uint8_t fields;
 
-    Pop;
+	fields = (uint8_t)S0;
+	msg = (struct cmdMessage *)S1;
+
+
+	msg->payload.message.fields = fields;
+
+	Pop;
 
 }
+
+prim FR_getFieldCnt() {
+	struct cmdMessage *msg;
+
+	msg=(struct cmdMessage *)S0;
+
+	S0=(stackitem)msg->payload.message.fields;
+}
+
 //
 // populate a GET message
 // Stack <msg pointer> <sender> <key> --
@@ -1547,12 +1837,42 @@ prim FR_mkmsgSub() {
     Pop2;
 }
 
+// TODO FreeRTOS Only and temporary at that
+// Ultimately these will become open close etc
+//
+#ifdef FREERTOS
+// <msg ptr> <sender> filename mode --
+//
+prim FR_mkmsgOpen() {
+	Sl(4);
+	So(0);
+
+	struct cmdMessage *out = S3;
+    QueueHandle_t sender = S2;
+	char *fname = S1;
+	char *mode = S0;
+
+	memset(out,0,sizeof(struct cmdMessage));
+
+	strcpy(out->payload.message.cmd, "OPEN");
+	strcpy(out->payload.message.key, fname);
+	strcpy(out->payload.message.value, mode);
+
+	out->payload.message.fields = 3;
+	out->sender = sender;
+
+	Npop(4);
+
+}
+#endif
+
 prim FR_putMessage() {
 	struct cmdMessage *out;
 	Sl(2);
 #ifdef FREERTOS
 	volatile QueueHandle_t dest;
-	osStatus rc = osOK;
+	BaseType_t status = errQUEUE_FULL;
+	bool rc=true;;
 
 	Sl(2);
 	So(1);
@@ -1561,7 +1881,13 @@ prim FR_putMessage() {
 	out = (struct cmdMessage *)S1;
 
 	if ( (dest != NULL) && (out != NULL)) {
-		rc = xQueueSendToBack(dest,out, osWaitForever);
+		status = xQueueSendToBack(dest,out, osWaitForever);
+
+		if( rc == pdPASS) {
+			rc=false;
+		} else {
+			rc=true;
+		}
 	}
 	Pop2;
 //	S0=rc;
@@ -1753,7 +2079,6 @@ prim FR_lookup() {
 static char *alloc(unsigned int size) {
     char *cp = (char *)malloc(size);
 
-    /* printf("\nAlloc %u", size); */
     if (cp == NULL) {
         
 #ifdef EMBEDDED
@@ -1992,7 +2317,40 @@ static dictword *lookup(tkname)
     encountered and no characters were stored.	No end
     of line character is stored in the string buffer.
     */
+#if defined(FREERTOS) && defined(YAFFS)
+Exported char *atl_fgetsp(char *s, int n, int stream) {
 
+	int rc=0;
+	int ch=0;
+	int idx=0;
+
+	while(True) {
+		rc = yaffs_read(stream, &ch, 1);
+		if(rc < 0) {
+			return errno;
+		}
+		if(rc == 0) {
+			if(idx == 0) {
+				return NULL;
+			}
+			break;
+		}
+		if( ch == '\r') {
+			break;
+		}
+		if( ch == '\n') {
+			break;
+		}
+		if(idx < (n-1)) {
+			s[idx++] = (ch & 0xff);
+		}
+	}
+	s[idx]='\0';
+	return s;
+}
+#endif
+
+#ifdef LINUX
 Exported char *atl_fgetsp(s, n, stream)
     char *s;
     int n;
@@ -2025,6 +2383,7 @@ Exported char *atl_fgetsp(s, n, stream)
     s[i] = EOS;
     return s;
 }
+#endif // LINUX
 #endif /* FgetspNeeded */
 
 /*  ATL_MEMSTAT  --  Print memory usage summary.  */
@@ -3376,26 +3735,58 @@ prim P_file()			      /* Declare file */
     Hstore = 0; 		      /* Mark file not open */
 }
 
-    /* Open file: fname fmodes fd -- flag */
-prim P_fopen() {
-    FILE *fd;
+prim P_mkdir() {
+	mode_t mode=0666; // By default make it globally accesible.
+#ifdef LINUX
+	S0=-1;	// Failed, unimplemented.
+#endif
+
+#if defined(FREERTOS) && defined(YAFFS)
+// int yaffs_mkdir(const YCHAR *path, mode_t mode)
+	S0 = yaffs_mkdir((char *)S0, mode);
+#endif
+}
+
+prim P_rmdir() {
+#ifdef LINUX
+	S0=-1;	// Failed, unimplemented.
+#endif
+
+#if defined(FREERTOS) && defined(YAFFS)
+// int yaffs_mkdir(const YCHAR *path, mode_t mode)
+	S0 = yaffs_rmdir((char *)S0);
+#endif
+}
+
+
+prim P_fopen()			      /* Open file: fname fmodes fd -- flag */
+{
     stackitem stat;
 
     Sl(3);
     Hpc(S2);
     Hpc(S0);
+#ifdef LINUX
     Isfile(S0);
-//    fd = fopen((char *) S2, fopenmodes[S1]);
-//    D|eviating, again, from atlast as delivered.
-//    The filemodes are paltform specific, get over it.
-//    On linux fopen expects a string.
-    fd = fopen((char *) S2, S1);
+    FILE *fd = fopen((char *) S2, fopenmodes[S1]);
     if (fd == NULL) {
+        stat = Falsity;
+    } else {
+        *(((stackitem *) S0) + 1) = (stackitem) fd;
+        stat = Truth;
+    }
+#endif
+
+#if defined(FREERTOS) && defined(YAFFS)
+    int fd = yaffs_open((char *)S2,(int)S1,S_IREAD | S_IWRITE);
+    if( fd < 0) {
         stat = Truth;
     } else {
         *(((stackitem *) S0) + 1) = (stackitem) fd;
         stat = Falsity;
     }
+#endif
+
     Pop2;
     S0 = stat;
 }
@@ -3404,9 +3795,18 @@ prim P_fclose() 		      /* Close file: fd -- */
 {
     Sl(1);
     Hpc(S0);
+#ifdef LINUX
     Isfile(S0);
     Isopen(S0);
     V fclose(FileD(S0));
+#endif
+
+#if defined(FREERTOS) && defined(YAFFS)
+    int fd = *(((stackitem *) S0) + 1);
+
+    yaffs_close( fd );
+#endif
+
     *(((stackitem *) S0) + 1) = (stackitem) NULL;
     Pop;
 }
@@ -3415,7 +3815,12 @@ prim P_fdelete()		      /* Delete file: fname -- flag */
 {
     Sl(1);
     Hpc(S0);
+#ifdef LINUX
     S0 = (unlink((char *) S0) == 0) ? Truth : Falsity;
+#endif
+#if defined(FREERTOS) && defined(YAFFS)
+    S0 = (yaffs_unlink((char *) S0) == 0) ? Truth : Falsity;
+#endif
 }
 
 prim P_fgetline()		      /* Get line: fd string -- flag */
@@ -3451,12 +3856,27 @@ prim P_fread()			      {
     /* ATH Now --- File read: buf len fd -- length */
     Sl(3);
     Hpc(S0);
+#ifdef LINUX
     Isfile(S0);
     Isopen(S0);
     // TODO This is stupid, it is inconsisitent with write.
     // The stack order should follow the C convention.
     // S2 = fread((char *) S0, 1, ((int) S1), FileD(S2));
     S2 = fread((char *) S2, 1, ((int) S1), FileD(S0));
+#endif
+#if defined(FREERTOS) && defined(YAFFS)
+    int fd;
+    char *buff;
+    int len;
+
+    fd = FileD(S0);
+    buff = (char *)S2;
+    len = (int)S1;
+
+
+//    S2 = yaffs_read((int)FileY(S0), (char *)S2,(int)S1);
+    S2 = yaffs_read(fd, buff, len);
+#endif
     Pop2;
 }
 
@@ -3465,8 +3885,16 @@ prim P_fwrite() 		      /* File write: len buf fd -- length */
     Sl(3);
     Hpc(S2);
     Isfile(S0);
+#ifdef LINUX
     Isopen(S0);
-    S2 = fwrite((char *) S2, 1, ((int) S1), FileD(S0));
+    S2 = fwrite((char *) S1, 1, ((int) S2), FileD(S0));
+#endif
+#if defined(FREERTOS) && defined(YAFFS)
+    int fd = *(((stackitem *) S0) + 1);
+
+//    S2 = yaffs_write((int)FileY(S0), (char *)S1,(int)S2);
+    S2 = yaffs_write(fd, (char *)S2,(int)S1);
+#endif
     Pop2;
 }
 
@@ -3498,11 +3926,79 @@ prim P_ftell()			      /* Return file position:	fd -- pos */
 prim P_fseek()			      /* Seek file:  offset base fd -- */
 {
     Sl(3);
+    So(1);
     Isfile(S0);
     Isopen(S0);
+
+    unsigned long roffset=0;
+#ifdef LINUX
     V fseek(FileD(S0), (long) S2, (int) S1);
-    Npop(3);
+#endif
+
+#if defined(FREERTOS) && defined(YAFFS)
+    roffset = yaffs_lseek(FileD(S0), (long) S2, (int) S1);
+#endif
+    Npop(2);
+    S0 = roffset;
 }
+
+prim P_access() {
+	Sl(2);
+	So(1);
+
+#if defined(FREERTOS) && defined(YAFFS)
+
+	S1 =  yaffs_access((char *)S1, (int) S0);
+
+	Pop;
+#endif
+
+}
+
+#if defined(FREERTOS) && defined(YAFFS)
+prim FR_loadFile() {
+	Sl(1);
+	So(0);
+
+	int fd=-1;
+	/*
+	char buffer[2048];
+	int idx=0;
+
+	memset(buffer,'A', 64);
+	fd = yaffs_open("NAND/crap.txt", O_WRONLY|O_CREAT,0666);
+
+	for(idx=0;idx<10;idx++) {
+		yaffs_write(fd, buffer, 64);
+	}
+	*/
+
+	char *fname=S0;
+	char buffer[132];
+	bool runFlag=True;
+
+	Pop;
+	V yaffs_unlink(fname);
+
+	fd = yaffs_open(fname, O_WRONLY|O_CREAT,0666);
+
+	while(runFlag) {
+		Push=(stackitem)buffer;
+		Push=132;
+
+		FR_consoleExpect();
+
+
+		if(!strcmp("\\ EOF\n", buffer)) {
+			runFlag=False;
+		} else {
+			yaffs_write(fd, buffer, strlen(buffer));
+		}
+	}
+
+	V yaffs_close(fd);
+}
+#endif
 
 prim P_fload()			      /* Load source file:  fd -- evalstat */
 {
@@ -3521,18 +4017,30 @@ prim P_fload()			      /* Load source file:  fd -- evalstat */
 
 prim P_include() {
     int estat;
+    Sl(1);
+#ifdef LINUX
     FILE *fd;
 
-    Sl(1);
 
     fd = fopen((char *)S0, "r") ;
+#endif
+#if defined(FREERTOS) && defined(YAFFS)
+    char *fname = (char *)S0;
+    int fd = yaffs_open(fname,O_RDONLY,0);
+#endif
+
     if(!fd) {
         perror("INCLUDE fopen");
         Pop;
         return;
     }
     estat = atl_load(fd);
+#ifdef LINUX
     fclose(fd);
+#endif
+#if defined(FREERTOS) && defined(YAFFS)
+    yaffs_close(fd);
+#endif
     Pop;
 }
 
@@ -3612,6 +4120,11 @@ prim P_swap()			      /* Exchange two top items on stack */
     t = S1;
     S1 = S0;
     S0 = t;
+}
+
+prim P_nip() {
+	S1=S0;
+	Pop;
 }
 
 prim P_over()			      /* Push copy of next to top of stack */
@@ -4508,11 +5021,6 @@ prim P_system()
 }
 
 // Time to leave.
-/*
-prim ATH_bye() {
-    exit(0);
-}
-*/
 #endif /* SYSTEM */
 
 #ifdef TRACE
@@ -4699,6 +5207,7 @@ static struct primfcn primt[] = {
     {"0DUP", P_dup},
     {"0DROP", P_drop},
     {"0SWAP", P_swap},
+    {"0NIP", P_nip},
     {"0OVER", P_over},
     {"0PICK", P_pick},
     {"0ROT", P_rot},
@@ -4910,9 +5419,14 @@ static struct primfcn primt[] = {
 
 #ifdef FILEIO
     {"0FILE", P_file},
+    {"0(MKDIR)", P_mkdir},
+    {"0(RMDIR)", P_rmdir},
+
+    {"0FACCESS", P_fopen},
     {"0FOPEN", P_fopen},
+    {"0ACCESS", P_access},
     {"0FCLOSE", P_fclose},
-    {"0FDELETE", P_fdelete},
+    {"0UNLINK", P_fdelete},
     {"0FGETS", P_fgetline},
     {"0FPUTS", P_fputline},
     {"0FREAD", P_fread},
@@ -4952,6 +5466,12 @@ static struct primfcn primt[] = {
     {(char *)"0MS", ATH_ms},
     {(char *)"0PWD", ATH_pwd},
     {(char *)"0CD", ATH_cd},
+    {(char *)"0DIR", RT_dir},
+    {(char *)"0TOUCH", RT_touch},
+    {(char *)"0MKFILE", RT_mkfile},
+    {(char *)"0CRCFILE", RT_crcfile},
+    {(char *)"0TEST", RT_test},
+    {(char *)"0ERRNO", ATH_errno},
 #endif
 
 #ifdef ANSI
@@ -4963,6 +5483,43 @@ static struct primfcn primt[] = {
     {(char *)"0FREE", ANSI_free},
 #endif
 #ifdef FREERTOS
+    {(char *)"0TOUCH", RT_touch},
+    {(char *)"0MKFILE", RT_mkfile},
+    {(char *)"0CRCFILE", RT_crcfile},
+    {(char *)"0TEST", RT_test},
+
+    {(char *)"0PERROR", ATH_perror},
+	{(char *)"0MKSCMD", FR_mkScmd},
+	{(char *)"0NAND-SETUP", FR_NANDSetup},
+	{(char *)"0NAND-BLOCKS", FR_NANDBlocks},
+	{(char *)"0NAND-MKBAD", FR_badBlockMap },
+	{(char *)"0NAND-LOCK", FR_NANDLock},
+	{(char *)"0NAND-UNLOCK", FR_NANDUnlock },
+	{(char *)"0NAND-READ", FR_NANDRead },
+	{(char *)"0NAND-WRITE", FR_NANDWrite },
+	{(char *)"0NAND-ERASE", FR_NANDErase },
+	{(char *)"0NAND-GETPARAMS", FR_NANDGetParams },
+
+#ifdef YAFFS
+	{(char *)"0YAFFS-INSTALL", FR_yaffsInstall },
+	{(char *)"0YAFFS-FORMAT", FR_yaffsFormat },
+	{(char *)"0YAFFS-MOUNT", FR_yaffsMount },
+	{(char *)"0YAFFS-UNMOUNT", FR_yaffsUnmount },
+	{(char *)"0O_CREAT", FR_yaffsCreatDef },
+	{(char *)"0O_TRUNC", FR_yaffsTruncDef },
+	{(char *)"0O_RDWR", FR_yaffsRdwrDef },
+	{(char *)"0O_RDONLY", FR_yaffsRdOnly },
+	{(char *)"0O_WRONLY", FR_yaffsWrOnly },
+	{(char *)"0O_APPEND", FR_yaffsAppend },
+
+	{(char *)"0SEEK_SET", FR_yaffsSeekSet },
+	{(char *)"0SEEK_CUR", FR_yaffsSeekCur },
+	{(char *)"0SEEK_END", FR_yaffsSeekEnd },
+	{(char *)"0LOAD-FILE", FR_loadFile },
+
+#endif
+
+	{(char *)"0RX", FR_rxXmodem},
     {(char *)"0QID@", FR_getQid},
     {(char *)"0DB@", FR_getTaskDb},
     {(char *)"0DB!", FR_setTaskDb},
@@ -4980,7 +5537,7 @@ static struct primfcn primt[] = {
 	{(char *)"0LCD-RESET", FR_lcdReset },
 	{(char *)"0LCD-REG-SET",FR_lcdRegSet},
 
-	{(char *)"0DEV-RESET", prim_FR_devReset},
+	{(char *)"0DEV-RESET", FR_devReset},
 	{(char *)"0?UART-RX", FR_uartRxReady},
 	{(char *)"0UART-TYPE", FR_uartTxBuffer},
 	{(char *)"0UART-KEY", FR_uartRxByte},
@@ -4989,11 +5546,19 @@ static struct primfcn primt[] = {
 	{(char *)"0RING-BUFFER@", FR_ringBufferPtr },
 	{(char *)"0RING-BUFFER-ERASE", FR_ringBufferErase },
 
+	{(char *)"0?KEY", FR_qconsoleKey },
+	{(char *)"0KEY", FR_consoleKey },
+	{(char *)"0EXPECT", FR_consoleExpect },
+
 	{(char *)"0SEM@", FR_semGet },
 	{(char *)"0SEM-COUNT@", FR_semGetCount },
 	{(char *)"0SEM-GIVE", FR_semGive },
 	{(char *)"0SEM-TAKE", FR_semTake },
 	{(char *)"0STACK-HWM", FR_stackHighWaterMark },
+	{(char *)"0PS", FR_ps },
+	{(char *)"0SUSPEND", FR_suspend },
+	{(char *)"0RESUME", FR_resume },
+	{(char *)"0NICE", FR_nice },
 	{(char *)"0GET-TASK-HANDLE", FR_getTaskHandle },
 	{(char *)"0GET-TASK-STATE", FR_getTaskState },
 
@@ -5008,16 +5573,25 @@ static struct primfcn primt[] = {
 	{(char *)"0.RECORD",  FR_displayRecord},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
+    {(char *)"0EVENT@", FR_getEvent},
 #ifdef FREERTOS
     // This code is compiled if PUBSUB AND FREERTOS are defined
     {(char *)"0MKMSG-GET", FR_mkmsgGet},
     {(char *)"0MKMSG-SET", FR_mkmsgSet},
     {(char *)"0MKMSG-SUB", FR_mkmsgSub},
+    {(char *)"0MKMSG-OPEN", FR_mkmsgOpen},
 
     {(char *)"0SET-CMD", FR_setCmd},
+    {(char *)"0GET-CMD", FR_getCmd},
+
     {(char *)"0SET-KEY", FR_setKey},
+    {(char *)"0GET-KEY", FR_getKey},
+
     {(char *)"0SET-VALUE", FR_setValue},
+    {(char *)"0GET-VALUE", FR_getValue},
+
     {(char *)"0SET-FIELD-CNT", FR_setFieldCnt},
+    {(char *)"0GET-FIELD-CNT", FR_getFieldCnt},
 
     {(char *)"0SET-SENDER", FR_setSender},
     {(char *)"0GET-SENDER", FR_getSender},
@@ -5788,7 +6362,7 @@ int atl_eval(char *sp) {
      printf("%s",outBuffer);
 #endif
 #endif
-//                        evalstat = ATL_UNDEFINED;
+                        // evalstat = ATL_UNDEFINED;
                     }
                 } else if (tickpend) {
                     tickpend = False;
