@@ -662,6 +662,65 @@ prim ATH_cd() {
 	 errno=0;
 }
 
+prim ATH_help() {
+	Sl(0);
+	So(0);
+
+#ifdef FREERTOS
+	atlastTxBuffer(console, (uint8_t *)"\r\nHelp is not avaialable, yet\r\n") ;
+	atlastTxBuffer(console, (uint8_t *)"\r\nHowever, set your terminal to local echo.\r\n") ;
+#endif
+}
+
+prim ATH_banner() {
+		uint8_t msgBuffer[80];
+		memset(msgBuffer,0,80);
+
+		strcpy (msgBuffer, (char *)"\r\nBased on ATLAST 1.2 (2007-10-07)\n");
+#ifdef FREERTOS
+		atlastTxBuffer(NULL,msgBuffer);
+		vTaskDelay(1);
+#endif
+
+#ifdef LINUX
+		printf("%s",msgBuffer);
+#endif
+
+		strcpy(msgBuffer, (char *)"\rThe original version of this program is in the public domain.\n");
+#ifdef FREERTOS
+		atlastTxBuffer(NULL,msgBuffer);
+		vTaskDelay(1);
+#endif
+
+#ifdef LINUX
+		printf("%s",msgBuffer);
+#endif
+
+		strcpy(msgBuffer, (char *)"\rModifications for FreeRTOS are the property of Elcometer Ltd.\r\n");
+#ifdef FREERTOS
+		atlastTxBuffer(NULL, (char *)msgBuffer);
+		vTaskDelay(1);
+#endif
+
+#ifdef LINUX
+		printf("%s",msgBuffer);
+#endif
+
+		strcpy((char *)msgBuffer,"\r\nCompiled: " );
+		strcat((char *)msgBuffer, __DATE__);
+		strcat((char *)msgBuffer," ");
+		strcat((char *)msgBuffer, __TIME__);
+		strcat((char *)msgBuffer,"\r\n");
+
+#ifdef FREERTOS
+		atlastTxBuffer(NULL, (char *)msgBuffer);
+		vTaskDelay(1);
+#endif
+#ifdef LINUX
+		printf("%s",msgBuffer);
+#endif
+}
+
 #ifdef FREERTOS
 prim ATH_perror() {
 	char *msg;
@@ -1663,6 +1722,9 @@ prim FR_getSender() {
 // <struct address> <string> -- <struct address>
 //
 prim FR_setCmd() {
+	Sl(2);
+	So(1);
+
     struct cmdMessage *msg;
     char *cmd;
 
@@ -1675,6 +1737,9 @@ prim FR_setCmd() {
 }
 
 prim FR_getCmd() {
+	Sl(1);
+	So(1);
+
     struct cmdMessage *msg;
     char *cmd;
 
@@ -1684,6 +1749,9 @@ prim FR_getCmd() {
 }
 
 prim FR_setKey() {
+	Sl(2);
+	So(1);
+
     struct cmdMessage *msg;
     char *key;
 
@@ -1696,6 +1764,9 @@ prim FR_setKey() {
 }
 
 prim FR_getKey() {
+	Sl(1);
+	So(1);
+
     struct cmdMessage *msg;
 
     msg = (struct cmdMessage *)S0;
@@ -1738,6 +1809,9 @@ prim FR_setFieldCnt() {
 }
 
 prim FR_getFieldCnt() {
+	Sl(1);
+	So(1);
+
 	struct cmdMessage *msg;
 
 	msg=(struct cmdMessage *)S0;
@@ -1836,6 +1910,36 @@ prim FR_mkmsgSub() {
     Pop;
     Pop2;
 }
+//
+// populate an UNSUB message
+// Stack <msg pointer> <sender> <key> --
+//
+prim FR_mkmsgUnsub() {
+    struct cmdMessage *msg;
+    char *key;
+
+#ifdef FREERTOS
+    QueueHandle_t sender;
+#endif
+
+#ifdef LINUX
+    char *sender;
+#endif
+
+    key=(char *)S0;
+#ifdef LINUX
+    strncpy(msg->sender,(char *)S1, SENDER_SIZE);
+#endif
+
+#ifdef FREERTOS
+    sender=(QueueHandle_t) S1;
+#endif
+    msg=(struct cmdMessage *)S2;
+
+    mkMsg(sender, msg, "UNSUB", key, NULL);
+    Pop;
+    Pop2;
+}
 
 // TODO FreeRTOS Only and temporary at that
 // Ultimately these will become open close etc
@@ -1869,6 +1973,7 @@ prim FR_mkmsgOpen() {
 prim FR_putMessage() {
 	struct cmdMessage *out;
 	Sl(2);
+	So(1);
 #ifdef FREERTOS
 	volatile QueueHandle_t dest;
 	BaseType_t status = errQUEUE_FULL;
@@ -1877,8 +1982,8 @@ prim FR_putMessage() {
 	Sl(2);
 	So(1);
 
-	dest = (QueueHandle_t ) S0;
-	out = (struct cmdMessage *)S1;
+	dest = (QueueHandle_t ) S1;
+	out = (struct cmdMessage *)S0;
 
 	if ( (dest != NULL) && (out != NULL)) {
 		status = xQueueSendToBack(dest,out, osWaitForever);
@@ -1894,10 +1999,10 @@ prim FR_putMessage() {
 
 #endif
 #ifdef LINUX
-	char *dest = (char *)S0;
+	char *dest = (char *)S1;
     int rc=0;
 
-	out = (struct cmdMessage *)S1;
+	out = (struct cmdMessage *)S0;
 
 	mqd_t mq=mq_open(dest,O_WRONLY);
 	if ((mqd_t) -1 == mq) {
@@ -5472,6 +5577,9 @@ static struct primfcn primt[] = {
     {(char *)"0CRCFILE", RT_crcfile},
     {(char *)"0TEST", RT_test},
     {(char *)"0ERRNO", ATH_errno},
+    {(char *)"0HELP", ATH_help},
+    {(char *)"0BANNER", ATH_banner},
+
 #endif
 
 #ifdef ANSI
@@ -5579,6 +5687,8 @@ static struct primfcn primt[] = {
     {(char *)"0MKMSG-GET", FR_mkmsgGet},
     {(char *)"0MKMSG-SET", FR_mkmsgSet},
     {(char *)"0MKMSG-SUB", FR_mkmsgSub},
+    {(char *)"0MKMSG-UNSUB", FR_mkmsgUnsub},
+
     {(char *)"0MKMSG-OPEN", FR_mkmsgOpen},
 
     {(char *)"0SET-CMD", FR_setCmd},
