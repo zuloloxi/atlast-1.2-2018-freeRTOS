@@ -53,15 +53,19 @@ prim mqttGetTopic() {
 
 prim mqttInit() {
     Sl(0);
-    So(0);
+    So(1);
 
+    int rc;
     static bool doneFlag=false;
 
-    if (doneFlag=false) {
-        mosquitto_lib_init();
+    if (doneFlag == false) {
+        rc=mosquitto_lib_init();
         memset(&mqttMessage, 0, (size_t)sizeof(struct cbMqttMessage));
         doneFlag=true;
+    } else {
+        rc=0;
     }
+    Push=rc;
 //    Push=(void *)&mqttMessage ;
 }
 // 
@@ -147,7 +151,7 @@ prim mqttClient() {
     hostname=S1;
     mosq=S2;
 
-    rc = mosquitto_connect(mosq, hostname, port, 0);
+    rc = mosquitto_connect(mosq, hostname, port, 10);
     Pop2;
 
     if( rc == MOSQ_ERR_SUCCESS) {
@@ -176,6 +180,7 @@ prim mqttLoop() {
         Push=false;
     } else {
         Push=true;
+        perror("mqtt-loop");
     }
 
 }
