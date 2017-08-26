@@ -1,4 +1,4 @@
-CC=gcc
+# CC=gcc
 MQTT=""
 ATLCONFIG=-DMQTT -DLINUX
 ATLOBJ=mqtt.o linux.o

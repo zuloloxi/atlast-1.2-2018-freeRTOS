@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <mosquitto.h>
+#include <string.h>
 
 #include "atldef.h"
 
@@ -36,7 +37,7 @@ prim mqttGetPayload() {
     struct cbMqttMessage *msg;
 
     msg=(struct cbMqttMessage *)S0;
-    S0=&(msg->payload);
+    S0=(stackitem)&(msg->payload);
 
 }
 
@@ -47,7 +48,7 @@ prim mqttGetTopic() {
     struct cbMqttMessage *msg;
 
     msg=(struct cbMqttMessage *)S0;
-    S0=&(msg->topic);
+    S0=(stackitem)&(msg->topic);
 
 }
 
@@ -78,13 +79,13 @@ prim mqttNew() {
     struct mosquitto *mosq = NULL;
     void *obj=NULL;
 
-    mosq=mosquitto_new(S1, true, (void *)S0);
+    mosq=mosquitto_new((char *)S1, true, (void *)S0);
     Pop;
 
     if(!mosq) {
         S0=true;
     } else {
-        S0=mosq;
+        S0=(stackitem)mosq;
         Push=false;
     }
 
@@ -101,9 +102,9 @@ prim mqttPublish() {
 
     int rc=0;
 
-    payload=S0;
-    topic=S1;
-    mosq=S2;
+    payload=(char *)S0;
+    topic=(char *)S1;
+    mosq=(struct mosquitto *)S2;
 
     Pop2;
 
@@ -122,8 +123,8 @@ prim mqttSubscribe() {
 
     int rc=0;
 
-    topic=S0;
-    mosq=S1;
+    topic=(char *)S0;
+    mosq=(struct mosquitto *)S1;
     Pop;
 
     rc = mosquitto_subscribe(mosq,NULL, topic, 0);
@@ -148,8 +149,8 @@ prim mqttClient() {
     int rc;
 
     port=S0;
-    hostname=S1;
-    mosq=S2;
+    hostname=(char *)S1;
+    mosq=(struct mosquitto *)S2;
 
     rc = mosquitto_connect(mosq, hostname, port, 10);
     Pop2;
@@ -160,7 +161,6 @@ prim mqttClient() {
     } else {
         S0=true;
     }
-
 }
 
 // id timeout
@@ -170,7 +170,7 @@ prim mqttLoop() {
     int timeout=0;
 
     timeout=S0;
-    mosq=S1;
+    mosq=(struct mosquitto *)S1;
 
     Pop2;
 
@@ -194,7 +194,7 @@ prim ATH_strtok() {
 
     ptr=strtok( (char *)S1, (char *)S0);
     Pop;
-    S0=ptr;
+    S0=(stackitem)ptr;
 }
 
 

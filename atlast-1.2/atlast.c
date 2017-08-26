@@ -644,7 +644,7 @@ prim ATH_cd() {
     Sl(1);
 #ifdef LINUX
     int rc=0;
-    rc=chdir(S0);
+    rc=chdir((char *)S0);
     if(rc < 0) {
         S0=true;
     } else {
@@ -676,7 +676,7 @@ prim ATH_banner() {
 		uint8_t msgBuffer[80];
 		memset(msgBuffer,0,80);
 
-		strcpy (msgBuffer, (char *)"\r\nBased on ATLAST 1.2 (2007-10-07)\n");
+		strcpy ((char *)msgBuffer, (char *)"\r\nBased on ATLAST 1.2 (2007-10-07)\n");
 #ifdef FREERTOS
 		atlastTxBuffer(NULL,msgBuffer);
 		vTaskDelay(1);
@@ -686,7 +686,7 @@ prim ATH_banner() {
 		printf("%s",msgBuffer);
 #endif
 
-		strcpy(msgBuffer, (char *)"\rThe original version of this program is in the public domain.\n");
+		strcpy((char *)msgBuffer, (char *)"\rThe original version of this program is in the public domain.\n");
 #ifdef FREERTOS
 		atlastTxBuffer(NULL,msgBuffer);
 		vTaskDelay(1);
@@ -696,7 +696,7 @@ prim ATH_banner() {
 		printf("%s",msgBuffer);
 #endif
 
-		strcpy(msgBuffer, (char *)"\rModifications for FreeRTOS are the property of Elcometer Ltd.\r\n");
+		strcpy((char *)msgBuffer, (char *)"\rModifications for FreeRTOS are the property of Elcometer Ltd.\r\n");
 #ifdef FREERTOS
 		atlastTxBuffer(NULL, (char *)msgBuffer);
 		vTaskDelay(1);
@@ -6273,9 +6273,7 @@ void atl_break()
 
 /*  ATL_LOAD  --  Load a file into the system.	*/
 #ifdef FILEIO
-int atl_load(fp)
-    FILE *fp;
-{
+int atl_load(FILE *fp) {
     int es = ATL_SNORM;
     char s[134];
     atl_statemark mk;
