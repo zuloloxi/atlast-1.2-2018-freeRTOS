@@ -1,8 +1,8 @@
 
 #	Unix makefile for ATLAST
 
-# CC = gcc
-CC = clang
+CC = gcc
+# CC = clang
 include profile.mk
 VERSION = 1.2
 
