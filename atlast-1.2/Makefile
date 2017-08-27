@@ -2,11 +2,13 @@
 #	Unix makefile for ATLAST
 
 CC = gcc
+# CC = clang
 include profile.mk
 VERSION = 1.2
 
 # COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
-COPTIONS = -g -w 
+# COPTIONS = -g -w 
+COPTIONS = -g
 
 # LIBRARIES = -lm
 LIBRARIES += -lrt -lpthread

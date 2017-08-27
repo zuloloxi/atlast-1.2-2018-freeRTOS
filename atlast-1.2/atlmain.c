@@ -206,8 +206,10 @@ int main(int argc, char *argv[]) {
     //
     atl_init();
 #ifdef LINUX
+#ifdef EXTRAS
     extern void extrasLoad();
     extrasLoad();
+#endif
 #endif
 
 #ifdef MQTT

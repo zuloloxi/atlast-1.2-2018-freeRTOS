@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <string.h>
+
 
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
@@ -19,9 +21,9 @@
 // Move this into atlast once updated frm FreeRTOS version
 //
 
-extern P_here();
-extern P_swap();
-extern P_allot();
+extern prim P_here();
+extern prim P_swap();
+extern prim P_allot();
 
 #ifdef PUBSUB
 void mkMsg(void *from, struct cmdMessage *msg, char *cmd, char *key, char *value) {
@@ -74,8 +76,8 @@ prim ATH_getenv() {
     Sl(2); // On entry will use this many.
     So(1); // on exit will leave this many.
 
-    char *name=S0;
-    char *ptr=S1;
+    char *name=(char *)S0;
+    char *ptr=(char *)S1;
     char *tmp;
 
     Pop2;
@@ -85,7 +87,7 @@ prim ATH_getenv() {
         Push=-1;
     } else {
         strcpy(ptr, tmp);
-        Push=ptr;
+        Push=(stackitem)ptr;
         Push=0;
     }
 }
@@ -96,7 +98,7 @@ prim ATH_shmOpen() {
     Sl(1);
     So(2);
     
-    shmFd=shm_open( S0, O_CREAT | O_RDWR, 0600 );  // only the owners processes can access
+    shmFd=shm_open( (char *)S0, O_CREAT | O_RDWR, 0600 );  // only the owners processes can access
     
     if(shmFd < 0) {
         S0 = true;
@@ -130,7 +132,7 @@ prim ATH_mmap() {
     
 	ptr = mmap(0,S0, PROT_READ | PROT_WRITE, MAP_SHARED, S1, 0);
     Pop;
-    S0=ptr;
+    S0=(stackitem)ptr;
 }
 
 // msg -- 
