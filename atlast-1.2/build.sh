@@ -5,8 +5,30 @@
 CPU=`uname -m`
 OS=`uname -s`
 
+if [ -z "$CC" ]; then
+    CC=gcc
+fi
+export CC
+
+case "$CC" in
+    gcc)
+        CFLAGS="-g -Wno-format -Wl,--no-as-needed"
+        ;;
+    clang)
+        CFLAGS="-g"
+        ;;
+    *)
+        echo "None, or invlaid compiler set, fatal error."
+        echo "CC sould be empty (defaults to gcc), set to ggc or clang."
+        exit 1
+esac
+
+export CFLAGS
+
+
 printf "\nbuilding for $CPU\n"
 echo "       OS is $OS"
+echo "Compiler  is $CC"
 
 if [ "$OS" = "Linux" ]; then
     ARCH=$CPU

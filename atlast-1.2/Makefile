@@ -1,25 +1,18 @@
 
 #	Unix makefile for ATLAST
 
-CC = gcc
-# CC = clang
 include profile.mk
 VERSION = 1.2
 
-# COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
-# COPTIONS = -g -w 
-COPTIONS = -g
 
 # LIBRARIES = -lm
 LIBRARIES += -lrt -lpthread
 # LIBRARIES = -L/usr/local/lib -lsmall -lstdc++ -lrt -lpthread
 
-# INCLUDE +=
-
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 LDFLAGS +=-Wl,--no-as-needed
 
-CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) # -DLINUX # -DMQ
+CFLAGS += $(ATLCONFIG) # -DLINUX # -DMQ
 
 ATLOBJ += atlast.o atlmain.o
 
@@ -35,8 +28,6 @@ mqtt.o:	mqtt.c
 
 atlast: $(ATLOBJ) # mqtt.o
 	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
-
-#	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/Small
 
