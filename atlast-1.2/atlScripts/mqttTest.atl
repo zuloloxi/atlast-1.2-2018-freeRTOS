@@ -8,7 +8,7 @@ variable subscribed
 32 string hostname
 
 \ change this as appropriate
-"localhost" hostname strcpy
+"192.168.0.65" hostname strcpy
 
 0 init_run !
 
