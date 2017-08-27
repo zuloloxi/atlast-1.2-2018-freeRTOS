@@ -5681,8 +5681,8 @@ static struct primfcn primt[] = {
 	{(char *)"0.RECORD",  FR_displayRecord},
     {(char *)"0MESSAGE@", FR_getMessage},
     {(char *)"0MESSAGE!", FR_putMessage},
-    {(char *)"0EVENT@", FR_getEvent},
 #ifdef FREERTOS
+    {(char *)"0EVENT@", FR_getEvent},
     // This code is compiled if PUBSUB AND FREERTOS are defined
     {(char *)"0MKMSG-GET", FR_mkmsgGet},
     {(char *)"0MKMSG-SET", FR_mkmsgSet},
