@@ -27,7 +27,7 @@ mqtt.o:	mqtt.c
 	$(CC) $(CFLAGS) -c mqtt.c -o mqtt.o 
 
 atlast: $(ATLOBJ) # mqtt.o
-	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
+	$(CC) $(CFLAGS) $(INCLUDE) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
 
 # CFLAGS += -I/usr/local/lib/Small
 
@@ -40,7 +40,7 @@ atlast.o:   atlast.c atldef.h atlcfig.h
 atldef.h:   atlast.h
 
 atlmain.o:  atlmain.c atlast.h
-	$(CC) $(CFLAGS) -c atlmain.c -o atlmain.o 
+	$(CC) $(CFLAGS) $(INCLUDE)  -c atlmain.c -o atlmain.o 
 
 primdeftest:
 	$(CC) $(CFLAGS) primdeftest.c atlast.c -o primdeftest $(LIBRARIES)

@@ -22,7 +22,7 @@
 
 #ifdef PUBSUB
 #warning "PubSub defined"
-#include "Small.h"
+#include <Small.h>
 #include "linuxParser.h"
 #include "msgs.h"
 #include <errno.h>
