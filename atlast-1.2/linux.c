@@ -92,6 +92,7 @@ prim ATH_getenv() {
     }
 }
 
+#ifdef SYSVIPC
 // name -- fd
 prim ATH_shmOpen() {
     int shmFd;
@@ -122,6 +123,8 @@ prim ATH_shmSize() {
 	ftruncate(shmFd,length);
     Pop2;
 }
+#endif
+
 // fd size -- ptr
 
 prim ATH_mmap() {
@@ -150,8 +153,10 @@ static struct primfcn extras[] = {
     {"0INIT-RAM", ATH_initRamBlocks},
     {"0GETENV", ATH_getenv},
     {"0MMAP", ATH_mmap},
+#ifdef SYSVIPC
     {"0SHM-SIZE", ATH_shmSize},
     {"0SHM-OPEN", ATH_shmOpen},
+#endif
     {"0PERROR", ATH_perror},
     {"0TESTING", crap},
     {NULL, (codeptr) 0}
