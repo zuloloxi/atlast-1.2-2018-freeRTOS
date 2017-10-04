@@ -277,7 +277,6 @@ int main(int argc, char *argv[]) {
 
     /* Now that all the preliminaries are out of the way, fall into
        the main ATLAST execution loop. */
-    //    tst = (int *) atl_body(rf);
     while (true) {
 
         if (!fname)
