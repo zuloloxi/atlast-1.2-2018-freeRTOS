@@ -837,8 +837,11 @@ prim RT_test() {
 
 prim ATH_ms() {
     Sl(1);
-#ifdef LINUX
+#ifdef LINUX 
+    // TODO: Fix this.
+#ifndef UCLINUX
     usleep((useconds_t)S0 * 1000);
+#endif
 #endif
 
 #ifdef FREERTOS
