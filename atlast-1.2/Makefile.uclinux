@@ -1,7 +1,7 @@
 
 #	Unix makefile for ATLAST
 
-CC=arm-uclinuxeabi-gcc 
+# CC=arm-uclinuxeabi-gcc 
 
 include profile.mk
 VERSION = 1.2
