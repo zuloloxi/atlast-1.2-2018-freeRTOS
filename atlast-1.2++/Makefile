@@ -62,7 +62,7 @@ clean:
 	rm -f *.bak *.o *.dvi *.aux *.log
 	rm -f core core.* cscope.out *.tar.gz
 	rm -rf dist
-	( cd tex ; make clean )
+#	( cd tex ; make clean )
 	
 dist:
 	rm -rf dist
