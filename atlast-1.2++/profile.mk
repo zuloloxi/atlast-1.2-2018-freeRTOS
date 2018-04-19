@@ -1,5 +1,1 @@
-CC=gcc
-BASIC=""
-ATLCONFIG=-DLINUX
-# ATLCONFIG=-DMQTT
-
+./extras.mk

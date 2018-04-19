@@ -3,7 +3,7 @@
 
 include profile.mk
 VERSION = 1.2
-CC=g++
+CC=g++ -g
 
 
 # LIBRARIES = -lm
