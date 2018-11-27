@@ -40,6 +40,7 @@ typedef struct dw {
 #define IMMEDIATE   1		      /* Word is immediate */
 #define WORDUSED    2		      /* Word used by program */
 #define WORDHIDDEN  4		      /* Word is hidden from lookup */
+#define VOCABULARY  8             /* ATH Word is a vocabulary definition */
 
 /*  Data types	*/
 
