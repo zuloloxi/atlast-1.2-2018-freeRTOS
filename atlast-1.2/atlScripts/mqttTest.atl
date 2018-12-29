@@ -1,0 +1,85 @@
+
+128 mkbuffer buffer
+
+variable mosq
+variable init_run
+variable subscribed
+
+32 string hostname
+
+\ change this as appropriate
+"192.168.0.65" hostname strcpy
+
+0 init_run !
+
+: init
+    init_run @ 0= if
+        -1 init_run !
+        0 subscribed !
+
+        "atlast" buffer mqtt-new 0= if
+            mosq !
+            "New" type cr
+            mosq @ hostname 1883 mqtt-client 0= if
+                "Client" type cr
+            else
+                "Client failed" type cr
+            then
+        else
+            "New Failed" type cr
+        then
+    then
+;
+
+: subscribe
+    subscribed @ 0= if
+        "Subscribe" type cr
+        -1 subscribed !
+        mosq @ "/home/office/ups/STATUS"  mqtt-sub 0= if
+            "STATUS" type cr
+        then
+
+        mosq @ "/home/office/Fans/power"  mqtt-sub 0= if
+            "POWER" type cr
+        then
+    then
+;
+
+: test
+    init
+    subscribe
+
+    buffer 128 erase
+    mosq @ 1000 mqtt-loop 0= if
+        buffer c@ 0> if
+            buffer 128 dump cr
+            "Topic   :" type buffer mqtt-topic@ type cr
+            "Payload :" type buffer mqtt-payload@ type cr
+        else
+            "No data" type cr
+        then
+    else
+        "loop error" type cr
+    then
+;
+
+\ true|false ---
+: fans
+    mosq @ swap
+    "/home/office/Fans/power" swap
+
+    if 
+        "ON"
+    else
+        "OFF"
+    then
+
+    mqtt-pub 0= if
+        "Done" type cr
+    else
+        "Fail" type cr
+    then
+;
+
+
+

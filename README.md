@@ -7,6 +7,7 @@ It is a fork of Michael Henderson's (aka quoha) of Atlast.
 
 I want to add a few features and use as the basis for a scriptable unit test framework.
 
+<<<<<<< HEAD
 I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as to usage.)
 
 27 August 2016 Now build with g++ and I have started to replace character io with a generic messaging class.  Current version behaves as before, ultimately will be able to have the console of IPC on Linux, and others.  Currently x86_64 only.
@@ -14,6 +15,9 @@ I have added a ./build.sh script in atlast-1.2 (run ./build.sh -h for hints as t
 29 August This is now wholly in C++ and dependent on a set of classes from my Tools repo (Tools/Linux/C++/portableMessages
 
 28 September 2016 Backed off a little from the above.  Console IO is through the class Console.  Removed the virtual class so it's better suited for embedded.
+=======
+See also my forthSrc repo for example scripts.  This will increase of time :)
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
 Below is Michael's original README.
 

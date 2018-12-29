@@ -1,0 +1,15 @@
+
+"struct.atl" include
+"linuxMsg.atl" include
+"pubsub.atl" include
+
+\ "/metrology" iam strcpy
+
+set QNAME /metrology
+
+set COUNT "1"
+
+pub COUNT
+
+comms
+

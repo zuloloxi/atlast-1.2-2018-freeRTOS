@@ -1,12 +1,43 @@
+<<<<<<< HEAD
 #!/bin/sh
+=======
+#!/bin/bash
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
 # set -x
 
 CPU=`uname -m`
 OS=`uname -s`
 
+<<<<<<< HEAD
 printf "\nbuilding for $CPU\n"
 echo "       OS is $OS"
+=======
+if [ -z "$CC" ]; then
+    CC=gcc
+fi
+export CC
+
+case "$CC" in
+    gcc)
+        CFLAGS="-g -Wno-format -Wl,--no-as-needed"
+        ;;
+    clang)
+        CFLAGS="-g"
+        ;;
+    *)
+        echo "None, or invlaid compiler set, fatal error."
+        echo "CC sould be empty (defaults to gcc), set to ggc or clang."
+        exit 1
+esac
+
+export CFLAGS
+
+
+printf "\nbuilding for $CPU\n"
+echo "       OS is $OS"
+echo "Compiler  is $CC"
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
 if [ "$OS" = "Linux" ]; then
     ARCH=$CPU
@@ -109,16 +140,44 @@ fi
 
 MAKEFILE=Makefile.${ARCH}${OPT}
 
+<<<<<<< HEAD
 if [ $PROFILE_CHANGED = "YES" ]; then
+=======
+if [ "$PROFILE_CHANGED" = "YES" ]; then
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 # 
 # If Makefile exists and is a symbolic link, remove
 # and remake link.
 #
+<<<<<<< HEAD
     if [ -L Makefile ]; then
         rm Makefile
     fi
     ln -s $MAKEFILE Makefile
     make $MAKE_FLAGS $MAKEFILE clean
+=======
+#    if [ -L Makefile ]; then
+#        rm Makefile
+#    fi
+#    ln -s $MAKEFILE Makefile
+#    make $MAKE_FLAGS $MAKEFILE clean
+    make clean
+fi
+
+if [ -L atlcfig.h ]; then
+    echo "Default config exists"
+else
+    echo "Default config DOES NOT exist."
+    echo "Creating ..."
+    ln -s ./linux-atlcfig.h ./atlcfig.h
+    echo ".. done."
+fi
+
+if [ "$DRY_RUN" = "YES" ]; then
+    echo
+    echo "DRY RUN"
+    echo
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 fi
 
 if [ -f $MAKEFILE ]; then
@@ -129,5 +188,15 @@ if [ -f $MAKEFILE ]; then
     sleep 1
     make -j 4 $MAKE_FLAGS $MAKEFILE $ARGS
 else
+<<<<<<< HEAD
 	echo "$MAKEFILE does not exist."
 fi
+=======
+	echo "$MAKEFILE does not exist, falling back to default Makefile"
+    MAKEFILE=Makefile
+    make -j 4 $MAKE_FLAGS $MAKEFILE $ARGS
+fi
+
+
+
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158

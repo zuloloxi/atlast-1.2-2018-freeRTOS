@@ -1,9 +1,11 @@
 *.swp
 atlast
+atlsmall
 *.o
 primdeftest
 cscope.out
 .gdb_history
+<<<<<<< HEAD
 atlsmall
 profile.mk
 # 
@@ -11,3 +13,8 @@ profile.mk
 #
 *.dSYM
 tst
+=======
+tst
+atlsrc.h
+atlcfig.h
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158

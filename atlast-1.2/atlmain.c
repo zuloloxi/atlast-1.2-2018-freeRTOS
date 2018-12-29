@@ -11,7 +11,26 @@
 #include <string.h>
 
 #include <signal.h>
+#include <stdbool.h>
+#include <unistd.h>
 #include "atldef.h"
+#include "atlcfig.h"
+#include <inttypes.h>
+
+#ifdef PUBSUB
+#warning "PubSub defined"
+#include <Small.h>
+#include "linuxParser.h"
+#include "msgs.h"
+#include <errno.h>
+
+#ifdef PTHREAD
+#include <pthread.h>
+#include <mqueue.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#endif
+#endif
 
 #define FALSE	0
 #define TRUE	1
@@ -20,19 +39,108 @@
 
 /*  Globals imported  */
 
-#ifndef HIGHC
+#ifdef PUBSUB
+#ifdef PTHREAD
+#warning "Define lock"
+pthread_mutex_t lock;
 
-/*  CTRLC  --  Catch a user console break signal.  If your C library
-    does not provide this Unix-compatibile facility
-    (registered with the call on signal() in main()),
-    just turn this code off or, better still, replace it
-    with the equivalent on your system.  */
+pthread_t tid[2];
+struct Small *table;
+char *queueName ;
 
+void doSmallCallback(struct nlist *rec, uint8_t idx) {
+    struct client *tmp;
+    void *fred;
+
+    printf("doSmallCallback\n");
+
+    tmp=(struct client *)nlistGetSubscriber(rec,idx);
+
+    if(tmp != 0) {
+        struct cmdMessage subMessage;
+
+<<<<<<< HEAD
 static void ctrlc( int sig) {
     if (sig == SIGINT)
         atl_break();
+=======
+        memset(&subMessage,0,sizeof(struct cmdMessage));
+
+        subMessage.payload.message.fields = 3;
+        strncpy(subMessage.sender,queueName,MAX_SUB_NAME);
+        strncpy(subMessage.payload.message.cmd,"SET",MAX_CMD);
+        strncpy(subMessage.payload.message.key,nlistGetName(rec),MAX_KEY);
+        strncpy(subMessage.payload.message.value,nlistGetDef(rec),MAX_VALUE);
+
+        int rc=mq_send(tmp->pipe,&subMessage,sizeof(struct cmdMessage),NULL);
+    }
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 }
-#endif /* HIGHC */
+
+void *doSmall(void *arg) {
+    bool runFlag=true;
+//    char *queueName ;
+    mqd_t mq;
+    struct mq_attr attr;
+    ssize_t len;
+    struct cmdMessage buffer;
+    //    char *res;
+
+    struct linuxParser *p;
+
+    bool ff;
+    struct Small *myTable=arg;
+
+    // This lock is held by this threads parent.
+    // Once the parent has completed its setup it will release the lock, and
+    // then we can continue.
+    //
+    pthread_mutex_lock(&lock);
+    fprintf(stderr,"Started\n");
+
+    queueName = dbLookup(myTable,"QNAME");
+    if(!queueName) {
+        ff=addRecord(myTable,"QNAME","/atlast");
+        if(ff) {
+            fprintf(stderr,"db install faulure, fatal error\n");
+            exit(1);
+        }
+        queueName = dbLookup(myTable,"QNAME");
+    }
+
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 10;
+    printf("size %d\n", sizeof(struct cmdMessage));
+    attr.mq_msgsize = sizeof(struct cmdMessage);
+    attr.mq_curmsgs = 0;
+
+    mq = mq_open(queueName, O_CREAT | O_RDONLY, 0644, &attr);
+    if( (mqd_t)-1 == mq) {
+        perror("mq_open");
+        if(errno == ENOSYS) {
+            fprintf(stderr,"Fatal ERROR\n");
+            exit(1);
+        }
+    }
+
+    mq_setattr(mq, &attr,NULL);
+
+    p=newParser(myTable);
+
+    setIam(p,queueName);
+
+    while(runFlag) {
+        len = mq_receive(mq, &buffer, sizeof(buffer), NULL);
+        if( len < 0) {
+            perror("mq_receive");
+        } else {
+            ff=cmdParse(p,&buffer,NULL);
+        }
+    }
+
+}
+#endif
+#endif
 
 
 /*  MAIN  --  Main program.  */
@@ -91,17 +199,25 @@ int main(int argc, char *argv[]) {
     FILE *ifp;
     char *include[20];
     int in = 0;
+<<<<<<< HEAD
     char t[132];  // command line buffer
     extern bool initIO();
 
     memset(t,0,sizeof(t));
+=======
+
+    int *tst;
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
 #define PR(x) (void) fprintf(stderr, x)
 
+#ifdef BANNER
     PR("ATLAST 1.2 (2007-10-07) This program is in the public domain.\n");
-    printf("Compiled: %s\n",__DATE__);
+    printf("Compiled: %s %s\n",__DATE__,__TIME__);
+#endif
 
     ifp = stdin;
+<<<<<<< HEAD
     for (i = 1; i < argc; i++) {
         char *cp, opt;
 
@@ -155,22 +271,94 @@ int main(int argc, char *argv[]) {
             }
         } else {
             char fn[132];
+=======
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
-            if (fname) {
-                PR("Duplicate file name.\n");
-                return 1;
-            }
-            fname = TRUE;
-            V strcpy(fn, cp);
-            if (strchr(fn, '.') == NULL)
-                V strcat(fn, ".atl");
-            ifp = fopen(fn, "r");
-            if (ifp == NULL) {
-                V fprintf(stderr, "Unable to open file %s\n", fn);
-                return 1;
-            }
+    int opt;
+
+    while((opt = getopt(argc,argv, "C:DH:I:R:S:T?U")) != -1) {
+        switch(opt) {
+            case 'C':
+                chdir(optarg);
+                break;
+            case 'D':
+                defmode = TRUE;
+                break;
+            case 'H':
+                atl_heaplen = atol(optarg);
+                break;
+            case 'I':
+                include[in]=(char *)malloc(strlen(optarg)+1);
+                strncpy(include[in++], optarg, strlen(optarg));
+                break;
+            case 'R':
+                atl_rstklen = atol(optarg);
+                break;
+
+            case 'S':
+                atl_stklen = atol(optarg);
+                break;
+
+            case 'T':
+                atl_trace = TRUE;
+                break;
+            case '?':
+            case 'U':
+                PR("Usage:  ATLAST [options] [inputfile]\n");
+                PR("        Options:\n");
+                PR("           -C <dir>  Change to this directory\n");
+                PR("           -D        Treat file as definitions\n");
+                PR("           -Hn       Heap length n\n");
+                PR("           -I <file> Include named definition file\n");
+                PR("           -R n      Return stack length n\n");
+                PR("           -S n      Stack length n\n");
+                PR("           -T        Set TRACE mode\n");
+                PR("           -U        Print this message\n");
+                return 0;
         }
     }
+    // OK, so init the system
+    //
+    atl_init();
+#ifdef LINUX
+#ifdef EXTRAS
+    extern void extrasLoad();
+    extrasLoad();
+#endif
+#endif
+
+#ifdef MQTT
+    extern void mqttLoad();
+    mqttLoad();
+#endif
+
+    int8_t len=0;
+    uint8_t lineBuffer[MAX_LINE];
+    char t[132];
+#ifdef PUBSUB
+    table = newSmall();
+#ifdef PTHREAD
+#warning Pthreads
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("pthread_mutex_init");
+        exit(1);
+    }
+
+
+#endif
+#ifdef LINUX
+    sprintf(t,"0x%x constant TABLE",table);
+    sprintf(t,"0x%" PRIx64 " constant TABLE",table);
+
+    atl_eval(t);
+    memset(t,0x00,sizeof(t));
+#endif
+    pthread_mutex_lock(&lock);
+    int err = pthread_create(&(tid[0]), NULL, &doSmall, (void *)table);
+
+
+#endif
+
 
     /* If any include files were named, load each in turn before
        we execute the program. */
@@ -204,6 +392,7 @@ int main(int argc, char *argv[]) {
 
     /* Now that all the preliminaries are out of the way, fall into
        the main ATLAST execution loop. */
+<<<<<<< HEAD
 
 #ifndef HIGHC
     V signal(SIGINT, ctrlc);
@@ -218,6 +407,9 @@ int main(int argc, char *argv[]) {
     bool cmdRun = false;
     while (TRUE) {
         //        char t[132];
+=======
+    while (true) {
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
         if (!fname)
             V printf(atl_comment ? "(  " :  /* Show pending comment */

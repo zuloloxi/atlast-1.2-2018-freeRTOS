@@ -1,0 +1,10 @@
+
+
+To Build
+
+cd ./atlast-1.2
+
+./build.sh clean
+
+./build.sh
+

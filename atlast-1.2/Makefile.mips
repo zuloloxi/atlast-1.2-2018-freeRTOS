@@ -1,5 +1,6 @@
 
 #	Unix makefile for ATLAST
+<<<<<<< HEAD
 CC = g++
 
 include profile.mk
@@ -9,11 +10,24 @@ VERSION = 1.2
 COPTIONS = -g -Wall
 
 LIBRARIES = -lm
+=======
+
+CC = gcc
+include profile.mk
+VERSION = 1.2
+
+# COPTIONS = -m32 -g -Wunused-function -Wsign-compare # -Wall
+COPTIONS = -g -w 
+
+# LIBRARIES = -lm
+LIBRARIES = -L/usr/local/lib -lsmall -lstdc++ -lm -lrt -lpthread -ldl
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 
 INCLUDE =
 
 ATLCONFIG += -DCUSTOM -DALIGNMENT -DEXPORT -DREADONLYSTRINGS
 
+<<<<<<< HEAD
 CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG)
 
 ATLOBJ = atlast.o atlmain.o
@@ -29,6 +43,29 @@ atlsmall: $(ATLOBJ) atlMinMain.c
 	$(CC) $(CFLAGS) -DEMBEDDED atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
 
 atlast.o:   atlast.c atldef.h atlcfig.h
+=======
+CFLAGS = $(COPTIONS) $(INCLUDE) $(ATLCONFIG) -DLINUX
+
+ATLOBJ = atlast.o atlmain.o
+
+APPS = atlast # atlsmall primdeftest
+
+all:	$(APPS)
+# all:	atlsmall
+
+atlast: $(ATLOBJ) tasks.h
+	$(CC) $(CFLAGS) -Wl,--no-as-needed $(ATLOBJ) -o atlast $(LIBRARIES)
+
+# CFLAGS += -I/usr/local/lib/C++/include
+CFLAGS += -I/usr/local/lib/Small
+
+atlsmall: $(ATLOBJ) atlMinMain.c
+	$(CC) $(CFLAGS) atlMinMain.c atlast.o -o atlsmall $(LIBRARIES)
+
+atlast.o:   atlast.c atldef.h atlcfig.h 
+	$(CC) $(CFLAGS) -c atlast.c -o atlast.o 
+
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
 atldef.h:   atlast.h
 atlmain.o:  atlmain.c atlast.h
 
@@ -72,3 +109,19 @@ lint:	lintatlast
 
 lintatlast:
 	lint atlast.c atlmain.c $(LIBRARIES) $(ATLCONFIG)
+<<<<<<< HEAD
+=======
+
+install:	atlast
+	strip atlast
+#	strip atlsmall
+	strip atlast
+#	mv ./atlsmall /usr/local/bin
+	mv ./atlast /usr/local/bin
+#	strip atlsmall
+#	mv ./atlsmall /usr/local/bin
+	mkdir -p /usr/local/lib/Small
+	cp tasks.h /usr/local/lib/Small
+
+
+>>>>>>> 730efb122a88b088d9387d8c350401c148e1b158
